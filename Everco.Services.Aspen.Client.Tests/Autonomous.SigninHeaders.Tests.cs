@@ -116,7 +116,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     .GetClient();
             });
 
-            Assert.That(exception.EventId, Is.EqualTo("15842"));
+            Assert.That(exception.EventId, Is.EqualTo("20002"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
         }
@@ -144,7 +144,7 @@ namespace Everco.Services.Aspen.Client.Tests
                         .GetClient();
                 });
 
-                Assert.That(exception.EventId, Is.EqualTo("15842"));
+                Assert.That(exception.EventId, Is.EqualTo("20002"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
             }
@@ -164,7 +164,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     .GetClient();
             });
 
-            Assert.That(exception.EventId, Is.EqualTo("15845"));
+            Assert.That(exception.EventId, Is.EqualTo("20002"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
         }
@@ -192,7 +192,7 @@ namespace Everco.Services.Aspen.Client.Tests
                         .GetClient();
                 });
 
-                Assert.That(exception.EventId, Is.EqualTo("15845"));
+                Assert.That(exception.EventId, Is.EqualTo("20002"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
             }
@@ -514,7 +514,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
                 Assert.That(exception.EventId, Is.EqualTo("99005"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-                StringAssert.IsMatch("Valor no admitido para el encabezado personalizado 'X-PRO-Api-Version'", exception.Message);
+                StringAssert.IsMatch("no es un valor admitido para el encabezado personalizado 'X-PRO-Api-Version'", exception.Message);
             }
         }
     }
