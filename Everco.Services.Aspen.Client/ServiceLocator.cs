@@ -41,12 +41,21 @@ namespace Everco.Services.Aspen.Client
         {
             this.container = new Container();
             this.container.Options.AllowOverridingRegistrations = true;
+            EnvironmentRuntime environmentRuntime = new EnvironmentRuntime();
+            this.container.RegisterInstance<IEnvironmentRuntime>(environmentRuntime);
             this.container.RegisterInstance<INonceGenerator>(new GuidNonceGenerator());
             this.container.RegisterInstance<IEpochGenerator>(new UnixEpochGenerator());
             this.container.RegisterInstance<IRequestHeaderNames>(new DefaultRequestHeaderNames());
             this.container.RegisterInstance<IHeadersManager>(new HeadersManager());
             this.container.RegisterInstance<IJsonSerializer>(new JsonNetSerializer());
             this.container.RegisterInstance<IWebProxy>(new NullWebProxy());
+            this.container.RegisterInstance<ILoggingProvider>(new NullLoggingProvider());
+
+            if (environmentRuntime.IsDevelopment)
+            {
+                this.container.RegisterInstance<ILoggingProvider>(new ConsoleLoggingProvider());
+            }
+
             this.container.Verify();
         }
 
@@ -90,6 +99,11 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del servidor proxy que se debe utilizar para las conexiones con el servicio.
         /// </summary>
         public IWebProxy WebProxy => this.container?.GetInstance<IWebProxy>();
+
+        /// <summary>
+        /// Obtiene una referencia que permite acceder al entorno de ejecución.
+        /// </summary>
+        public IEnvironmentRuntime Runtime => this.container?.GetInstance<IEnvironmentRuntime>();
 
         /// <summary>
         /// Registra una instancia de <see cref="IHeadersManager"/> que permite agregar las cabeceras personalizadas.
@@ -212,6 +226,7 @@ namespace Everco.Services.Aspen.Client
                 }
 
                 this.container = new Container();
+                this.container.RegisterInstance<IEnvironmentRuntime>(new EnvironmentRuntime());
                 this.container.RegisterInstance(instanceOfNonceGenerator);
                 this.container.RegisterInstance(instanceOfEpochGenerator);
                 this.container.RegisterInstance(instanceOfRequestHeaderNames);

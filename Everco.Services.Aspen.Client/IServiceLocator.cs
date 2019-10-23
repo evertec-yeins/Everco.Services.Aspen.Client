@@ -52,6 +52,11 @@ namespace Everco.Services.Aspen.Client
         IWebProxy WebProxy { get; }
 
         /// <summary>
+        /// Obtiene una referencia que permite acceder al entorno de ejecución.
+        /// </summary>
+        IEnvironmentRuntime Runtime { get; }
+
+        /// <summary>
         /// Registra una instancia de <see cref="IHeadersManager"/> que permite agregar las cabeceras personalizadas.
         /// </summary>
         /// <param name="headersManager">Instancia que implementa <see cref="IHeadersManager"/>.</param>

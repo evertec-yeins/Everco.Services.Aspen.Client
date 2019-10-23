@@ -48,6 +48,76 @@ namespace Everco.Services.Aspen.Client.Tests
 
         [Test]
         [Category("Autonomous.Signed.Headers")]
+        public void MissingNonceThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingNonceClaimOnPayloadHeader());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
+        public void NullOrEmptyNonceThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            {
+                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Null),
+                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Empty),
+                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+            };
+
+            foreach (IHeadersManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
+        public void InvalidNonceFormatThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            {
+                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+            };
+
+            foreach (IHeadersManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Nonce' debe coincidir con el patrón", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
             Guid duplicatedNonce = Guid.NewGuid();
@@ -67,6 +137,103 @@ namespace Everco.Services.Aspen.Client.Tests
 
         [Test]
         [Category("Autonomous.Signed.Headers")]
+        public void MissingEpochThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingEpochClaimOnPayloadHeader());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
+        public void NullOrEmptyEpochThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            {
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Null),
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Empty),
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+            };
+
+            foreach (IHeadersManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
+        public void InvalidEpochFormatThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            {
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MinLengthRequired),
+                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+            };
+
+            foreach (IHeadersManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15850"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
+        public void EpochExpiredThrows()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate(false)
+                .GetClient();
+
+            IList<IEpochGenerator> epochBehaviors = new List<IEpochGenerator>()
+            {
+                new PastUnixEpochGenerator(),
+                new FutureUnixEpochGenerator(),
+            };
+
+            foreach (IEpochGenerator behavior in epochBehaviors)
+            {
+                ServiceLocator.Instance.RegisterInstanceOfEpochGenerator(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15851"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+                StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Autonomous.Signed.Headers")]
         public void MissingAuthTokenThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
@@ -80,7 +247,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-            StringAssert.IsMatch("'Token' no debería estar vacío", exception.Message);
+            StringAssert.IsMatch("'Token' no puede ser nulo ni vacío", exception.Message);
         }
 
         [Test]
@@ -107,7 +274,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-                StringAssert.IsMatch("'Token' no debería estar vacío", exception.Message);
+                StringAssert.IsMatch("'Token' no puede ser nulo ni vacío", exception.Message);
             }
         }
 

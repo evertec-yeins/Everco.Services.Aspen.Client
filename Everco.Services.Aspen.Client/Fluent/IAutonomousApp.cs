@@ -20,6 +20,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         ISettingsModule Settings { get; }
 
         /// <summary>
+        /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización del sistema Aspen.
+        /// </summary>
+        IUtilsModule Utils { get; }
+
+        /// <summary>
         /// Envía al servicio la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <param name="useCache">Cuando es <see langword="true" /> se utiliza el último token de autenticación generado en la sesión.</param>

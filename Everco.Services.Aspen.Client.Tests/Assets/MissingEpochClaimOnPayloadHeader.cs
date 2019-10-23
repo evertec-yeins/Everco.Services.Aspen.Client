@@ -108,7 +108,41 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
 
         public void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token)
         {
-            throw new NotImplementedException();
+            Dictionary<string, object> payload = new Dictionary<string, object>
+            {
+                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
+                { "Token", token }
+            };
+
+            string claimName = ServiceLocator.Instance.EpochGenerator.Name;
+            switch (this.HeaderValueBehavior)
+            {
+                case HeaderValueBehavior.Null:
+                    payload.Add(claimName, null);
+                    break;
+
+                case HeaderValueBehavior.Empty:
+                    payload.Add(claimName, string.Empty);
+                    break;
+
+                case HeaderValueBehavior.WhiteSpaces:
+                    payload.Add(claimName, "    ");
+                    break;
+
+                case HeaderValueBehavior.UnexpectedFormat:
+                    payload.Add(claimName, Guid.NewGuid().ToString("N").Substring(0, 10));
+                    break;
+
+                case HeaderValueBehavior.MinLengthRequired:
+                    payload.Add(claimName, Guid.NewGuid().ToString("N").Substring(0, 5));
+                    break;
+
+                case HeaderValueBehavior.MaxLengthExceeded:
+                    payload.Add(claimName, Guid.NewGuid().ToString("N"));
+                    break;
+            }
+
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwtEncoder.Encode(payload, apiSecret));
         }
 
         public void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)

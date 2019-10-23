@@ -77,7 +77,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="request">Información de la solicitud.</param>
         /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private TResponse Execute<TResponse>(IRestRequest request)
+        private TResponse Execute<TResponse>(IRestRequest request) where TResponse : class, new()
         {
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, this.AuthToken.Token);

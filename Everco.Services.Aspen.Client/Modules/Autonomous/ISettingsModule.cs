@@ -11,7 +11,7 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
     using Entities;
 
     /// <summary>
-    /// Define las operaciones soportadas por el servicio Aspen para acceder a entidades de información relacionadas con parametrización del sistema.
+    /// Define las operaciones soportadas apara acceder a entidades de información relacionadas con parametrización del sistema.
     /// </summary>
     public interface ISettingsModule
     {
@@ -20,5 +20,29 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         /// </summary>
         /// <returns>Lista de tipos de documento soportados.</returns>
         IList<DocTypeInfo> GetDocTypes();
+
+        /// <summary>
+        /// Obtiene la lista de operadores de telefonía móvil soportados por el servicio Aspen.
+        /// </summary>
+        /// <returns>Lista de operadores de telefonía soportados.</returns>
+        IList<CarrierInfo> GetCarriers();
+
+        /// <summary>
+        /// Obtiene la lista de los tipos de transacción para una aplicación.
+        /// </summary>
+        /// <returns>Lista de tipos de transacción soportados.</returns>
+        IList<TranTypeInfo> GetTranTypes();
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// </summary>
+        /// <returns>Lista de <see cref="PaymentTypeInfo"/> con los tipos de pago para la aplicación solicitante.</returns>
+        IList<PaymentTypeInfo> GetPaymentTypes();
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// </summary>
+        /// <returns>Lista de <see cref="TopUpInfo"/> con los valores admitidos de recarga por operador para la aplicación solicitante.</returns>
+        IList<TopUpInfo> GetTopUpValues();
     }
 }

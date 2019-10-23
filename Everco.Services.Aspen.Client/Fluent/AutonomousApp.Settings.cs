@@ -24,6 +24,19 @@ namespace Everco.Services.Aspen.Client.Fluent
         public ISettingsModule Settings => this;
 
         /// <summary>
+        /// Obtiene la lista de operadores de telefonía móvil soportados por el servicio Aspen.
+        /// </summary>
+        /// <returns>
+        /// Lista de operadores de telefonía soportados.
+        /// </returns>
+        public IList<CarrierInfo> GetCarriers()
+        {
+            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.Telcos}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<CarrierInfo>>(request);
+        }
+
+        /// <summary>
         /// Obtiene la lista de tipos de documento soportados por el servicio Aspen.
         /// </summary>
         /// <returns>
@@ -34,6 +47,45 @@ namespace Everco.Services.Aspen.Client.Fluent
             string resource = $"{Routes.AutonomousRoot}{Routes.Resources.DocTypes}";
             IRestRequest request = new AspenRequest(resource, Method.GET);
             return this.Execute<List<DocTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// </summary>
+        /// <returns>
+        /// Lista de <see cref="PaymentTypeInfo" /> con los tipos de pago para la aplicación solicitante.
+        /// </returns>
+        public IList<PaymentTypeInfo> GetPaymentTypes()
+        {
+            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.PaymentTypes}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<PaymentTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// </summary>
+        /// <returns>
+        /// Lista de <see cref="TopUpInfo" /> con los valores admitidos de recarga por operador para la aplicación solicitante.
+        /// </returns>
+        public IList<TopUpInfo> GetTopUpValues()
+        {
+            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.TopUp}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<TopUpInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la lista de los tipos de transacción para una aplicación.
+        /// </summary>
+        /// <returns>
+        /// Lista de tipos de transacción soportados.
+        /// </returns>
+        public IList<TranTypeInfo> GetTranTypes()
+        {
+            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.TranTypes}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<TranTypeInfo>>(request);
         }
     }
 }

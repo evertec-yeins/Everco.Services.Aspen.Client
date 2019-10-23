@@ -23,8 +23,8 @@ namespace Everco.Services.Aspen.Client.Internals
             base(resource, method, DataFormat.Json)
         {
             Throw.IfNullOrEmpty(resource, nameof(resource));
-            this.AddHeader("Accept", "application/json");
-            this.AddHeader("Content-Type", "application/json; charset=utf-8");
+            //this.AddHeader("Accept", "application/json");
+            //this.AddHeader("Content-Type", "application/json; charset=utf-8");
         }
     }
 }
