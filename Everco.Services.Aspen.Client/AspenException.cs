@@ -60,6 +60,11 @@ namespace Everco.Services.Aspen.Client
         }
 
         /// <summary>
+        /// Obtiene la información de los datos incluidos en la respuesta generada por el servicio Aspen.
+        /// </summary>
+        public Dictionary<string, object> Content { get; private set; }
+
+        /// <summary>
         /// Obtiene el identificador del evento emitido para el error por el servicio Aspen.
         /// </summary>        
         public string EventId { get; private set; }
@@ -88,12 +93,6 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la descripción del estado HTTP devuelto por el servicio Aspen.
         /// </summary>
         public string StatusDescription { get; private set; }
-
-        /// <summary>
-        /// Obtiene la información de los datos incluidos en la respuesta generada por el servicio Aspen.
-        /// </summary>
-        public Dictionary<string, object> Content { get; private set; }
-
         /// <summary>
         /// Obtiene el valor de una cabecera de la respuesta.
         /// </summary>

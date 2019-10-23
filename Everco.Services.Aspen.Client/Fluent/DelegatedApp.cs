@@ -64,7 +64,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             if (useCache)
             {
-                this.AuthToken = CacheStore.GetCurrentToken();
+                this.AuthToken = CacheStore.GetCurrentToken(this.AppIdentity.ApiKey);
                 if (this.AuthToken != null)
                 {
                     return this;
@@ -83,7 +83,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             }
 
             this.AuthToken = JsonConvert.DeserializeObject<UserAuthToken>(this.DecodeJwtResponse(response.Content));
-            CacheStore.SetCurrentToken(this.AuthToken);
+            CacheStore.SetCurrentToken(this.AppIdentity.ApiKey, this.AuthToken);
             return this;
         }
 

@@ -26,8 +26,8 @@ namespace Everco.Services.Aspen.Client.Tests
         public void Setup()
         {
             ServiceLocator.Instance.Reset();
-            ServiceLocator.Instance.RegisterInstanceOfWebProxy(new WebProxy("http://192.168.2.70:8080", true));
-            ServiceLocator.Instance.RegisterInstanceOfLoggingProvider(new ConsoleLoggingProvider());
+            ServiceLocator.Instance.RegisterWebProxy(new WebProxy("http://192.168.2.70:8080", true));
+            ServiceLocator.Instance.RegisterLoggingProvider(new ConsoleLoggingProvider());
         }
 
         [Test]
@@ -37,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
@@ -53,7 +53,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 IAutonomousApp client = AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -73,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -93,7 +93,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(apiKey, randomApiSecret)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -108,11 +108,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingApiKeyHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -136,11 +136,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
+                    ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -156,11 +156,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -184,11 +184,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -204,11 +204,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -223,11 +223,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingNonceClaimOnPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingNonceClaimOnPayloadHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -251,11 +251,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -279,11 +279,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -298,11 +298,11 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NonceAlreadyProcessedThrows()
         {
             Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterInstanceOfNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
@@ -316,7 +316,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -331,11 +331,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingEpochClaimOnPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochClaimOnPayloadHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
             });
 
@@ -359,11 +359,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -388,11 +388,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -416,11 +416,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfEpochGenerator(behavior);
+                    ServiceLocator.Instance.RegisterEpochGenerator(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -443,13 +443,13 @@ namespace Everco.Services.Aspen.Client.Tests
 
             foreach (IHeadersManager behavior in headerBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -472,13 +472,13 @@ namespace Everco.Services.Aspen.Client.Tests
 
             foreach (IHeadersManager behavior in headerBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -502,13 +502,13 @@ namespace Everco.Services.Aspen.Client.Tests
 
             foreach (IHeadersManager behavior in headerBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate(false)
+                        .Authenticate()
                         .GetClient();
                 });
 

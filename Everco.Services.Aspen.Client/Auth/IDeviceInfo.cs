@@ -21,10 +21,16 @@ namespace Everco.Services.Aspen.Client.Auth
         string DeviceId { get; set; }
 
         /// <summary>
-        /// Obtiene o establece el modelo del dispositivo.
+        /// Obtiene o establece una cadena que identifica si el dispositivo es físico o virtual.
         /// </summary>
-        /// <example>SMG-950U, iPhone10,6, iPhone10,1, iPhone5,3, iPad6,3</example>
-        string Model { get; set; }
+        /// <example>Virtual(cuando se trata de un Emulador) o Physical.</example>
+        string DeviceType { get; set; }
+
+        /// <summary>
+        /// Obtiene o establece el "tipo" de dispositivo.
+        /// </summary>
+        /// <example>Tablet,Phone,TV,Desktop,CarPlay,Unspecified, etc.</example>
+        string Idiom { get; set; }
 
         /// <summary>
         /// Obtiene o establece el nombre del fabricante del dispositivo.
@@ -32,6 +38,11 @@ namespace Everco.Services.Aspen.Client.Auth
         /// <example>Samsung, Apple, LG, Motorola, etc</example>
         string Manufacturer { get; set; }
 
+        /// <summary>
+        /// Obtiene o establece el modelo del dispositivo.
+        /// </summary>
+        /// <example>SMG-950U, iPhone10,6, iPhone10,1, iPhone5,3, iPad6,3</example>
+        string Model { get; set; }
         /// <summary>
         /// Obtiene o establece el nombre asociado con el dispositivo.
         /// </summary>
@@ -42,28 +53,15 @@ namespace Everco.Services.Aspen.Client.Auth
         string Name { get; set; }
 
         /// <summary>
-        /// Obtiene o establece la versión del sistema operativo del dispositivo.
-        /// </summary>        
-        string Version { get; set; }
-
-        /// <summary>
         /// Obtiene o establece el nombre del sistema operativo del dispositivo.
         /// </summary>
         /// <example>Android, iOS</example>
         string Platform { get; set; }
 
         /// <summary>
-        /// Obtiene o establece el "tipo" de dispositivo.
-        /// </summary>
-        /// <example>Tablet,Phone,TV,Desktop,CarPlay,Unspecified, etc.</example>
-        string Idiom { get; set; }
-
-        /// <summary>
-        /// Obtiene o establece una cadena que identifica si el dispositivo es físico o virtual.
-        /// </summary>
-        /// <example>Virtual(cuando se trata de un Emulador) o Physical.</example>
-        string DeviceType { get; set; }
-
+        /// Obtiene o establece la versión del sistema operativo del dispositivo.
+        /// </summary>        
+        string Version { get; set; }
         /// <summary>
         /// Obtiene la representación de la instancia actual en formato Json.
         /// </summary>

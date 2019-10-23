@@ -15,15 +15,14 @@ namespace Everco.Services.Aspen.Client.Auth
     public interface IAuthToken
     {
         /// <summary>
-        /// Obtiene o establece la fecha y hora local en la que se emitió el token de autenticación.
-        /// </summary>
-        DateTime IssueAt { get; set; }
-
-        /// <summary>
         /// Obtiene o establece la fecha y hora local en la que se expira el token de autenticación
         /// </summary>        
         DateTime ExpiresAt { get; set; }
 
+        /// <summary>
+        /// Obtiene o establece la fecha y hora local en la que se emitió el token de autenticación.
+        /// </summary>
+        DateTime IssueAt { get; set; }
         /// <summary>
         /// Obtiene o establece una cadena de texto que representa el token de autenticación
         /// </summary>        

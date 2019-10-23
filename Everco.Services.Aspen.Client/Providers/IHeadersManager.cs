@@ -27,15 +27,9 @@ namespace Everco.Services.Aspen.Client.Providers
         /// </summary>
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
-        void AddApiKeyHeader(IRestRequest request, string apiKey);
-
-        /// <summary>
-        /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a la aplicación en el servicio Aspen.
-        /// </summary>
-        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
-        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
-        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret);
+        void AddApiKeyHeader(
+            IRestRequest request, 
+            string apiKey);
 
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para firmar una solicitud de una aplicación a partir del token de autenticación.
@@ -44,16 +38,11 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para la aplicación.</param>
-        void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token);
-
-        /// <summary>
-        /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
-        /// </summary>
-        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
-        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
-        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
-        void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity);
+        void AddSignedPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret,
+            string token);
 
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
@@ -63,6 +52,34 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para el usuario.</param>
         /// <param name="username">La identificación del usuario autenticado.</param>
-        void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username);
+        void AddSignedPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret,
+            string token,
+            string username);
+
+        /// <summary>
+        /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a la aplicación en el servicio Aspen.
+        /// </summary>
+        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
+        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
+        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
+        void AddSigninPayloadHeader(
+            IRestRequest request, 
+            IJwtEncoder jwtEncoder, 
+            string apiSecret);
+        /// <summary>
+        /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
+        /// </summary>
+        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
+        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
+        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
+        /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
+        void AddSigninPayloadHeader(
+            IRestRequest request, 
+            IJwtEncoder jwtEncoder, 
+            string apiSecret, 
+            IUserIdentity userIdentity);
     }
 }

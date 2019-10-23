@@ -20,7 +20,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     internal class UnsupportedApiVersionHeader : IHeadersManager
     {
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="HeadersManager"/>
+        /// Inicializa una nueva instancia de la clase <see cref="DefaultHeadersManager"/>
         /// </summary>
         /// <param name="apiVersion">Número de versión para incluir en las cabeceras personalizadas.</param>
         public UnsupportedApiVersionHeader(string apiVersion = null)
@@ -46,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         public virtual void AddApiKeyHeader(IRestRequest request, string apiKey)
         {
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, apiKey);
-            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.RequestedApiVersionHeaderName, this.ApiVersion);
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiVersionHeaderName, this.ApiVersion);
         }
 
         /// <summary>
