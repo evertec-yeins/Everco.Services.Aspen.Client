@@ -18,6 +18,8 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// </summary>
     internal class MissingApiKeyHeader : IHeadersManager
     {
+        private readonly Func<string> behavior;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
         /// </summary>
@@ -33,6 +35,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         public MissingApiKeyHeader(HeaderValueBehavior headerValueBehavior)
         {
             this.HeaderValueBehavior = headerValueBehavior;
+        }
+
+        public MissingApiKeyHeader(Func<string> behavior)
+
+        {
+            this.behavior = behavior;
         }
 
         /// <summary>
@@ -52,6 +60,8 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
         public void AddApiKeyHeader(IRestRequest request, string apiKey)
         {
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, this.behavior?.Invoke());
+
             switch (HeaderValueBehavior)
             {
                 case HeaderValueBehavior.Null:
