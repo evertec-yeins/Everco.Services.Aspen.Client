@@ -13,9 +13,9 @@ namespace Everco.Services.Aspen.Client.Auth
     public interface IUserIdentity
     {
         /// <summary>
-        /// Obtiene el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
-        /// </summary>        
-        string DocType { get; }
+        /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
+        /// </summary>
+        IDeviceInfo DeviceInfo { get; }
 
         /// <summary>
         /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.
@@ -23,13 +23,12 @@ namespace Everco.Services.Aspen.Client.Auth
         string DocNumber { get; }
 
         /// <summary>
+        /// Obtiene el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
+        /// </summary>        
+        string DocType { get; }
+        /// <summary>
         /// Obtiene la clave de acceso del usuario que intenta autenticar la solicitud.
         /// </summary>
         string Password { get; }
-
-        /// <summary>
-        /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
-        /// </summary>
-        IDeviceInfo DeviceInfo { get; }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="FutureUnixEpochGenerator.cs" company="Evertec Colombia">
+// <copyright file="PastUnixEpochGenerator.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -13,8 +13,15 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// <summary>
     /// Implementa un generador de épocas o marcas de tiempo Unix (número de segundos que han transcurrido desde 1970-01-01T00:00:00Z)
     /// </summary>
-    public class FutureUnixEpochGenerator : IEpochGenerator
+    public class DatePickerEpochGenerator : IEpochGenerator
     {
+        private readonly int days = 0; 
+
+        public DatePickerEpochGenerator(int days)
+        {
+            this.days = days;
+        }
+
         /// <summary>
         /// Obtiene el nombre con el que se agrega esta información a la solicitud.
         /// </summary>
@@ -26,6 +33,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <returns>
         /// Marca de tiempo Unix, expresado como el número de segundos que han transcurrido desde 1970-01-01T00:00:00Z
         /// </returns>
-        public double GetSeconds() => DateTimeOffset.Now.AddDays(3).ToUnixTimeSeconds();
+        public double GetSeconds() => DateTimeOffset.Now.AddDays(this.days).ToUnixTimeSeconds();
     }
 }

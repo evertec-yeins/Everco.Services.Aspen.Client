@@ -37,15 +37,27 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <summary>
         /// Envía al servicio la solicitud de generación de un token de autenticación.
         /// </summary>
-        /// <param name="useCache">Cuando es <see langword="true" /> se utiliza el último token de autenticación generado en la sesión.</param>
-        /// <returns>
-        /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
-        /// </returns>
-        public ISession<IAutonomousApp> Authenticate(bool useCache = true)
+        /// <returns>Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.</returns>
+        /// <exception cref="AspenException"></exception>
+        public ISession<IAutonomousApp> Authenticate()
         {
-            if (useCache)
+            return this.Authenticate(CachePolicy.CacheIfAvailable);
+        }
+
+        /// <summary>
+        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// </summary>
+        /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
+        public ISession<IAutonomousApp> AuthenticateNoCache()
+        {
+            return this.Authenticate(CachePolicy.BypassCache);
+        }
+
+        private ISession<IAutonomousApp> Authenticate(CachePolicy cache)
+        {
+            if (cache == CachePolicy.CacheIfAvailable)
             {
-                this.AuthToken = CacheStore.GetCurrentToken();
+                this.AuthToken = CacheStore.GetCurrentToken(this.AppIdentity.ApiKey);
                 if (this.AuthToken != null)
                 {
                     return this;
@@ -53,11 +65,11 @@ namespace Everco.Services.Aspen.Client.Fluent
             }
 
             this.InitializeClient();
-            IRestRequest request = new AspenRequest($"{Routes.AutonomousRoot}{Routes.Auth.Signin}", Method.POST);
+            IRestRequest request = new AspenRequest($"{Routes.AutonomousRoot.TrimEnd('/')}{Routes.Auth.Signin.TrimEnd('/')}", Method.POST);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Uri => {this.RestClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method.ToString()}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             IRestResponse response = this.RestClient.Execute(request);
 
             if (!response.IsSuccessful)
@@ -66,7 +78,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             }
 
             this.AuthToken = JsonConvert.DeserializeObject<AuthToken>(this.DecodeJwtResponse(response.Content));
-            CacheStore.SetCurrentToken(this.AuthToken);
+            CacheStore.SetCurrentToken(this.AppIdentity.ApiKey, this.AuthToken);
             return this;
         }
 

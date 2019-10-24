@@ -41,7 +41,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <summary>
         /// Impide que se cree una instancia predeterminada de la clase <see cref="EnvironmentEndpointProvider" />.
         /// </summary>
-        private EnvironmentEndpointProvider()
+        private EnvironmentEndpointProvider() : this($"{Environment.GetEnvironmentVariable("ASPEN:PUBLIC_SERVICE_URL")}/api", null)
         {
         }
 
@@ -54,14 +54,14 @@ namespace Everco.Services.Aspen.Client.Providers
         {
             this.BaseUrl = baseUrl;
             int defaultTimeout = 15;
-            int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
+            int waitForSeconds = Math.Max(timeout ?? defaultTimeout, 1);
             this.Timeout = TimeSpan.FromSeconds(waitForSeconds);
         }
 
         /// <summary>
         /// Obtiene una instancia de <see cref="IEndpointProvider"/> con la Url local del servicio de Aspen.
         /// </summary>
-        public static IEndpointProvider Local => localEndpoint ?? (localEndpoint = new EnvironmentEndpointProvider("http://localhost/api"));
+        public static IEndpointProvider Local => localEndpoint ??= new EnvironmentEndpointProvider();
 
         /// <summary>
         /// Obtiene una instancia de <see cref="IEndpointProvider"/> con la Url Pública del servicio de Aspen almacenada en variable de ambiente.

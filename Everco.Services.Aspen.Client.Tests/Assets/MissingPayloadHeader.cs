@@ -56,7 +56,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
 
             if (this.RequestedApiVersion != null)
             {
-                request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.RequestedApiVersionHeaderName, this.RequestedApiVersion.ToString(2));
+                request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiVersionHeaderName, this.RequestedApiVersion.ToString(2));
             }
         }
 

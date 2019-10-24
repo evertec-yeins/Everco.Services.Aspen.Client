@@ -25,10 +25,15 @@ namespace Everco.Services.Aspen.Client.Fluent
         IUtilsModule Utils { get; }
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación.
+        /// Envía al servicio la solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
         /// </summary>
-        /// <param name="useCache">Cuando es <see langword="true" /> se utiliza el último token de autenticación generado en la sesión.</param>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
-        ISession<IAutonomousApp> Authenticate(bool useCache = true);
+        ISession<IAutonomousApp> Authenticate();
+
+        /// <summary>
+        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// </summary>
+        /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
+        ISession<IAutonomousApp> AuthenticateNoCache();
     }
 }

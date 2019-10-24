@@ -20,10 +20,10 @@ namespace Everco.Services.Aspen.Client.Auth
     public class AuthToken : IAuthToken
     {
         /// <summary>
-        /// Obtiene o establece una cadena de texto que representa el token de autenticación
+        /// Obtiene un valor que permite determinar si el token ya expiró.
         /// </summary>
-        [JsonProperty("jti")]
-        public string Token { get; set; }
+        [JsonIgnore]
+        public bool Expired => DateTime.Now >= this.ExpiresAt;
 
         /// <summary>
         /// Obtiene o establece la fecha y hora local en la que se expira el token de autenticación
@@ -40,11 +40,10 @@ namespace Everco.Services.Aspen.Client.Auth
         public DateTime IssueAt { get; set; }
 
         /// <summary>
-        /// Obtiene un valor que permite determinar si el token ya expiró.
+        /// Obtiene o establece una cadena de texto que representa el token de autenticación
         /// </summary>
-        [JsonIgnore]
-        public bool Expired => DateTime.Now >= this.ExpiresAt;
-
+        [JsonProperty("jti")]
+        public string Token { get; set; }
         /// <summary>
         /// Obtiene el texto que se muestra en el depurador para la clase.
         /// </summary>
