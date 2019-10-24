@@ -27,8 +27,8 @@ namespace Everco.Services.Aspen.Client.Tests
         public void Setup()
         {
             ServiceLocator.Instance.Reset();
-            ServiceLocator.Instance.RegisterInstanceOfWebProxy(new WebProxy("http://192.168.2.70:8080", true));
-            ServiceLocator.Instance.RegisterInstanceOfLoggingProvider(new ConsoleLoggingProvider());
+            ServiceLocator.Instance.RegisterWebProxy(new WebProxy("http://192.168.2.70:8080", true));
+            ServiceLocator.Instance.RegisterLoggingProvider(new ConsoleLoggingProvider());
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate(false)
+                    .Authenticate()
                     .GetClient();
 
             // Se usa una operación que requiere token de autenticación.
@@ -53,10 +53,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
-            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingNonceClaimOnPayloadHeader());
+            ServiceLocator.Instance.RegisterHeadersManager(new MissingNoncePayloadHeader());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -70,19 +70,19 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Null),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingNoncePayloadHeader(HeaderValueBehavior.Null),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.Empty),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.WhiteSpaces)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -97,18 +97,18 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+                new MissingNoncePayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -121,11 +121,11 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NonceAlreadyProcessedThrows()
         {
             Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterInstanceOfNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando.
@@ -142,10 +142,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
-            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingEpochClaimOnPayloadHeader());
+            ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochPayloadHeader());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -159,19 +159,19 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Null),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingEpochPayloadHeader(HeaderValueBehavior.Null),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.Empty),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.WhiteSpaces)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -186,19 +186,19 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MinLengthRequired),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+                new MissingEpochPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.MinLengthRequired),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15850"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -213,18 +213,19 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
+            int randomDays = new Random().Next(5, 10);
             IList<IEpochGenerator> epochBehaviors = new List<IEpochGenerator>()
             {
-                new PastUnixEpochGenerator(),
-                new FutureUnixEpochGenerator(),
+                new DatePickerEpochGenerator(-randomDays),
+                new DatePickerEpochGenerator(randomDays),
             };
 
             foreach (IEpochGenerator behavior in epochBehaviors)
             {
-                ServiceLocator.Instance.RegisterInstanceOfEpochGenerator(behavior);
+                ServiceLocator.Instance.RegisterEpochGenerator(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15851"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
@@ -239,11 +240,11 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
-            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingAuthTokenClaimOnPayloadHeader());
+            ServiceLocator.Instance.RegisterHeadersManager(new MissingAuthTokenClaimOnPayloadHeader());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -257,7 +258,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
@@ -270,7 +271,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 // Se intenta usar una operación que requiere el token de autenticación.
-                ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -285,11 +286,11 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate(false)
+                .Authenticate()
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
-            ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
+            ServiceLocator.Instance.RegisterHeadersManager(new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20007"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));

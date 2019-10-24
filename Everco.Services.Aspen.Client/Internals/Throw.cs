@@ -20,6 +20,86 @@ namespace Everco.Services.Aspen.Client.Internals
     internal static class Throw
     {
         /// <summary>
+        /// Genera una excepción <exception cref="ArgumentNullException" /> si <paramref name="argumentValue" /> es <see cref="Guid.Empty" />.
+        /// </summary>
+        /// <typeparam name="T">Tipo de <paramref name="argumentValue"/> que se está validando.</typeparam>
+        /// <param name="argumentValue">Valor del argumento que se valida.</param>
+        /// <param name="argumentName">Nombre del argumento que se valida.</param>
+        public static void IfEmpty<T>(T argumentValue, string argumentName)
+        {
+            if (argumentValue.Equals(default(T)))
+            {
+                throw new ArgumentException(Resources.ArgumentInvalidMessage, argumentName);
+            }
+        }
+
+        /// <summary>
+        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="lambda" /> se evalua como <c>false</c>.
+        /// </summary>
+        /// <param name="lambda">Expresión lambda para evaluar.</param>
+        /// <param name="message">Texto que describe la excepción.</param>
+        public static void IfFalse(Func<bool> lambda, string message = null)
+        {
+            bool ret = lambda.Invoke();
+            if (!ret)
+            {
+                throw new InvalidConstraintException(message);
+            }
+        }
+
+        /// <summary>
+        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="expression" /> se evalua como <c>false</c>.
+        /// </summary>
+        /// <param name="expression">Expresión para evaluar.</param>
+        /// <param name="message">Texto que describe la excepción.</param>
+        public static void IfFalse(bool expression, string message = null)
+        {
+            if (!expression)
+            {
+                throw new InvalidConstraintException(message);
+            }
+        }
+
+        /// <summary>
+        /// Genera una excepción <exception cref="ArgumentNullException" /> si <paramref name="argumentValue" /> es <c>null</c>, o
+        /// <exception cref="ArgumentException" /> si <paramref name="argumentValue" /> contiene algún elemento <c>null</c>.
+        /// </summary>
+        /// <typeparam name="T">Tipo de los elementos en la colección</typeparam>
+        /// <param name="argumentValue">Valor del argumento que se valida.</param>
+        /// <param name="argumentName">Nombre del argumento que se valida.</param>
+        /// <exception cref="ArgumentException">La colección contiene algún elemento <c>null</c>.</exception>
+        public static void IfHasNull<T>(ICollection<T> argumentValue, string argumentName)
+        {
+            if (argumentValue == null)
+            {
+                return;
+            }
+
+            if (argumentValue.Any(item => item == null))
+            {
+                throw new ArgumentException(Resources.NullItemCollectionMessage, argumentName);
+            }
+        }
+
+        /// <summary>
+        /// Genera una excepción <exception cref="ArgumentOutOfRangeException"/> cuando el argumento no está en el rango.
+        /// </summary>
+        /// <param name="argumentValue">Valor del argumento que se valida.</param>
+        /// <param name="startRange">Valor de inicio del rango. <paramref name="argumentValue"/> debe ser mayor o igual que <paramref name="startRange"/></param>
+        /// <param name="endRange">Valor final del rango. <paramref name="argumentValue"/> debe ser menor o igual que <paramref name="endRange"/></param>
+        /// <param name="argumentName">Nombre del argumento que se valida.</param>
+        public static void IfInRange(int argumentValue, int startRange, int endRange, string argumentName)
+        {
+            if (argumentValue >= startRange && argumentValue <= endRange)
+            {
+                throw new ArgumentOutOfRangeException(
+                    argumentName,
+                    argumentValue,
+                    string.Format(Resources.ArgumentInOfRangeMessageFormat, startRange, endRange));
+            }
+        }
+
+        /// <summary>
         /// Genera una excepción <exception cref="ArgumentNullException"/> si <paramref name="argumentValue"/> es <c>null</c>.
         /// </summary>
         /// <typeparam name="T">Tipo del argumento a validar</typeparam>
@@ -93,96 +173,6 @@ namespace Everco.Services.Aspen.Client.Internals
                 throw new ArgumentException(Resources.EmptyCollectionMessage, argumentName);
             }
         }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="ArgumentNullException" /> si <paramref name="argumentValue" /> es <c>null</c>, o
-        /// <exception cref="ArgumentException" /> si <paramref name="argumentValue" /> contiene algún elemento <c>null</c>.
-        /// </summary>
-        /// <typeparam name="T">Tipo de los elementos en la colección</typeparam>
-        /// <param name="argumentValue">Valor del argumento que se valida.</param>
-        /// <param name="argumentName">Nombre del argumento que se valida.</param>
-        /// <exception cref="ArgumentException">La colección contiene algún elemento <c>null</c>.</exception>
-        public static void IfHasNull<T>(ICollection<T> argumentValue, string argumentName)
-        {
-            if (argumentValue == null)
-            {
-                return;
-            }
-
-            if (argumentValue.Any(item => item == null))
-            {
-                throw new ArgumentException(Resources.NullItemCollectionMessage, argumentName);
-            }
-        }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="ArgumentNullException" /> si <paramref name="argumentValue" /> es <see cref="Guid.Empty" />.
-        /// </summary>
-        /// <typeparam name="T">Tipo de <paramref name="argumentValue"/> que se está validando.</typeparam>
-        /// <param name="argumentValue">Valor del argumento que se valida.</param>
-        /// <param name="argumentName">Nombre del argumento que se valida.</param>
-        public static void IfEmpty<T>(T argumentValue, string argumentName)
-        {            
-            if (argumentValue.Equals(default(T)))
-            {
-                throw new ArgumentException(Resources.ArgumentInvalidMessage, argumentName);
-            }
-        }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="lambda" /> se evalua como <c>false</c>.
-        /// </summary>
-        /// <param name="lambda">Expresión lambda para evaluar.</param>
-        /// <param name="message">Texto que describe la excepción.</param>
-        public static void IfFalse(Func<bool> lambda, string message = null)
-        {
-            bool ret = lambda.Invoke();
-            if (!ret)
-            {
-                throw new InvalidConstraintException(message);
-            }
-        }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="expression" /> se evalua como <c>false</c>.
-        /// </summary>
-        /// <param name="expression">Expresión para evaluar.</param>
-        /// <param name="message">Texto que describe la excepción.</param>
-        public static void IfFalse(bool expression, string message = null)
-        {
-            if (!expression)
-            {
-                throw new InvalidConstraintException(message);
-            }
-        }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="lambda" /> se evalua como <c>true</c>.
-        /// </summary>
-        /// <param name="lambda">Expresión lambda para evaluar.</param>
-        /// <param name="message">Texto que describe la excepción.</param>
-        public static void IfTrue(Func<bool> lambda, string message = null)
-        {
-            bool ret = lambda.Invoke();
-            if (ret)
-            {
-                throw new InvalidConstraintException(message);
-            }
-        }
-
-        /// <summary>
-        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="expression" /> se evalua como <c>true</c>.
-        /// </summary>
-        /// <param name="expression">Expresión para evaluar.</param>
-        /// <param name="message">Texto que describe la excepción.</param>
-        public static void IfTrue(bool expression, string message = null)
-        {
-            if (expression)
-            {
-                throw new InvalidConstraintException(message);
-            }
-        }
-
         /// <summary>
         /// Genera una excepción <exception cref="ArgumentOutOfRangeException"/> cuando el argumento no está dentro del rango inclusivo. 
         /// </summary>
@@ -220,20 +210,29 @@ namespace Everco.Services.Aspen.Client.Internals
         }
 
         /// <summary>
-        /// Genera una excepción <exception cref="ArgumentOutOfRangeException"/> cuando el argumento no está en el rango.
+        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="lambda" /> se evalua como <c>true</c>.
         /// </summary>
-        /// <param name="argumentValue">Valor del argumento que se valida.</param>
-        /// <param name="startRange">Valor de inicio del rango. <paramref name="argumentValue"/> debe ser mayor o igual que <paramref name="startRange"/></param>
-        /// <param name="endRange">Valor final del rango. <paramref name="argumentValue"/> debe ser menor o igual que <paramref name="endRange"/></param>
-        /// <param name="argumentName">Nombre del argumento que se valida.</param>
-        public static void IfInRange(int argumentValue, int startRange, int endRange, string argumentName)
+        /// <param name="lambda">Expresión lambda para evaluar.</param>
+        /// <param name="message">Texto que describe la excepción.</param>
+        public static void IfTrue(Func<bool> lambda, string message = null)
         {
-            if (argumentValue >= startRange && argumentValue <= endRange)
+            bool ret = lambda.Invoke();
+            if (ret)
             {
-                throw new ArgumentOutOfRangeException(
-                    argumentName,
-                    argumentValue,
-                    string.Format(Resources.ArgumentInOfRangeMessageFormat, startRange, endRange));
+                throw new InvalidConstraintException(message);
+            }
+        }
+
+        /// <summary>
+        /// Genera una excepción <exception cref="InvalidConstraintException" /> si <paramref name="expression" /> se evalua como <c>true</c>.
+        /// </summary>
+        /// <param name="expression">Expresión para evaluar.</param>
+        /// <param name="message">Texto que describe la excepción.</param>
+        public static void IfTrue(bool expression, string message = null)
+        {
+            if (expression)
+            {
+                throw new InvalidConstraintException(message);
             }
         }
     }

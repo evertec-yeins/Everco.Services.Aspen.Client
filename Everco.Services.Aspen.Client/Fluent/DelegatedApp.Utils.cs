@@ -25,19 +25,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         public IUtilsModule Utils => this;
 
         /// <summary>
-        /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
-        /// </summary>
-        /// <returns>
-        /// Lista de tipos de documento predeterminados.
-        /// </returns>
-        public IList<DocTypeInfo> GetDefaultDocTypes()
-        {
-            string resource = Routes.Utils.DocTypes;
-            IRestRequest request = new AspenRequest(resource, Method.GET);
-            return this.Execute<List<DocTypeInfo>>(request);
-        }
-
-        /// <summary>
         /// Cifra una cadena de texto usando el algoritmo de cifrado del servicio.
         /// </summary>
         /// <param name="value">La cadena de texto en claro a cifrar.</param>
@@ -65,6 +52,18 @@ namespace Everco.Services.Aspen.Client.Fluent
             return response.Content;
         }
 
+        /// <summary>
+        /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
+        /// </summary>
+        /// <returns>
+        /// Lista de tipos de documento predeterminados.
+        /// </returns>
+        public IList<DocTypeInfo> GetDefaultDocTypes()
+        {
+            string resource = Routes.Utils.DocTypes;
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<DocTypeInfo>>(request);
+        }
         /// <summary>
         /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
         /// </summary>

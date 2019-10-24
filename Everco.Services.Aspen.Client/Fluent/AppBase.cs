@@ -107,8 +107,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public IAppIdentity<TFluent> RoutingTo(IEndpointProvider endpointProvider)
         {
             Throw.IfNull(endpointProvider, nameof(endpointProvider));
-            this.endpoint = new Uri(endpointProvider.BaseUrl, UriKind.Absolute);
-            this.timeout = endpointProvider.Timeout;
+            this.RoutingTo(endpointProvider.BaseUrl, Convert.ToInt32(endpointProvider.Timeout.TotalSeconds));
             return this;
         }
 
@@ -121,7 +120,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public IAppIdentity<TFluent> RoutingTo(string baseUrl, int? timeout = null)
         {
             Throw.IfNullOrEmpty(nameof(baseUrl), baseUrl);
-            this.endpoint = new Uri(baseUrl, UriKind.Absolute);
+            this.endpoint = new Uri(baseUrl.TrimEnd('/'), UriKind.Absolute);
             int defaultTimeout = 15;
             int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
             this.timeout = TimeSpan.FromSeconds(waitForSeconds);
@@ -159,7 +158,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         protected void InitializeClient()
         {
-            this.RestClient = new RestClient($"{this.endpoint}/");
+            this.RestClient = new RestClient(this.endpoint.ToString().TrimEnd('/'));
             this.JwtEncoder = new JwtEncoder(this.algorithm, ServiceLocator.Instance.JwtJsonSerializer, this.urlEncoder);
             this.validator = new JwtValidator(ServiceLocator.Instance.JwtJsonSerializer, this.datetimeProvider);
             this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder);

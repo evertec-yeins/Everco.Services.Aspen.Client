@@ -24,6 +24,19 @@ namespace Everco.Services.Aspen.Client.Fluent
         public ISettingsModule Settings => this;
 
         /// <summary>
+        /// Obtiene la lista de operadores de telefonía móvil soportados por el servicio Aspen.
+        /// </summary>
+        /// <returns>
+        /// Lista de operadores de telefonía soportados.
+        /// </returns>
+        public IList<CarrierInfo> GetCarriers()
+        {
+            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Telcos}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<CarrierInfo>>(request);
+        }
+
+        /// <summary>
         /// Obtiene la lista de tipos de documento soportados por el servicio Aspen.
         /// </summary>
         /// <returns>
@@ -35,18 +48,28 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(resource, Method.GET);
             return this.Execute<List<DocTypeInfo>>(request);
         }
+        /// <summary>
+        /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
+        /// </summary>
+        /// <returns>Lista de opciones de menú.</returns>
+        public IList<MenuItemInfo> GetMenu()
+        {
+            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Menu}";
+            IRestRequest request = new AspenRequest(resource, Method.GET);
+            return this.Execute<List<MenuItemInfo>>(request);
+        }
 
         /// <summary>
-        /// Obtiene la lista de operadores de telefonía móvil soportados por el servicio Aspen.
+        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
         /// </summary>
         /// <returns>
-        /// Lista de operadores de telefonía soportados.
+        /// Colección de valores admitidos.
         /// </returns>
-        public IList<CarrierInfo> GetCarriers()
+        public MiscellaneousSettings GetMiscellaneousSettings()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Telcos}";
+            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Miscellaneous}";
             IRestRequest request = new AspenRequest(resource, Method.GET);
-            return this.Execute<List<CarrierInfo>>(request);
+            return this.Execute<MiscellaneousSettings>(request);
         }
 
         /// <summary>
@@ -86,30 +109,6 @@ namespace Everco.Services.Aspen.Client.Fluent
             string resource = $"{Routes.DelegatedRoot}{Routes.Resources.TranTypes}";
             IRestRequest request = new AspenRequest(resource, Method.GET);
             return this.Execute<List<TranTypeInfo>>(request);
-        }
-
-        /// <summary>
-        /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
-        /// </summary>
-        /// <returns>Lista de opciones de menú.</returns>
-        public IList<MenuItemInfo> GetMenu()
-        {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Menu}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
-            return this.Execute<List<MenuItemInfo>>(request);
-        }
-
-        /// <summary>
-        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
-        /// </summary>
-        /// <returns>
-        /// Colección de valores admitidos.
-        /// </returns>
-        public MiscellaneousSettings GetMiscellaneousSettings()
-        {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Miscellaneous}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
-            return this.Execute<MiscellaneousSettings>(request);
         }
     }
 }

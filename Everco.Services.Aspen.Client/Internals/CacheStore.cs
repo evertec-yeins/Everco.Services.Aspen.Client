@@ -8,7 +8,7 @@
 namespace Everco.Services.Aspen.Client.Internals
 {
     using System;
-    using System.Reflection;
+    using System.Collections.Generic;
     using Auth;
 
     /// <summary>
@@ -19,40 +19,32 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <summary>
         /// Para uso interno.
         /// </summary>
+        private const string DeviceCacheKey = "CURRENT_DEVICE_INFO";
+
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
         private const string TokenCacheKey = "CURRENT_AUTH_TOKEN";
 
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private const string DeviceCacheKey = "CURRENT_DEVICE_INFO";
+        private static readonly List<string> keys;
 
+        static CacheStore()
+        {
+            keys = new List<string>();
+        }
         /// <summary>
         /// Obtiene el último token de autenticación generado o  <see langword="null" /> si no se ha obtenido ninguno.
         /// </summary>
-        /// <returns>Instancia que implementa <see cref="IAuthToken"/> con el valor del último token generado.</returns>
-        internal static IAuthToken GetCurrentToken()
+        /// <param name="apiKey">ApiKey para el que se obtiene el token de autemticación de la cache.</param>
+        /// <returns>Instancia que implementa <see cref="IAuthToken" /> con el valor del último token generado.</returns>
+        internal static IAuthToken GetCurrentToken(string apiKey)
         {
-            string cacheKey = TokenCacheKey;
+            string cacheKey = $"{TokenCacheKey}-{apiKey}";
+            keys.Add(cacheKey);
             return AppDomain.CurrentDomain.GetData(cacheKey) as IAuthToken;
-        }
-
-        /// <summary>
-        /// Guarda el último token de autenticación generado.
-        /// </summary>
-        /// <param name="authToken">Instancia del token que se debe guardar.</param>
-        internal static void SetCurrentToken(IAuthToken authToken)
-        {
-            string cacheKey = TokenCacheKey;
-            AppDomain.CurrentDomain.SetData(cacheKey, authToken);
-        }
-
-        /// <summary>
-        /// Reestablece a <see langword="null" /> todos los valores en la cache.
-        /// </summary>
-        internal static void Reset()
-        {
-            AppDomain.CurrentDomain.SetData(TokenCacheKey, null);
-            AppDomain.CurrentDomain.SetData(DeviceCacheKey, null);
         }
 
         /// <summary>
@@ -64,6 +56,31 @@ namespace Everco.Services.Aspen.Client.Internals
             return AppDomain.CurrentDomain.GetData(DeviceCacheKey) as IDeviceInfo;
         }
 
+        /// <summary>
+        /// Reestablece a <see langword="null" /> todos los valores en la cache.
+        /// </summary>
+        internal static void Reset()
+        {
+            foreach (string key in keys)
+            {
+                AppDomain.CurrentDomain.SetData(key, null);
+            }
+            
+            keys.Clear();
+            AppDomain.CurrentDomain.SetData(DeviceCacheKey, null);
+        }
+
+        /// <summary>
+        /// Guarda el último token de autenticación generado.
+        /// </summary>
+        /// <param name="apiKey">ApiKey con el que se asocia el token de autemticación en la cache.</param>
+        /// <param name="authToken">Instancia del token que se debe guardar.</param>
+        internal static void SetCurrentToken(string apiKey, IAuthToken authToken)
+        {
+            string cacheKey = $"{TokenCacheKey}-{apiKey}";
+            keys.Add(cacheKey);
+            AppDomain.CurrentDomain.SetData(cacheKey, authToken);
+        }
         /// <summary>
         /// Guarda la ifnormación del dispositivo actual.
         /// </summary>
