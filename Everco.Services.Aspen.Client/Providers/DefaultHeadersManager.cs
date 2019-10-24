@@ -47,7 +47,7 @@ namespace Everco.Services.Aspen.Client.Providers
         }
 
         /// <summary>
-        /// Obtiene el número de versión del API.
+        /// Obtiene el número de versión del API que se envía con la solicitud.
         /// </summary>
         public Version RequestedApiVersion { get; }
 

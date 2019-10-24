@@ -223,7 +223,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingNonceClaimOnPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingNoncePayloadHeader());
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(DelegatedAppIdentity.Default)
@@ -242,9 +242,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Null),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingNoncePayloadHeader(HeaderValueBehavior.Null),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.Empty),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.WhiteSpaces)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
@@ -271,8 +271,8 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingNonceClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+                new MissingNoncePayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingNoncePayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
@@ -331,7 +331,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochClaimOnPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochPayloadHeader());
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(DelegatedAppIdentity.Default)
@@ -350,9 +350,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Null),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingEpochPayloadHeader(HeaderValueBehavior.Null),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.Empty),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.WhiteSpaces)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
@@ -379,9 +379,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
             {
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MinLengthRequired),
-                new MissingEpochClaimOnPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+                new MissingEpochPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.MinLengthRequired),
+                new MissingEpochPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
             };
 
             foreach (IHeadersManager behavior in payloadBehaviors)
@@ -406,10 +406,11 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Delegated.Signin.Headers")]
         public void EpochExpiredThrows()
         {
+            int randomDays = new Random().Next(5, 10);
             IList<IEpochGenerator> epochBehaviors = new List<IEpochGenerator>()
             {
-                new PastUnixEpochGenerator(),
-                new FutureUnixEpochGenerator(),
+                new DatePickerEpochGenerator(-randomDays),
+                new DatePickerEpochGenerator(randomDays),
             };
 
             foreach (IEpochGenerator behavior in epochBehaviors)
