@@ -136,7 +136,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)

@@ -127,16 +127,16 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiKeyHeader(() => null),
-                new MissingApiKeyHeader(() => string.Empty),
-                new MissingApiKeyHeader(() => "      ")
+                new MissingApiKeyHeader(HeaderValueBehavior.Null),
+                new MissingApiKeyHeader(HeaderValueBehavior.Empty),
+                new MissingApiKeyHeader(HeaderValueBehavior.WhiteSpaces)
             };
 
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(behavior);
+                    ServiceLocator.Instance.RegisterInstanceOfApiSignManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(DelegatedAppIdentity.Default)

@@ -18,7 +18,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// </summary>
     internal class MissingApiKeyHeader : IHeadersManager
     {
-        private readonly Func<string> _behavior;
+        private readonly Func<string> behavior;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
@@ -31,11 +31,22 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <summary>
         /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
         /// </summary>
-        /// <param name="behavior">The header value behavior.</param>
-        public MissingApiKeyHeader(Func<string> behavior)
+        /// <param name="headerValueBehavior">The header value behavior.</param>
+        public MissingApiKeyHeader(HeaderValueBehavior headerValueBehavior)
         {
-            this._behavior = behavior;
+            this.HeaderValueBehavior = headerValueBehavior;
         }
+
+        public MissingApiKeyHeader(Func<string> behavior)
+
+        {
+            this.behavior = behavior;
+        }
+
+        /// <summary>
+        /// Gets the header value behavior.
+        /// </summary>
+        public HeaderValueBehavior HeaderValueBehavior { get; }
 
         /// <summary>
         /// Obtiene el número de versión que se envia en la solicitud.
@@ -49,7 +60,22 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
         public void AddApiKeyHeader(IRestRequest request, string apiKey)
         {
-            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, this._behavior?.Invoke());
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, this.behavior?.Invoke());
+
+            switch (HeaderValueBehavior)
+            {
+                case HeaderValueBehavior.Null:
+                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, null);
+                    break;
+
+                case HeaderValueBehavior.Empty:
+                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, string.Empty);
+                    break;
+
+                case HeaderValueBehavior.WhiteSpaces:
+                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, "    ");
+                    break;
+            }
         }
 
         /// <summary>
