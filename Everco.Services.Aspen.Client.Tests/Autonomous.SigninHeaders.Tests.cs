@@ -93,7 +93,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(apiKey, randomApiSecret)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -112,7 +112,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -136,11 +136,11 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -160,7 +160,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -188,7 +188,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -208,7 +208,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -227,7 +227,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -255,7 +255,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -283,7 +283,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -297,12 +297,12 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signin.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
+            string nonce = Guid.NewGuid().ToString("D");
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate()
+                .AuthenticateNoCache()
                 .GetClient();
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
@@ -310,13 +310,14 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
 
-            // No se podrá autentica la aplicación, cuando use el mismo nonce por segunda vez.
+            // No se podrá autenticar la aplicación, cuando use el mismo nonce por segunda vez.
+            Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), nonce);
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -335,7 +336,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Local)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -363,7 +364,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -392,7 +393,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -422,7 +423,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -451,7 +452,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -480,7 +481,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 
@@ -510,7 +511,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(AutonomousAppIdentity.Default)
-                        .Authenticate()
+                        .AuthenticateNoCache()
                         .GetClient();
                 });
 

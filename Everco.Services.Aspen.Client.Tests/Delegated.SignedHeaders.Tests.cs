@@ -50,8 +50,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Delegated.Signed.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
+            string nonce = Guid.NewGuid().ToString("D");
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(DelegatedAppIdentity.Default)

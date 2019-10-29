@@ -120,15 +120,18 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signed.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
 
-            // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando.
+            // Se usa una operación luego de la autenticación con un nuevo nonce y debe funcionar.
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(Guid.NewGuid().ToString()));
+            IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
+            CollectionAssert.IsNotEmpty(docTypes);
+
+            // Se una nuevamente el mismo nonce y debe fallar ya que se está reutilizando.
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));

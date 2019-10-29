@@ -63,7 +63,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia actual de la clase.
         /// </summary>
         /// <value>Referencia de la instancia actual.</value>
-        public static IServiceLocator Instance => instance ?? (instance = new ServiceLocator());
+        public static IServiceLocator Instance => instance ??= new ServiceLocator();
 
         /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para generar valores Epoch.

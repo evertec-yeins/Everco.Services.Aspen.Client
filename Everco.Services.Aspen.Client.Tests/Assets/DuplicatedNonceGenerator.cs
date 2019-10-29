@@ -20,18 +20,17 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// </summary>
         private readonly string duplicatedNonce = null;
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="DuplicatedNonceGenerator"/> class from being created.
+        /// </summary>
         private DuplicatedNonceGenerator()
         {
+            this.duplicatedNonce = Guid.NewGuid().ToString("D");
         }
 
         public DuplicatedNonceGenerator(string nonce)
         {
             this.duplicatedNonce = nonce;
-        }
-
-        public DuplicatedNonceGenerator(Guid nonce)
-        {
-            this.duplicatedNonce = nonce.ToString("D");
         }
 
         /// <summary>
