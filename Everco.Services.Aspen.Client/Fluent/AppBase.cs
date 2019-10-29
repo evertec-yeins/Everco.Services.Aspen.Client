@@ -80,16 +80,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         protected IRestClient RestClient { get; private set; }
 
         /// <summary>
-        /// Decodifica una cadena JWT.
-        /// </summary>
-        /// <param name="jwt">La cadena a decodificar.</param>
-        /// <returns>Json que conforma el contenido de la respuesta.</returns>
-        public string DecodeJwtResponse(string jwt)
-        {
-            return this.JwtDecoder.Decode(jwt, this.AppIdentity.ApiSecret, true);
-        }
-
-        /// <summary>
         /// Envía una solicitud de autenticación al servicio Aspen.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que se puede utilizar para solicitar más recursos de información al servicio Aspen.</returns>
@@ -153,6 +143,15 @@ namespace Everco.Services.Aspen.Client.Fluent
             return this as TFluent;
         }
 
+        /// <summary>
+        /// Decodifica una cadena JWT.
+        /// </summary>
+        /// <param name="jwt">La cadena a decodificar.</param>
+        /// <returns>Json que conforma el contenido de la respuesta.</returns>
+        protected string DecodeJwtResponse(string jwt)
+        {
+            return this.JwtDecoder.Decode(jwt, this.AppIdentity.ApiSecret, true);
+        }
         /// <summary>
         /// Inicializa la instancia del tipo <see cref="RestSharp.RestClient"/> que se utilza para enviar las solicitudes al servicio Aspen.
         /// </summary>

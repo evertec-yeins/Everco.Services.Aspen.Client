@@ -65,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             }
 
             this.InitializeClient();
-            IRestRequest request = new AspenRequest($"{Routes.AutonomousRoot.TrimEnd('/')}{Routes.Auth.Signin.TrimEnd('/')}", Method.POST);
+            IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.Signin);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");

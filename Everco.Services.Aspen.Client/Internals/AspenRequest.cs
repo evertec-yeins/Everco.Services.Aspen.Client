@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Internals
 {
+    using System;
     using RestSharp;
 
     /// <summary>
@@ -17,14 +18,45 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="AspenRequest" />.
         /// </summary>
-        /// <param name="resource">El recurso solicitado.</param>
+        /// <param name="resource">Url del recurso solicitado.</param>
         /// <param name="method">Método o verbo HTTP para invocar el recurso.</param>
-        internal AspenRequest(string resource, Method method) :
-            base(resource, method, DataFormat.Json)
+        /// <param name="accept">Texto que se envía en la cabecera Accept de la solicitud.</param>
+        /// <param name="contextType">Texto que se envía en la cabecera Content-Type de la solicitud.</param>
+        /// <param name="dataFormat">Formato de los datos que se envian con la solicitud.</param>
+        internal AspenRequest(
+            string resource,
+            Method method,
+            string accept = "application/json",
+            string contextType = "application/json; charset=utf-8",
+            DataFormat dataFormat = DataFormat.Json) :
+            base(resource, method, dataFormat)
         {
             Throw.IfNullOrEmpty(resource, nameof(resource));
-            //this.AddHeader("Accept", "application/json");
-            //this.AddHeader("Content-Type", "application/json; charset=utf-8");
+            if (!string.IsNullOrWhiteSpace(accept))
+            {
+                this.AddHeader("Accept", accept);
+            }
+
+            if (!string.IsNullOrWhiteSpace(contextType))
+            {
+                this.AddHeader("Content-Type", contextType);
+            }
+        }
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="AspenRequest"/>
+        /// </summary>
+        /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
+        /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
+        /// <param name="accept">Texto que se envía en la cabecera Accept de la solicitud.</param>
+        /// <param name="contextType">Texto que se envía en la cabecera Content-Type de la solicitud.</param>
+        internal AspenRequest(
+            Scope scope,
+            EndpointMapping mappingInfo,
+            string accept = "application/json",
+            string contextType = "application/json; charset=utf-8") :
+            base(mappingInfo.GetEndPointMappingInfo(scope).Key, mappingInfo.GetEndPointMappingInfo(scope).Value)
+        {
         }
     }
 }
