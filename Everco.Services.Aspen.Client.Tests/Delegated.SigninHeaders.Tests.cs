@@ -127,16 +127,16 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiKeyHeader(HeaderValueBehavior.Null),
-                new MissingApiKeyHeader(HeaderValueBehavior.Empty),
-                new MissingApiKeyHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingApiKeyHeader(() => null),
+                new MissingApiKeyHeader(() => string.Empty),
+                new MissingApiKeyHeader(() => "     ")
             };
 
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader(HeaderValueBehavior.Null));
+                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Local)
                         .WithIdentity(DelegatedAppIdentity.Default)
@@ -297,8 +297,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Delegated.Signin.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            Guid duplicatedNonce = Guid.NewGuid();
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(duplicatedNonce));
+            string nonce = Guid.NewGuid().ToString("D");
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Local)
                 .WithIdentity(DelegatedAppIdentity.Default)
