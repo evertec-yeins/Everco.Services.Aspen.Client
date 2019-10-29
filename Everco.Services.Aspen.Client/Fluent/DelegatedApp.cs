@@ -72,7 +72,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             }
 
             this.InitializeClient();
-            IRestRequest request = new AspenRequest($"{Routes.DelegatedRoot}/{Routes.Auth.Signin}", Method.POST);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.Signin);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userIdentity);
             IRestResponse response = this.RestClient.Execute(request);

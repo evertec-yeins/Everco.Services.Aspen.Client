@@ -5,12 +5,12 @@
 // <author>atorrest</author>
 // <date>2019-10-23 02:16 PM</date>
 // ----------------------------------------------------------------------
-namespace Everco.Services.Aspen.Client.Fluent
+namespace Everco.Services.Aspen.Client.Internals
 {
     /// <summary>
     /// Define el uso de la cache para los tokens de autenticación.
     /// </summary>
-    public enum CachePolicy
+    internal enum CachePolicy
     {
         /// <summary>
         /// Establece que no se utilice ninguna entrada almacenada en la cache.

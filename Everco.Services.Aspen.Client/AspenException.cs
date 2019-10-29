@@ -5,6 +5,7 @@
 // <author>atorrest</author>
 // <date>2019-01-02 04:56 PM</date>
 // ----------------------------------------------------------------------
+// ReSharper disable MemberCanBePrivate.Global
 namespace Everco.Services.Aspen.Client
 {
     using System;
