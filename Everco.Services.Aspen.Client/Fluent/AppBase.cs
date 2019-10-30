@@ -97,7 +97,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public IAppIdentity<TFluent> RoutingTo(IEndpointProvider endpointProvider)
         {
             Throw.IfNull(endpointProvider, nameof(endpointProvider));
-            this.RoutingTo(endpointProvider.BaseUrl, Convert.ToInt32(endpointProvider.Timeout.TotalSeconds));
+            this.RoutingTo(endpointProvider.Url, Convert.ToInt32(endpointProvider.Timeout.TotalSeconds));
             return this;
         }
 
@@ -152,6 +152,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             return this.JwtDecoder.Decode(jwt, this.AppIdentity.ApiSecret, true);
         }
+
         /// <summary>
         /// Inicializa la instancia del tipo <see cref="RestSharp.RestClient"/> que se utilza para enviar las solicitudes al servicio Aspen.
         /// </summary>

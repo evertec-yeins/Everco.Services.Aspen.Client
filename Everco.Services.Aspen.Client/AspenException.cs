@@ -89,11 +89,12 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene el código de estado de respuesta HTTP devuelto por el servicio Aspen.
         /// </summary>
         public HttpStatusCode StatusCode { get; private set; }
-        
+
         /// <summary>
         /// Obtiene la descripción del estado HTTP devuelto por el servicio Aspen.
         /// </summary>
         public string StatusDescription { get; private set; }
+
         /// <summary>
         /// Obtiene el valor de una cabecera de la respuesta.
         /// </summary>
@@ -101,7 +102,10 @@ namespace Everco.Services.Aspen.Client
         /// <param name="name">Nombre de la cabecera a buscar.</param>
         /// <param name="comparisonType">Especifica cómo se compararán las cadenas.</param>
         /// <returns>Valor de la cabecera si se encuentra o <see langword="null" /> si no se encuentra la cabecera en <paramref name="name" />.</returns>
-        private static string GetHeader(IRestResponse response, string name, StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
+        private static string GetHeader(
+            IRestResponse response,
+            string name,
+            StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
         {
             return response
                    .Headers

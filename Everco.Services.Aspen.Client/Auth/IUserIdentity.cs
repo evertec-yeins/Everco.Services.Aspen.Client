@@ -26,6 +26,7 @@ namespace Everco.Services.Aspen.Client.Auth
         /// Obtiene el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
         /// </summary>        
         string DocType { get; }
+
         /// <summary>
         /// Obtiene la clave de acceso del usuario que intenta autenticar la solicitud.
         /// </summary>

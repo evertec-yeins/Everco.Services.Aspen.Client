@@ -17,7 +17,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <summary>
         /// Obtiene la Url base para las solicitudes realizadas hacia el servicio Aspen.
         /// </summary>
-        string BaseUrl { get; }
+        string Url { get; }
 
         /// <summary>
         /// Obtiene el tiempo de espera para las respuestas del servicio Aspen.

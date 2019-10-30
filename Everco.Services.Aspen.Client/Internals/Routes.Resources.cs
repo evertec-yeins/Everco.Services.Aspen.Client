@@ -18,11 +18,6 @@ namespace Everco.Services.Aspen.Client.Internals
         internal static class Resources
         {
             /// <summary>
-            /// Endpoint para obtener los tipos de documentos de una aplicación.
-            /// </summary>
-            public static string DocTypes => $"{Root}/document-types";
-
-            /// <summary>
             /// Endpoint para obtener los tipos de pago de una aplicación.
             /// </summary>
             public static string PaymentTypes => $"{Root}/payment-types";

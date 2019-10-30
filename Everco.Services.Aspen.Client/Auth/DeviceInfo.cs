@@ -110,7 +110,7 @@ namespace Everco.Services.Aspen.Client.Auth
         /// Obtiene o establece la versión del sistema operativo del dispositivo.
         /// </summary>        
         public string Version { get; set; }
-        
+
         /// <summary>
         /// Obtiene la representación de la instancia actual en formato Json.
         /// </summary>

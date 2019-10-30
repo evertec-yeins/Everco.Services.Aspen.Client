@@ -37,8 +37,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(value, "value");
             }
 
-            string resource = Routes.Utils.Crypto;
-            IRestRequest request = new AspenRequest(resource, Method.POST);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.Encrypt);
             request.AddParameter("Input", value);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             IRestResponse response = this.RestClient.Execute(request);
@@ -59,8 +58,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDefaultDocTypes()
         {
-            string resource = Routes.Utils.DocTypes;
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.GetDefaultDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
     }

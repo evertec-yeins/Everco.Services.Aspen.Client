@@ -5,6 +5,7 @@
 // <author>dmontalvo</author>
 // <date>2019-09-23 08:31 AM</date>
 // ----------------------------------------------------------------------
+// ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client
 {
     using System.Net;
@@ -63,7 +64,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia actual de la clase.
         /// </summary>
         /// <value>Referencia de la instancia actual.</value>
-        public static IServiceLocator Instance => instance ??= new ServiceLocator();
+        public static IServiceLocator Instance => instance ?? (instance = new ServiceLocator());
 
         /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para generar valores Epoch.
@@ -104,6 +105,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del servidor proxy que se debe utilizar para las conexiones con el servicio.
         /// </summary>
         public IWebProxy WebProxy => this.container?.GetInstance<IWebProxy>();
+
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator" /> para la generación de valores Epoch.
         /// </summary>
@@ -123,6 +125,7 @@ namespace Everco.Services.Aspen.Client
             Throw.IfNull(headersManager, nameof(headersManager));
             this.RegisterInstance(headersManager: headersManager);
         }
+
         /// <summary>
         /// Registra una instancia de <see cref="IJsonSerializer" /> que permite serializar valores en el Payload.
         /// </summary>
@@ -178,14 +181,7 @@ namespace Everco.Services.Aspen.Client
         /// </summary>
         public void Reset()
         {
-            this.RegisterInstance(
-                new GuidNonceGenerator(),
-                new UnixEpochGenerator(),
-                requestHeaderNames: new DefaultHeaderElement(),
-                headersManager: new DefaultHeadersManager(),
-                jwtJsonSerializer: new JsonNetSerializer(),
-                webProxy: new NullWebProxy(),
-                loggingProvider: new NullLoggingProvider());
+            instance = new ServiceLocator();
         }
 
         /// <summary>

@@ -18,25 +18,29 @@ namespace Everco.Services.Aspen.Client.Tests
     using Providers;
 
     /// <summary>
-    /// 
+    /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de autónoma.
     /// </summary>
     [TestFixture]
     public class AutonomousSignedHeadersTests
     {
+        /// <summary>
+        /// Proporciona un conjunto común de funciones que se ejecutan antes de llamar a cada método de prueba.
+        /// </summary>
         [SetUp]
         public void Setup()
         {
             ServiceLocator.Instance.Reset();
-            ServiceLocator.Instance.RegisterWebProxy(new WebProxy("http://192.168.2.70:8080", true));
-            ServiceLocator.Instance.RegisterLoggingProvider(new ConsoleLoggingProvider());
         }
 
+        /// <summary>
+        /// Una solicitud firmada funciona.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signed.Headers")]
         public void SignedRequestWorks()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
                     .Authenticate()
                     .GetClient();
@@ -51,7 +55,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingNonceThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -68,7 +72,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NullOrEmptyNonceThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -95,7 +99,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void InvalidNonceFormatThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -121,7 +125,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NonceAlreadyProcessedThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -143,7 +147,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingEpochThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -160,7 +164,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NullOrEmptyEpochThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -187,7 +191,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void InvalidEpochFormatThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -214,7 +218,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void EpochExpiredThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -241,7 +245,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingAuthTokenThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -259,7 +263,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NullOrEmptyAuthTokenThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();
@@ -287,7 +291,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void InvalidAuthTokenFormatThrows()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
                 .Authenticate()
                 .GetClient();

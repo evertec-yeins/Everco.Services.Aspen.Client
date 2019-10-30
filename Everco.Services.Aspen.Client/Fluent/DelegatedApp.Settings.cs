@@ -44,10 +44,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDocTypes()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.DocTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.GetDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
+
         /// <summary>
         /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
         /// </summary>
@@ -80,8 +80,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<PaymentTypeInfo> GetPaymentTypes()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.PaymentTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.GetPaymentTypes);
             return this.Execute<List<PaymentTypeInfo>>(request);
         }
 

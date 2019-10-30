@@ -57,7 +57,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
         public virtual void AddApiKeyHeader(
-            IRestRequest request, 
+            IRestRequest request,
             string apiKey)
         {
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, apiKey);
@@ -151,6 +151,7 @@ namespace Everco.Services.Aspen.Client.Providers
 
             this.AddPayloadHeader(request, jwtEncoder.Encode(payload, apiSecret));
         }
+
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
         /// </summary>
@@ -185,6 +186,7 @@ namespace Everco.Services.Aspen.Client.Providers
 
             this.AddPayloadHeader(request, jwtEncoder.Encode(payload, apiSecret));
         }
+
         /// <summary>
         /// Agrega la cabecera con el payload requerido por el servicio Aspen.
         /// </summary>
@@ -192,7 +194,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="value">Cadena con el Payload para agregar.</param>
         /// Agrega la cabecera con el payload requerido por el servicio Aspen.
         private void AddPayloadHeader(
-            IRestRequest request, 
+            IRestRequest request,
             string value)
         {
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, value);

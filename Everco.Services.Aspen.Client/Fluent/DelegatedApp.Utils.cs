@@ -38,8 +38,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(value, "value");
             }
 
-            string resource = Routes.Utils.Crypto;
-            IRestRequest request = new AspenRequest(resource, Method.POST);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.Encrypt);
             request.AddParameter("Input", value);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             IRestResponse response = this.RestClient.Execute(request);
@@ -60,10 +59,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDefaultDocTypes()
         {
-            string resource = Routes.Utils.DocTypes;
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.GetDefaultDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
+
         /// <summary>
         /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
         /// </summary>
@@ -77,8 +76,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(userName, "userName");
             }
 
-            string resource = Routes.Utils.AppCrash;
-            IRestRequest request = new AspenRequest(resource, Method.POST);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.SaveAppCrash);
             request.AddParameter("ErrorReport", errorReport);
             request.AddParameter("Username", userName);
             IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();

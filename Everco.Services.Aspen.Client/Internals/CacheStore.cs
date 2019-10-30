@@ -31,10 +31,14 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         private static readonly List<string> keys;
 
+        /// <summary>
+        /// Inicializa la clase <see cref="CacheStore" />.
+        /// </summary>
         static CacheStore()
         {
             keys = new List<string>();
         }
+
         /// <summary>
         /// Obtiene el último token de autenticación generado o  <see langword="null" /> si no se ha obtenido ninguno.
         /// </summary>
@@ -65,7 +69,7 @@ namespace Everco.Services.Aspen.Client.Internals
             {
                 AppDomain.CurrentDomain.SetData(key, null);
             }
-            
+
             keys.Clear();
             AppDomain.CurrentDomain.SetData(DeviceCacheKey, null);
         }
@@ -81,6 +85,7 @@ namespace Everco.Services.Aspen.Client.Internals
             keys.Add(cacheKey);
             AppDomain.CurrentDomain.SetData(cacheKey, authToken);
         }
+
         /// <summary>
         /// Guarda la ifnormación del dispositivo actual.
         /// </summary>

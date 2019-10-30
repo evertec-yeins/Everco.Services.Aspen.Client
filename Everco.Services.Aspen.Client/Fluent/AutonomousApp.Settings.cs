@@ -44,8 +44,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDocTypes()
         {
-            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.DocTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.GetDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
 
@@ -57,8 +56,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<PaymentTypeInfo> GetPaymentTypes()
         {
-            string resource = $"{Routes.AutonomousRoot}{Routes.Resources.PaymentTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.GetPaymentTypes);
             return this.Execute<List<PaymentTypeInfo>>(request);
         }
 

@@ -7,7 +7,6 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Internals
 {
-    using System;
     using RestSharp;
 
     /// <summary>
@@ -28,8 +27,7 @@ namespace Everco.Services.Aspen.Client.Internals
             Method method,
             string accept = "application/json",
             string contextType = "application/json; charset=utf-8",
-            DataFormat dataFormat = DataFormat.Json) :
-            base(resource, method, dataFormat)
+            DataFormat dataFormat = DataFormat.Json) : base(resource, method, dataFormat)
         {
             Throw.IfNullOrEmpty(resource, nameof(resource));
             if (!string.IsNullOrWhiteSpace(accept))
@@ -48,14 +46,9 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
         /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
-        /// <param name="accept">Texto que se envía en la cabecera Accept de la solicitud.</param>
-        /// <param name="contextType">Texto que se envía en la cabecera Content-Type de la solicitud.</param>
         internal AspenRequest(
             Scope scope,
-            EndpointMapping mappingInfo,
-            string accept = "application/json",
-            string contextType = "application/json; charset=utf-8") :
-            base(mappingInfo.GetEndPointMappingInfo(scope).Key, mappingInfo.GetEndPointMappingInfo(scope).Value)
+            EndpointMapping mappingInfo) : base(mappingInfo.GetEndPointMappingInfo(scope).Key, mappingInfo.GetEndPointMappingInfo(scope).Value)
         {
         }
     }

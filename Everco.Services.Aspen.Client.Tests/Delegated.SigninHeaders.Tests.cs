@@ -17,17 +17,18 @@ namespace Everco.Services.Aspen.Client.Tests
     using Providers;
 
     /// <summary>
-    /// 
+    /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de delegada.
     /// </summary>
     [TestFixture]
     public class DelegatedSigninHeadersTests
     {
+        /// <summary>
+        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
+        /// </summary>
         [SetUp]
         public void Setup()
         {
             ServiceLocator.Instance.Reset();
-            ServiceLocator.Instance.RegisterWebProxy(new WebProxy("http://192.168.2.70:8080", true));
-            ServiceLocator.Instance.RegisterLoggingProvider(new ConsoleLoggingProvider());
         }
 
         [Test]
@@ -35,7 +36,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void SigninRequestWorks()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -51,7 +52,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -71,7 +72,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 string randomApiKey = Guid.NewGuid().ToString();
                 string apiKeySecret = AutonomousAppIdentity.Default.ApiSecret;
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -91,7 +92,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 string apiKey = AutonomousAppIdentity.Default.ApiKey;
                 string randomApiSecret = Guid.NewGuid().ToString();
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(apiKey, randomApiSecret)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -110,7 +111,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -138,7 +139,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -158,7 +159,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -186,7 +187,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -206,7 +207,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -225,7 +226,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new MissingNoncePayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -253,7 +254,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -281,7 +282,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -300,7 +301,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string nonce = Guid.NewGuid().ToString("D");
             ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
             IDelegatedApp client = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Local)
+                .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
                 .Authenticate(DelegatedAppIdentity.Default, false)
                 .GetClient();
@@ -314,7 +315,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -333,7 +334,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochPayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -361,7 +362,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -390,7 +391,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -419,7 +420,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterEpochGenerator(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -439,7 +440,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new UnsupportedDocTypeOnPayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -467,7 +468,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -501,7 +502,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -521,7 +522,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new UnsupportedDocNumberOnPayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -549,7 +550,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -580,7 +581,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -600,7 +601,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(new UnsupportedDocNumberOnPayloadHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Local)
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
                     .Authenticate(DelegatedAppIdentity.Default, false)
                     .GetClient();
@@ -628,7 +629,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -657,7 +658,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
@@ -687,7 +688,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Local)
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
                         .Authenticate(DelegatedAppIdentity.Default, false)
                         .GetClient();
