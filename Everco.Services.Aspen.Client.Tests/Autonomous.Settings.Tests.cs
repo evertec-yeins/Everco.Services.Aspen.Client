@@ -64,5 +64,56 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
         }
+
+        /// <summary>
+        /// Obtener la lista de operadores de telefonía móvil soportados para la aplicación funciona.
+        /// </summary>
+        [Test]
+        [Category("Autonomous.Settings")]
+        public void GetCarriersWorks()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .AuthenticateNoCache()
+                .GetClient();
+
+            IList<CarrierInfo> carriers = client.Settings.GetCarriers();
+            CollectionAssert.IsNotEmpty(carriers);
+        }
+
+        /// <summary>
+        /// Obtiener los valores admitidos de recarga por operador para la aplicación solicitante funciona.
+        /// </summary>
+        [Test]
+        [Category("Autonomous.Settings")]
+        public void GetTopUpValuesWorks()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .AuthenticateNoCache()
+                .GetClient();
+
+            IList<TopUpInfo> topUpValues = client.Settings.GetTopUpValues();
+            CollectionAssert.IsNotEmpty(topUpValues);
+        }
+
+        /// <summary>
+        /// Obtener la lista de los tipos de transacción soportados para la aplicación solicitante funciona.
+        /// </summary>
+        [Test]
+        [Category("Autonomous.Settings")]
+        public void GetTranTypesWorks()
+        {
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .AuthenticateNoCache()
+                .GetClient();
+
+            IList<TranTypeInfo> tranTypes = client.Settings.GetTranTypes();
+            CollectionAssert.IsNotEmpty(tranTypes);
+        }
     }
 }

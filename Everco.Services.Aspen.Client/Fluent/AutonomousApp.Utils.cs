@@ -58,7 +58,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDefaultDocTypes()
         {
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.GetDefaultDocTypes);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.DefaultDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
     }

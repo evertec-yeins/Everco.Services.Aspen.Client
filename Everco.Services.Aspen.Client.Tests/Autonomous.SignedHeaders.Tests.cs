@@ -230,9 +230,9 @@ namespace Everco.Services.Aspen.Client.Tests
                 new DatePickerEpochGenerator(randomDays),
             };
 
-            foreach (IEpochGenerator behavior in epochBehaviors)
+            foreach (IEpochGenerator epochBehavior in epochBehaviors)
             {
-                ServiceLocator.Instance.RegisterEpochGenerator(behavior);
+                ServiceLocator.Instance.RegisterEpochGenerator(epochBehavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15851"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));

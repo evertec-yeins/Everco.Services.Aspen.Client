@@ -8,6 +8,8 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using Auth;
     using Internals;
@@ -151,6 +153,31 @@ namespace Everco.Services.Aspen.Client.Fluent
         protected string DecodeJwtResponse(string jwt)
         {
             return this.JwtDecoder.Decode(jwt, this.AppIdentity.ApiSecret, true);
+        }
+
+        /// <summary>
+        /// Obtiene el cupero que se está enviando con la solicitud (en formato Json).
+        /// </summary>
+        /// <param name="parameters">Parámetros de la solicitud.</param>
+        /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
+        protected string GetBody(IEnumerable<Parameter> parameters)
+        {
+            Parameter body = parameters.FirstOrDefault(item => item.Type == ParameterType.RequestBody);
+            return body != null
+                ? JsonConvert.SerializeObject(body.Value, Formatting.Indented)
+                : string.Empty;
+        }
+
+        /// <summary>
+        /// Obtiene la lista de cabeceras que se envian con la solicitud.
+        /// </summary>
+        /// <param name="parameters">Parámeros de la solicitud.</param>
+        /// <returns>Listado de parámeros que se envian en la cabecera de la solicitud.</returns>
+        protected Dictionary<string, object> GetHeaders(IEnumerable<Parameter> parameters)
+        {
+            return parameters
+                .Where(item => item.Type == ParameterType.HttpHeader)
+                .ToDictionary(p => p.Name, p => p.Value);
         }
 
         /// <summary>

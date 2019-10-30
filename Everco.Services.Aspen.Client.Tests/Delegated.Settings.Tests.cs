@@ -7,12 +7,10 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using System;
     using System.Collections.Generic;
     using Everco.Services.Aspen.Entities;
     using Fluent;
     using Identities;
-    using Newtonsoft.Json;
     using NUnit.Framework;
     using Providers;
 
@@ -63,6 +61,74 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
+        }
+
+        /// <summary>
+        /// Obtiener los valores admitidos de recarga por operador para la aplicación solicitante funciona.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Settings")]
+        public void GetTopUpValuesWorks()
+        {
+            IDelegatedApp client = DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Default)
+                .Authenticate(DelegatedAppIdentity.Default, false)
+                .GetClient();
+
+            IList<TopUpInfo> topUpValues = client.Settings.GetTopUpValues();
+            CollectionAssert.IsNotEmpty(topUpValues);
+        }
+
+        /// <summary>
+        /// Obtener la lista de los tipos de transacción soportados para la aplicación solicitante funciona.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Settings")]
+        public void GetTranTypesWorks()
+        {
+            IDelegatedApp client = DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Default)
+                .Authenticate(DelegatedAppIdentity.Default, false)
+                .GetClient();
+
+            IList<TranTypeInfo> tranTypes = client.Settings.GetTranTypes();
+            CollectionAssert.IsNotEmpty(tranTypes);
+        }
+
+        /// <summary>
+        /// Obtener la lista de opciones que representan el menú para la aplicación móvil funciona.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Settings")]
+        public void GetAppMenuItemsWorks()
+        {
+            IDelegatedApp client = DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Default)
+                .Authenticate(DelegatedAppIdentity.Default, false)
+                .GetClient();
+
+            IList<MenuItemInfo> menuItems = client.Settings.GetMenu();
+            CollectionAssert.IsNotEmpty(menuItems);
+        }
+
+        /// <summary>
+        /// Obtener la configuración de valores misceláneos soportados para la aplicación funciona.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Settings")]
+        public void GetMiscellaneousSettingsWorks()
+        {
+            IDelegatedApp client = DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Default)
+                .Authenticate(DelegatedAppIdentity.Default, false)
+                .GetClient();
+
+            MiscellaneousSettings miscellaneous = client.Settings.GetMiscellaneousSettings();
+            CollectionAssert.IsNotEmpty(miscellaneous);
         }
     }
 }

@@ -5,6 +5,7 @@
 // <author>dmontalvo</author>
 // <date>2019-09-24 10:00 AM</date>
 // ----------------------------------------------------------------------
+// ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests.Identities
 {
     using Auth;
@@ -26,6 +27,9 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         {
         }
 
+        /// <summary>
+        /// Obtiene la instancia predeterminada.
+        /// </summary>
         public static IAppIdentity Default => @default ?? (@default = new AutonomousAppIdentity());
 
         /// <summary>

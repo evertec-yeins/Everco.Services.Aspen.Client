@@ -59,7 +59,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDefaultDocTypes()
         {
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.GetDefaultDocTypes);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.DefaultDocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
 
@@ -76,7 +76,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(userName, "userName");
             }
 
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.SaveAppCrash);
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.AppCrash);
             request.AddParameter("ErrorReport", errorReport);
             request.AddParameter("Username", userName);
             IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();

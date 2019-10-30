@@ -59,7 +59,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp autonomousClient = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.IsNotEmpty(autonomousClient.Utils.Encrypt("colombia"));
