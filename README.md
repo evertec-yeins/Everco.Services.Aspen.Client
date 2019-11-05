@@ -12,7 +12,7 @@ autonomousClient.Settings.GetDocTypes().Dump("Autonomous Document Types");
 
 IDelegatedApp delegatedClient = DelegatedApp.Initialize()
 	.RoutingTo("https://localhost/api")
-	.WithIdentity("MyApyKey", "MyApiSecret")
+	.WithIdentity("MyApiKey", "MyApiSecret")
 	.Authenticate("UserDocType", "UserDocNumber", "UserPassword", useCache: false)
 	.GetClient();
 		
