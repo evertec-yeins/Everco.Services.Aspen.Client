@@ -39,7 +39,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .Authenticate(DelegatedAppIdentity.Default, false)
+                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
                     .GetClient();
 
             // Se usa una operación que requiere token de autenticación.
@@ -51,12 +51,11 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Delegated.Signed.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            string nonce = Guid.NewGuid().ToString("D");
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator());
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando.
@@ -73,7 +72,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -91,7 +90,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
@@ -119,7 +118,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.

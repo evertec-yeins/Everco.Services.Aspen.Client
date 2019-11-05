@@ -18,20 +18,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private readonly string duplicatedNonce = null;
+        private readonly string nonce = null;
 
         /// <summary>
-        /// Prevents a default instance of the <see cref="DuplicatedNonceGenerator"/> class from being created.
+        /// Inicializa una nueva instancia de la clase <see cref="DuplicatedNonceGenerator" />.
         /// </summary>
-        private DuplicatedNonceGenerator()
-        {
-            this.duplicatedNonce = Guid.NewGuid().ToString("D");
-        }
-
-        public DuplicatedNonceGenerator(string nonce)
-        {
-            this.duplicatedNonce = nonce;
-        }
+        public DuplicatedNonceGenerator() => this.nonce = Guid.NewGuid().ToString("D");
 
         /// <summary>
         /// Obtiene el nombre con el que se agrega esta información a la solicitud.
@@ -44,6 +36,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <returns>
         /// Una cadena de texto repetida.
         /// </returns>
-        public string GetNonce() => this.duplicatedNonce;
+        public string GetNonce() => this.nonce;
     }
 }

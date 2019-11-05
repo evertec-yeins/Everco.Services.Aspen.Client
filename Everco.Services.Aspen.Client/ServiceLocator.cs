@@ -92,6 +92,11 @@ namespace Everco.Services.Aspen.Client
         public INonceGenerator NonceGenerator => this.container?.GetInstance<INonceGenerator>();
 
         /// <summary>
+        /// Obtiene la instancia del servicio que se utiliza para obtener los nombres que se utilizan para las reclamaciones usadas en la carga útil de una solicitud al servicio Aspen.
+        /// </summary>
+        public IPayloadClaimElement PayloadClaimNames => this.container?.GetInstance<IPayloadClaimElement>();
+
+        /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio.
         /// </summary>
         public IHeaderElement RequestHeaderNames => this.container?.GetInstance<IHeaderElement>();
@@ -177,10 +182,13 @@ namespace Everco.Services.Aspen.Client
         }
 
         /// <summary>
-        /// Restablece esta instancia con los valores predeterminados.
+        /// Restablece esta instancia a los valores predeterminados.
         /// </summary>
         public void Reset()
         {
+            this.container?.Dispose();
+            this.container = null;
+            instance = null;
             instance = new ServiceLocator();
         }
 

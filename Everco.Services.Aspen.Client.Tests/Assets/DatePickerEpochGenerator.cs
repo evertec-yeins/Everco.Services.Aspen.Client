@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="PastUnixEpochGenerator.cs" company="Evertec Colombia">
+// <copyright file="DatePickerEpochGenerator.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -15,8 +15,15 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// </summary>
     public class DatePickerEpochGenerator : IEpochGenerator
     {
-        private readonly int days = 0; 
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
+        private readonly int days = 0;
 
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="DatePickerEpochGenerator"/>.
+        /// </summary>
+        /// <param name="days">El número de días de se agregarán o restarán a la época. El número puede ser negativo o positivo.</param>
         public DatePickerEpochGenerator(int days)
         {
             this.days = days;

@@ -16,48 +16,30 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// <summary>
     /// Implementa un manejador que no establece las cabeceras personalizadas esperadas por el servicio de Aspen.
     /// </summary>
-    internal class MissingPayloadHeader : IHeadersManager
+    internal class MissingPayloadHeader : MissingHeadersManager
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Para uso interno.
         /// </summary>
+        private readonly Func<string> payloadHeaderBehavior = null;
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="MissingHeadersManager"/>.
+        /// </summary>
+        /// <remarks>
+        /// Con el constructor predeterminado no se establece el comportamiento para los encabezados.
+        /// </remarks>
         public MissingPayloadHeader()
         {
-
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Inicializa una nueva instancia de la clase <see cref="MissingHeadersManager"/>.
         /// </summary>
-        /// <param name="headerValueBehavior">The header value behavior.</param>
-        public MissingPayloadHeader(HeaderValueBehavior headerValueBehavior)
+        /// <param name="payloadHeaderBehavior">Expresión que determina el comportamiento del valor para la cabecera del payload.</param>
+        public MissingPayloadHeader(Func<string> payloadHeaderBehavior)
         {
-            this.HeaderValueBehavior = headerValueBehavior;
-        }
-
-        /// <summary>
-        /// Gets the header value behavior.
-        /// </summary>
-        public HeaderValueBehavior HeaderValueBehavior { get; }
-
-        /// <summary>
-        /// Obtiene el número de versión que se envia en la solicitud.
-        /// </summary>
-        public Version RequestedApiVersion => null;
-
-        /// <summary>
-        /// Agrega la cabecera que identifica la aplicación solicitante.
-        /// </summary>
-        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
-        /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
-        public void AddApiKeyHeader(IRestRequest request, string apiKey)
-        {
-            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, apiKey);
-
-            if (this.RequestedApiVersion != null)
-            {
-                request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiVersionHeaderName, this.RequestedApiVersion.ToString(2));
-            }
+            this.payloadHeaderBehavior = payloadHeaderBehavior;
         }
 
         /// <summary>
@@ -66,58 +48,36 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        public void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret)
+        public override void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret)
         {
-            switch (this.HeaderValueBehavior)
+           this.AddPayloadHeader(request);
+        }
+
+        /// <summary>
+        /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
+        /// </summary>
+        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
+        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
+        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
+        /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
+        public override void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)
+        {
+            this.AddPayloadHeader(request);
+        }
+
+        /// <summary>
+        ///  Agrega la cabecera con los datos de la carga útil a la solicitud.
+        /// </summary>
+        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
+        private void AddPayloadHeader(IRestRequest request)
+        {
+            if (this.payloadHeaderBehavior == null)
             {
-                case HeaderValueBehavior.Null:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, null);
-                    break;
-
-                case HeaderValueBehavior.Empty:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, string.Empty);
-                    break;
-
-                case HeaderValueBehavior.WhiteSpaces:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, "    ");
-                    break;
-
-                case HeaderValueBehavior.UnexpectedFormat:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.");
-                    break;
+                return;
             }
-        }
 
-        public void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)
-        {
-            switch (this.HeaderValueBehavior)
-            {
-                case HeaderValueBehavior.Null:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, null);
-                    break;
-
-                case HeaderValueBehavior.Empty:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, string.Empty);
-                    break;
-
-                case HeaderValueBehavior.WhiteSpaces:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, "    ");
-                    break;
-
-                case HeaderValueBehavior.UnexpectedFormat:
-                    request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.");
-                    break;
-            }
-        }
-
-        public void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
-        {
-            throw new NotImplementedException();
+            string payloadHeaderValue = this.payloadHeaderBehavior?.Invoke();
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, payloadHeaderValue);
         }
     }
 }

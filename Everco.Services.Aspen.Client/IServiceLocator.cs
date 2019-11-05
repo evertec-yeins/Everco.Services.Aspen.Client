@@ -42,6 +42,11 @@ namespace Everco.Services.Aspen.Client
         INonceGenerator NonceGenerator { get; }
 
         /// <summary>
+        /// Obtiene la instancia del servicio que se utiliza para obtener los nombres que se utilizan para las reclamaciones usadas en la carga útil de una solicitud al servicio Aspen.
+        /// </summary>
+        IPayloadClaimElement PayloadClaimNames { get; }
+
+        /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio Aspen.
         /// </summary>
         IHeaderElement RequestHeaderNames { get; }
@@ -99,7 +104,7 @@ namespace Everco.Services.Aspen.Client
         void RegisterWebProxy(IWebProxy webProxy);
 
         /// <summary>
-        /// Restablece esta instancia con los valores predeterminados.
+        /// Restablece esta instancia a los valores predeterminados.
         /// </summary>
         void Reset();
     }

@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="MissingApiSignManager.cs" company="Evertec Colombia">
+// <copyright file="MissingHeadersManager.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -14,74 +14,48 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using RestSharp;
 
     /// <summary>
-    /// Implementa un manejador que no establece las cabeceras personalizadas esperadas por el servicio de Aspen.
+    /// Implementa un manejador que establece comportamientos de prueba para las cabeceras personalizadas esperadas por el servicio.
     /// </summary>
-    internal class MissingApiKeyHeader : IHeadersManager
+    internal class MissingApiKeyHeader : MissingHeadersManager
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Para uso interno.
         /// </summary>
+        private readonly Func<string> apiKeyHeaderBehavior = null;
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="MissingHeadersManager"/>.
+        /// </summary>
+        /// <remarks>
+        /// Con el constructor predeterminado no se establece el comportamiento para los encabezados.
+        /// </remarks>
         public MissingApiKeyHeader()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Inicializa una nueva instancia de la clase <see cref="MissingHeadersManager"/>.
         /// </summary>
-        /// <param name="apiKeyHeaderValueBehavior">The header value behavior.</param>
-        public MissingApiKeyHeader(Func<string> apiKeyHeaderValueBehavior)
+        /// <param name="apiKeyHeaderBehavior">Expresión que determina el comportamiento del valor para la cabecera del ApiKey.</param>
+        public MissingApiKeyHeader(Func<string> apiKeyHeaderBehavior)
         {
-            this.ApiKeyHeaderValueBehavior = apiKeyHeaderValueBehavior;
+            this.apiKeyHeaderBehavior = apiKeyHeaderBehavior;
         }
-
-        /// <summary>
-        /// Gets the header value behavior.
-        /// </summary>
-        public Func<string> ApiKeyHeaderValueBehavior { get; set; }
-
-        /// <summary>
-        /// Obtiene el número de versión que se envia en la solicitud.
-        /// </summary>
-        public Version RequestedApiVersion => null;
-
+        
         /// <summary>
         /// Agrega la cabecera que identifica la aplicación solicitante.
         /// </summary>
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
-        public void AddApiKeyHeader(IRestRequest request, string apiKey)
+        public override void AddApiKeyHeader(IRestRequest request, string apiKey)
         {
-            if (this.ApiKeyHeaderValueBehavior == null)
+            if (this.apiKeyHeaderBehavior == null)
             {
                 return;
             }
 
-            string apiKeyHeaderValue = this.ApiKeyHeaderValueBehavior?.Invoke();
+            string apiKeyHeaderValue = this.apiKeyHeaderBehavior?.Invoke();
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, apiKeyHeaderValue);
-        }
-
-        /// <summary>
-        /// Agrega la cabecera con los datos de la carga útil necesarios para el servicio Aspen.
-        /// </summary>
-        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
-        /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
-        /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        public void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret)
-        {
-        }
-
-        public void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)
-        {
-        }
-
-        public void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -41,28 +41,69 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="docNumber">El número de documento del usuario que firma la solicitud de autenticación.</param>
         /// <param name="password">La clave de acceso del usuario que firma la solicitud de autenticación.</param>
         /// <param name="deviceInfo">La información del dispositivo desde donde se intenta autenticar el usuario.</param>
-        /// <param name="useCache">Cuando es <see langword="true" /> se utiliza el último token de autenticación generado en la sesión.</param>
         /// <returns>
         /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
         /// </returns>
-        public ISession<IDelegatedApp> Authenticate(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null, bool useCache = true)
+        public ISession<IDelegatedApp> Authenticate(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
         {
-            StaticUserIdentity staticUserIdentity = new StaticUserIdentity(docType, docNumber, password, deviceInfo);
-            return this.Authenticate(staticUserIdentity, useCache);
+            StaticUserIdentity userIdentity = new StaticUserIdentity(docType, docNumber, password, deviceInfo);
+            return this.Authenticate(userIdentity, CachePolicy.CacheIfAvailable);
         }
 
         /// <summary>
         /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación firmada con las credenciales de un usuario.
         /// </summary>
         /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
-        /// <param name="useCache">Cuando es <see langword="true" /> se utiliza el último token de autenticación generado en la sesión.</param>
+        /// <returns>
+        /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
+        /// </returns>
+        public ISession<IDelegatedApp> Authenticate(IUserIdentity userIdentity)
+        {
+            Throw.IfNull(userIdentity, nameof(userIdentity));
+            return this.Authenticate(userIdentity, CachePolicy.CacheIfAvailable);
+        }
+
+        /// <summary>
+        /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del usuario que firma la solicitud de autenticación.</param>
+        /// <param name="docNumber">El número de documento del usuario que firma la solicitud de autenticación.</param>
+        /// <param name="password">La clave de acceso del usuario que firma la solicitud de autenticación.</param>
+        /// <param name="deviceInfo">La información del dispositivo desde donde se intenta autenticar el usuario.</param>
+        /// <returns>
+        /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
+        /// </returns>
+        public ISession<IDelegatedApp> AuthenticateNoCache(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
+        {
+            StaticUserIdentity userIdentity = new StaticUserIdentity(docType, docNumber, password, deviceInfo);
+            return this.Authenticate(userIdentity, CachePolicy.BypassCache);
+        }
+
+        /// <summary>
+        /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// </summary>
+        /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
+        /// <returns>
+        /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
+        /// </returns>
+        public ISession<IDelegatedApp> AuthenticateNoCache(IUserIdentity userIdentity)
+        {
+            Throw.IfNull(userIdentity, nameof(userIdentity));
+            return this.Authenticate(userIdentity, CachePolicy.BypassCache);
+        }
+
+        /// <summary>
+        /// Envía al servicio la solicitud de generación de un token de autenticación.
+        /// </summary>
+        /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
+        /// <param name="cache">La política para manejar el caché.</param>
         /// <returns>
         /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
         /// </returns>
         /// <exception cref="AspenException">Se produce cuando el servicio Aspen genera una respuesta de error.</exception>
-        public ISession<IDelegatedApp> Authenticate(IUserIdentity userIdentity, bool useCache = true)
+        private ISession<IDelegatedApp> Authenticate(IUserIdentity userIdentity, CachePolicy cache)
         {
-            if (useCache)
+            if (cache == CachePolicy.CacheIfAvailable)
             {
                 this.AuthToken = CacheStore.GetCurrentToken(this.AppIdentity.ApiKey);
                 if (this.AuthToken != null)
@@ -75,6 +116,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.Signin);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userIdentity);
+            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
@@ -101,13 +143,15 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         /// <typeparam name="TResponse">Tipo al que se convierte la respuesta del servicio Aspen.</typeparam>
         /// <param name="request">Información de la solicitud.</param>
+        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
         /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private TResponse Execute<TResponse>(IRestRequest request) where TResponse : class, new()
+        private TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
         {
             UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userAuthToken.Token, userAuthToken.Username);
+            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");

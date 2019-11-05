@@ -21,14 +21,14 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     {
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Initializes a new instance of the <see cref="MissingHeadersManager"/> class.
         /// </summary>
         public MissingEpochPayloadHeader()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MissingApiKeyHeader"/> class.
+        /// Initializes a new instance of the <see cref="MissingHeadersManager"/> class.
         /// </summary>
         /// <param name="headerValueBehavior">The header value behavior.</param>
         public MissingEpochPayloadHeader(HeaderValueBehavior headerValueBehavior)
@@ -51,11 +51,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             string apiKey)
         {
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiKeyHeaderName, apiKey);
-
-            if (this.RequestedApiVersion != null)
-            {
-                request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.ApiVersionHeaderName, this.RequestedApiVersion.ToString(2));
-            }
         }
 
         /// <summary>

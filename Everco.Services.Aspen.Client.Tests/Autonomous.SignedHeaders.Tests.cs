@@ -131,7 +131,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con un nuevo nonce y debe funcionar.
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(Guid.NewGuid().ToString()));
+            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator());
             IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
 

@@ -32,7 +32,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Firmar la solicitud funciona.
+        /// Autenticar una aplicación funciona.
         /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
@@ -106,6 +106,9 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
         }
 
+        /// <summary>
+        /// Autenticar una aplicación cuando falta el encabezado del ApiKey no funciona.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
         public void MissingApiKeyHeaderThrows()
@@ -125,18 +128,21 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
         }
 
+        /// <summary>
+        /// Nulls the or empty API key header throws.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
         public void NullOrEmptyApiKeyHeaderThrows()
         {
-            IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
+            IList<IHeadersManager> apiKeyHeaderBehaviors = new List<IHeadersManager>()
             {
                 new MissingApiKeyHeader(() => null),
                 new MissingApiKeyHeader(() => string.Empty),
                 new MissingApiKeyHeader(() => "      ")
             };
 
-            foreach (IHeadersManager behavior in headerBehaviors)
+            foreach (IHeadersManager behavior in apiKeyHeaderBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
@@ -177,18 +183,18 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signin.Headers")]
         public void NullOrEmptyPayloadHeaderThrows()
         {
-            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            IList<IHeadersManager> payloadHeaderBehaviors = new List<IHeadersManager>()
             {
-                new MissingPayloadHeader(HeaderValueBehavior.Null),
-                new MissingPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                new MissingPayloadHeader(() => null),
+                new MissingPayloadHeader(() => string.Empty),
+                new MissingPayloadHeader(() => "     ")
             };
 
-            foreach (IHeadersManager behavior in payloadBehaviors)
+            foreach (IHeadersManager headerBehavior in payloadHeaderBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                    ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -208,7 +214,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
+                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr"));
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -301,8 +307,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signin.Headers")]
         public void NonceAlreadyProcessedThrows()
         {
-            string nonce = Guid.NewGuid().ToString("D");
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator(nonce));
+            DuplicatedNonceGenerator nonceGenerator = new DuplicatedNonceGenerator();
+            ServiceLocator.Instance.RegisterNonceGenerator(nonceGenerator);
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
@@ -315,7 +321,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(client.AuthToken.Token, Is.Not.Null);
 
             // No se podrá autenticar la aplicación, cuando use el mismo nonce por segunda vez.
-            Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), nonce);
+            Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), nonceGenerator.GetNonce());
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 AutonomousApp.Initialize()
@@ -437,20 +443,42 @@ namespace Everco.Services.Aspen.Client.Tests
             }
         }
 
+        /// <summary>
+        /// Autenticar una aplicación sin la cabecera de la versión del API solicitada funciona.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
-        public void NullOrEmptyApiVersionHeaderThrows()
+        public void MissingApiVersionHeaderWorks()
         {
-            IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
+            ServiceLocator.Instance.RegisterHeadersManager(new MissingApiVersionHeader());
+            IAutonomousApp client = AutonomousApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(AutonomousAppIdentity.Default)
+                .Authenticate()
+                .GetClient();
+
+            Assert.That(client, Is.Not.Null);
+            Assert.That(client.AuthToken, Is.Not.Null);
+            Assert.That(client.AuthToken.Token, Is.Not.Null);
+        }
+
+        /// <summary>
+        /// Autenticar una aplicación con valores nulos o vacíos en la cabecera de la versión del API solicitada no funciona.
+        /// </summary>
+        [Test]
+        [Category("Autonomous.Signin.Headers")]
+        public void NullEmptyApiVersionHeaderThrows()
+        {
+            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
             {
-                new UnsupportedApiVersionHeader(),
-                new UnsupportedApiVersionHeader(string.Empty),
-                new UnsupportedApiVersionHeader("  ")
+                new MissingApiVersionHeader(() => null),
+                new MissingApiVersionHeader(() => string.Empty),
+                new MissingApiVersionHeader(() => "     ")
             };
 
-            foreach (IHeadersManager behavior in headerBehaviors)
+            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
             {
-                ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
@@ -466,15 +494,22 @@ namespace Everco.Services.Aspen.Client.Tests
             }
         }
 
+        /// <summary>
+        /// Autenticar una aplicación con valores inválidos en la cabecera de la versión del API solicitada no funciona.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
         public void InvalidApiVersionHeaderFormatThrows()
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new UnsupportedApiVersionHeader("xxxx"),
-                new UnsupportedApiVersionHeader("123"),
-                new UnsupportedApiVersionHeader("1,0")
+                new MissingApiVersionHeader(() => "abc"),
+                new MissingApiVersionHeader(() => Guid.NewGuid().ToString()),
+                new MissingApiVersionHeader(() => "123"),
+                new MissingApiVersionHeader(() => "1,0"),
+                new MissingApiVersionHeader(() => "1A"),
+                new MissingApiVersionHeader(() => "-1.0"),
+
             };
 
             foreach (IHeadersManager behavior in headerBehaviors)
@@ -495,16 +530,19 @@ namespace Everco.Services.Aspen.Client.Tests
             }
         }
 
+        /// <summary>
+        /// Autenticar una aplicación con valores no soportados en la cabecera de la versión del API solicitada no funciona.
+        /// </summary>
         [Test]
         [Category("Autonomous.Signin.Headers")]
         public void UnsupportedApiVersionHeaderThrows()
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new UnsupportedApiVersionHeader("0.1"),
-                new UnsupportedApiVersionHeader("999999.999999"),
-                new UnsupportedApiVersionHeader("999999.999999.999999"),
-                new UnsupportedApiVersionHeader("999999.999999.999999.999999")
+                new MissingApiVersionHeader(() => "0.1"),
+                new MissingApiVersionHeader(() => "999999.999999"),
+                new MissingApiVersionHeader(() => "999999.999999.999999"),
+                new MissingApiVersionHeader(() => "999999.999999.999999.999999")
             };
 
             foreach (IHeadersManager behavior in headerBehaviors)

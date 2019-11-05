@@ -18,18 +18,22 @@ namespace Everco.Services.Aspen.Client.Providers
     public interface IHeadersManager
     {
         /// <summary>
-        /// Obtiene el número de versión que se envia en la solicitud.
-        /// </summary>
-        Version RequestedApiVersion { get; }
-
-        /// <summary>
-        /// Agrega la cabecera que identifica la aplicación solicitante.
+        /// Agrega la cabecera que identifica a la aplicación solicitante.
         /// </summary>
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
-        /// <param name="apiKey">ApiKey de la aplicación para inclucir en la cabecera.</param>
+        /// <param name="apiKey">ApiKey de la aplicación para incluir en la cabecera.</param>
         void AddApiKeyHeader(
             IRestRequest request,
             string apiKey);
+
+        /// <summary>
+        /// Agrega la cabecera que identifica el número de versión del API solicitada.
+        /// </summary>
+        /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
+        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
+        void AddApiVersionHeader(
+            IRestRequest request,
+            string apiVersion);
 
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para firmar una solicitud de una aplicación a partir del token de autenticación.

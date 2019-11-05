@@ -39,7 +39,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
@@ -56,7 +56,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
@@ -73,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<TopUpInfo> topUpValues = client.Settings.GetTopUpValues();
@@ -90,7 +90,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<TranTypeInfo> tranTypes = client.Settings.GetTranTypes();
@@ -107,7 +107,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             IList<MenuItemInfo> menuItems = client.Settings.GetMenu();
@@ -124,7 +124,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .Authenticate(DelegatedAppIdentity.Default, false)
+                .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
             MiscellaneousSettings miscellaneous = client.Settings.GetMiscellaneousSettings();
