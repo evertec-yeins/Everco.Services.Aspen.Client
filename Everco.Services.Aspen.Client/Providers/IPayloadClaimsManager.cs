@@ -18,7 +18,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// Agrega la reclamación del identificador del dispositivo que origina la solicitud.
         /// </summary>
         /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
-        /// <param name="deviceId">El valor del token de autenticación.</param>
+        /// <param name="deviceId">El valor del identificador del dispositivo.</param>
         void AddDeviceIdClaim(IDictionary<string, object> payload, string deviceId);
 
         /// <summary>
@@ -50,10 +50,24 @@ namespace Everco.Services.Aspen.Client.Providers
         void AddNonceClaim(IDictionary<string, object> payload, string nonce);
 
         /// <summary>
+        /// Agrega la reclamación de la contraseña o secreto de acceso asociada al usuario.
+        /// </summary>
+        /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
+        /// <param name="password">La contraseña del usuario.</param>
+        void AddPasswordClaim(IDictionary<string, object> payload, string password);
+
+        /// <summary>
         /// Agrega la reclamación del token de autenticación emitido para la aplicación.
         /// </summary>
         /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
         /// <param name="token">El valor del token de autenticación.</param>
         void AddTokenClaim(IDictionary<string, object> payload, string token);
+
+        /// <summary>
+        /// Agrega la reclamación del nombre que identifica al usuario en el servicio.
+        /// </summary>
+        /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
+        /// <param name="username">El valor del nombre de usuario.</param>
+        void AddUsernameClaim(IDictionary<string, object> payload, string username);
     }
 }

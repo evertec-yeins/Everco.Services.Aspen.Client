@@ -45,7 +45,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp delegatedClient = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             CollectionAssert.IsNotEmpty(delegatedClient.Utils.GetDefaultDocTypes());
@@ -66,7 +66,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp delegatedClient = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             Assert.IsNotEmpty(delegatedClient.Utils.Encrypt("colombia"));
@@ -79,7 +79,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             Dictionary<string, object> errorReportInfo = new Dictionary<string, object>

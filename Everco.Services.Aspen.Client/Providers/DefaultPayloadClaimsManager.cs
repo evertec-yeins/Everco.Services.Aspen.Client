@@ -76,6 +76,18 @@ namespace Everco.Services.Aspen.Client.Providers
         }
 
         /// <summary>
+        /// Agrega la reclamación de la contraseña o secreto de acceso asociada al usuario.
+        /// </summary>
+        /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
+        /// <param name="password">La contraseña del usuario.</param>
+        public void AddPasswordClaim(IDictionary<string, object> payload, string password)
+        {
+            Throw.IfNull(payload, nameof(payload));
+            Throw.IfNullOrEmpty(password, nameof(password));
+            payload.Add(ServiceLocator.Instance.PayloadClaimNames.PasswordClaimName, password);
+        }
+
+        /// <summary>
         /// Agrega la reclamación del token de autenticación emitido para la aplicación.
         /// </summary>
         /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
@@ -85,6 +97,18 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNull(payload, nameof(payload));
             Throw.IfNullOrEmpty(token, nameof(token));
             payload.Add(ServiceLocator.Instance.PayloadClaimNames.TokenClaimName, token);
+        }
+
+        /// <summary>
+        /// Agrega la reclamación del nombre que identifica al usuario en el servicio.
+        /// </summary>
+        /// <param name="payload">Colección de claves y valores que representa la carga útil para la solicitud.</param>
+        /// <param name="username">El valor del nombre de usuario.</param>
+        public void AddUsernameClaim(IDictionary<string, object> payload, string username)
+        {
+            Throw.IfNull(payload, nameof(payload));
+            Throw.IfNullOrEmpty(username, nameof(username));
+            payload.Add(ServiceLocator.Instance.PayloadClaimNames.UsernameClaimName, username);
         }
     }
 }

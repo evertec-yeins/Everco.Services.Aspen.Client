@@ -24,9 +24,15 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public class AutonomousSignedHeadersTests
     {
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
         private IAutonomousApp autonomousClient = null;
 
-        public IAutonomousApp AutonomousClient => autonomousClient ?? (this.autonomousClient = AutonomousApp.Initialize()
+        /// <summary>
+        /// Obtiene un cliente previamente autenticado.
+        /// </summary>
+        public IAutonomousApp AutonomousClient => this.autonomousClient ?? (this.autonomousClient = AutonomousApp.Initialize()
                                                                            .RoutingTo(EnvironmentEndpointProvider.Default)
                                                                            .WithIdentity(AutonomousAppIdentity.Default)
                                                                            .Authenticate()

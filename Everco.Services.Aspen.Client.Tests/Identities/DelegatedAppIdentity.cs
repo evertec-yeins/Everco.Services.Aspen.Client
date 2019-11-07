@@ -13,7 +13,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
     /// <summary>
     /// Representa la información que se utiliza para autenticar la solicitud en el servicio Aspen.
     /// </summary>
-    internal class DelegatedAppIdentity : IAppIdentity, IUserIdentity
+    internal class DelegatedAppIdentity : IAppIdentity
     {
         /// <summary>
         /// Para uso interno.
@@ -41,25 +41,5 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// Obtiene el ApiSecret asociado a la aplicación que intenta autenticar la solicitud.
         /// </summary>
         public string ApiSecret => "colombia";
-
-        /// <summary>
-        /// Obtiene o establece el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
-        /// </summary>
-        public string DocType => "CC";
-
-        /// <summary>
-        /// Obtiene o establece el número de documento asociado con el usuario que intenta autenticar la solicitud.
-        /// </summary>
-        public string DocNumber => "52080323";
-
-        /// <summary>
-        /// Obtiene o establece la clave de acceso del usuario que intenta autenticar la solicitud.
-        /// </summary>
-        public string Password => "colombia";
-
-        /// <summary>
-        /// Obtiene o establece la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
-        /// </summary>
-        public IDeviceInfo DeviceInfo => new DeviceInfo();
     }
 }

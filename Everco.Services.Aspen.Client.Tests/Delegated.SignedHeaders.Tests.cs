@@ -24,12 +24,18 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public class DelegatedSignedHeadersTests
     {
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
         private IDelegatedApp delegatedClient = null;
 
-        public IDelegatedApp DelegatedClient => delegatedClient ?? (this.delegatedClient = DelegatedApp.Initialize()
+        /// <summary>
+        /// Obtiene un cliente previamente autenticado.
+        /// </summary>
+        public IDelegatedApp DelegatedClient => this.delegatedClient ?? (this.delegatedClient = DelegatedApp.Initialize()
                                                                         .RoutingTo(EnvironmentEndpointProvider.Default)
                                                                         .WithIdentity(DelegatedAppIdentity.Default)
-                                                                        .Authenticate(DelegatedAppIdentity.Default)
+                                                                        .Authenticate(UserIdentity.Default)
                                                                         .GetClient());
         /// <summary>
         /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
@@ -47,7 +53,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
 
             // Se usa una operación que requiere token de autenticación.
@@ -96,7 +102,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando.
@@ -113,7 +119,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -131,7 +137,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
@@ -159,7 +165,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -280,6 +286,98 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.DeviceId")]
+        public void MissingDeviceIdThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidDeviceIdPayloadClaim.AvoidingClaim());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'DeviceId' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.DeviceId")]
+        public void NullOrEmptyDeviceIdThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => "     ")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'DeviceId' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.DeviceId")]
+        public void InvalidDeviceIdFormatThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
+                                                                {
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'DeviceId' debe coincidir con el patrón", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// The missing username throws.
+        /// </summary>
+        [Test]
+        [Category("Headers.Payload.Username")]
+        public void MissingUsernameThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidUsernamePayloadClaim.AvoidingClaim());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Username' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Username")]
+        public void NullOrEmptyUsernameThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidUsernamePayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidUsernamePayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidUsernamePayloadClaim.WithClaimBehavior(() => "     ")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Username' no puede ser nulo ni vacío", exception.Message);
+            }
         }
     }
 }

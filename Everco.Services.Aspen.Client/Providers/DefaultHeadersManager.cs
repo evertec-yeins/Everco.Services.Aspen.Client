@@ -95,16 +95,12 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNullOrEmpty(username, nameof(username));
 
             IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.PayloadClaimNames.UsernameClaimName, username },
-            };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
             ServiceLocator.Instance.PayloadClaimsManager.AddTokenClaim(payload, token);
+            ServiceLocator.Instance.PayloadClaimsManager.AddUsernameClaim(payload, username);
             ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
-
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
@@ -152,15 +148,12 @@ namespace Everco.Services.Aspen.Client.Providers
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             CacheStore.SetDeviceInfo(deviceInfo);
 
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.PayloadClaimNames.PasswordClaimName, userIdentity.Password },
-            };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
             ServiceLocator.Instance.PayloadClaimsManager.AddDocTypeClaim(payload, userIdentity.DocType);
             ServiceLocator.Instance.PayloadClaimsManager.AddDocNumberClaim(payload, userIdentity.DocNumber);
+            ServiceLocator.Instance.PayloadClaimsManager.AddPasswordClaim(payload, userIdentity.Password);
             ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);

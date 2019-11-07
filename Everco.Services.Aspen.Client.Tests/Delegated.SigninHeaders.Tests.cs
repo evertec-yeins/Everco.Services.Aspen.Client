@@ -31,30 +31,134 @@ namespace Everco.Services.Aspen.Client.Tests
             ServiceLocator.Instance.Reset();
         }
 
+        /// <summary>
+        /// Se emite un token de autenticación para un usuario cuando la credencial corresponde a una válida por el sistema.
+        /// </summary>
         [Test]
         [Category("Delegated.Signin.Headers")]
-        public void SigninRequestWorks()
+        public void UserSigninRequestWorks()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
         }
 
+        /// <summary>
+        /// Se produce una excepción de autenticación si la credencial del usuario no es válida.
+        /// </summary>
         [Test]
         [Category("Delegated.Signin.Headers")]
-        public void SigninUsingApiKeyDelegatedThrows()
+        public void InvalidUserCredentialSigninRequestThrows()
+        {
+            string password = Guid.Empty.ToString();
+            UserIdentity invalidCredentialIdentity = new UserIdentity("CC", "52080323", password);
+
+            AspenException exception = Assert.Throws<AspenException>(() =>
+            {
+                DelegatedApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(invalidCredentialIdentity)
+                    .GetClient();
+            });
+
+            Assert.That(exception.EventId, Is.EqualTo("97414"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación si el usuario no es reconocido en el sistema.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Signin.Headers")]
+        public void UnrecognizedUserSigninRequestThrows()
+        {
+            string fixedDocType = "CC";
+            string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            string password = Guid.Empty.ToString();
+            UserIdentity unrecognizedUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+
+            AspenException exception = Assert.Throws<AspenException>(() =>
+            {
+                DelegatedApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(unrecognizedUserIdentity)
+                    .GetClient();
+            });
+
+            Assert.That(exception.EventId, Is.EqualTo("97412"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando el usario está bloqueado.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Signin.Headers")]
+        public void LockoutUserSigninRequestThrows()
+        {
+            UserIdentity userIdentity = UserIdentity.Default;
+            SqlDataContext.Default.EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
+            AspenException exception = Assert.Throws<AspenException>(() =>
+            {
+                DelegatedApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(userIdentity)
+                    .GetClient();
+            });
+
+            Assert.That(exception.EventId, Is.EqualTo("97413"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("Usuario está bloqueado por superar el número máximo de intentos de sesión inválidos", exception.Message);
+            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando el usuario existe pero no tiene credenciales establecidas.
+        /// </summary>
+        [Test]
+        [Category("Delegated.Signin.Headers")]
+        public void MissingCredentialUserProfileSigninRequestThrows()
+        {
+            string fixedDocType = "CC";
+            string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            string password = Guid.Empty.ToString();
+            UserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+            SqlDataContext.Default.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(tempUserIdentity)
+                        .GetClient();
+                });
+
+            Assert.That(exception.EventId, Is.EqualTo("97416"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
+            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+        }
+
+        [Test]
+        [Category("Delegated.Signin.Headers")]
+        public void SigninUsingApiKeyWithAutonomousScopeThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -74,7 +178,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -94,7 +198,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(apiKey, randomApiSecret)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -113,7 +217,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -141,7 +245,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -161,7 +265,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -189,7 +293,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -212,7 +316,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -231,7 +335,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -259,7 +363,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -287,7 +391,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -305,7 +409,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
@@ -319,7 +423,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -338,7 +442,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -366,7 +470,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -395,7 +499,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -416,7 +520,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -436,7 +540,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -456,7 +560,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -475,7 +579,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -494,7 +598,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -522,7 +626,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -556,7 +660,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -576,7 +680,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -604,7 +708,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -635,7 +739,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -655,7 +759,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Default)
-                    .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
 
@@ -664,18 +768,123 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("'DeviceId' no puede ser nulo ni vacío", exception.Message);
         }
 
+        [Test]
+        [Category("Headers.Payload.DeviceId")]
+        public void NullOrEmptyDeviceIdThrows()
+        {
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => "     ")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                    {
+                        ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                        DelegatedApp.Initialize()
+                            .RoutingTo(EnvironmentEndpointProvider.Default)
+                            .WithIdentity(DelegatedAppIdentity.Default)
+                            .AuthenticateNoCache(UserIdentity.Default)
+                            .GetClient();
+                    });
+
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'DeviceId' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.DeviceId")]
+        public void InvalidDeviceIdFormatThrows()
+        {
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
+                                                                {
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                                                                    InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                    {
+                        ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                        DelegatedApp.Initialize()
+                            .RoutingTo(EnvironmentEndpointProvider.Default)
+                            .WithIdentity(DelegatedAppIdentity.Default)
+                            .AuthenticateNoCache(UserIdentity.Default)
+                            .GetClient();
+                    });
+
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'DeviceId' debe coincidir con el patrón", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.Password")]
+        public void MissingPasswordThrows()
+        {
+            AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidPasswordPayloadClaim.AvoidingClaim());
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
+                        .GetClient();
+                });
+
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Password' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Password")]
+        public void NullOrEmptyPasswordThrows()
+        {
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidPasswordPayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidPasswordPayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidPasswordPayloadClaim.WithClaimBehavior(() => "     ")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                    {
+                        ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                        DelegatedApp.Initialize()
+                            .RoutingTo(EnvironmentEndpointProvider.Default)
+                            .WithIdentity(DelegatedAppIdentity.Default)
+                            .AuthenticateNoCache(UserIdentity.Default)
+                            .GetClient();
+                    });
+
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Password' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
         /// <summary>
         /// Autenticar una aplicación sin la cabecera de la versión del API solicitada funciona.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiVersion")]
         public void MissingApiVersionHeaderWorks()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
                 .GetClient();
 
             Assert.That(client, Is.Not.Null);
@@ -687,7 +896,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Autenticar una aplicación con valores nulos o vacíos en la cabecera de la versión del API solicitada no funciona.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiVersion")]
         public void NullEmptyApiVersionHeaderThrows()
         {
             IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
@@ -705,7 +914,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -719,7 +928,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Autenticar una aplicación con valores inválidos en la cabecera de la versión del API solicitada no funciona.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiVersion")]
         public void InvalidApiVersionHeaderFormatThrows()
         {
             IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
@@ -740,7 +949,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
@@ -754,7 +963,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Autenticar una aplicación con valores no soportados en la cabecera de la versión del API solicitada no funciona.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiVersion")]
         public void UnsupportedApiVersionHeaderThrows()
         {
             IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
@@ -773,7 +982,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
                         .GetClient();
                 });
 
