@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="MissingHeadersManager.cs" company="Evertec Colombia">
+// <copyright file="InvalidHeadersManager.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests.Assets
 {
+    using System;
     using System.Collections.Generic;
     using Auth;
     using JWT;
@@ -16,12 +17,29 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// <summary>
     /// Implementa un manejador que establece comportamientos de prueba para las cabeceras personalizadas esperadas por el servicio.
     /// </summary>
-    internal abstract class MissingHeadersManager : IHeadersManager
+    internal abstract class InvalidHeadersManager : IHeadersManager
     {
         /// <summary>
-        /// Para uso interno de la prueba.
+        /// Inicializa una nueva instancia de la clase <see cref="InvalidHeadersManager"/>.
         /// </summary>
-        protected readonly Dictionary<string, object> Payload = new Dictionary<string, object>();
+        protected InvalidHeadersManager()
+        {
+            this.HeaderBehavior = null;
+        }
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="InvalidHeadersManager"/>.
+        /// </summary>
+        /// <param name="headerBehavior">El comportamiento del encabezado.</param>
+        protected InvalidHeadersManager(Func<string> headerBehavior)
+        {
+            this.HeaderBehavior = headerBehavior;
+        }
+
+        /// <summary>
+        /// Obtiene el comportamiento del encabezado.
+        /// </summary>
+        public Func<string> HeaderBehavior { get; }
 
         /// <summary>
         /// Agrega la cabecera que identifica la aplicación solicitante.
@@ -57,6 +75,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="token">El token de autenticación emitido para la aplicación.</param>
         public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token)
         {
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddTokenClaim(payload, token);
+            string jwt = jwtEncoder.Encode(payload, apiSecret);
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
 
         /// <summary>
@@ -69,6 +93,18 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="username">La identificación del usuario autenticado.</param>
         public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
         {
+            IDeviceInfo deviceInfo = new DeviceInfo();
+            Dictionary<string, object> payload = new Dictionary<string, object>
+                                                     {
+                                                         { ServiceLocator.Instance.PayloadClaimNames.TokenClaimName, token },
+                                                         { ServiceLocator.Instance.PayloadClaimNames.UsernameClaimName, username },
+                                                         { ServiceLocator.Instance.PayloadClaimNames.DeviceIdClaimName, deviceInfo.DeviceId }
+                                                     };
+
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            string jwt = jwtEncoder.Encode(payload, apiSecret);
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
 
         /// <summary>
@@ -79,12 +115,9 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         public virtual void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret)
         {
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() }
-            };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
@@ -102,15 +135,15 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
 
             Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() },
-                { "DocType", userIdentity.DocType },
-                { "DocNumber", userIdentity.DocNumber },
-                { "Password", userIdentity.Password },
-                { "DeviceId", deviceInfo.DeviceId }
-            };
+                                                     {
+                                                         { ServiceLocator.Instance.PayloadClaimNames.PasswordClaimName, userIdentity.Password },
+                                                     };
 
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddDocTypeClaim(payload, userIdentity.DocType);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDocNumberClaim(payload, userIdentity.DocNumber);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }

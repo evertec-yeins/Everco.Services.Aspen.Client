@@ -28,7 +28,7 @@ namespace Everco.Services.Aspen.Client.Providers
         string DocTypeClaimName { get; }
 
         /// <summary>
-        /// Obtiene el nombre de la reclamación para la época unix o marcas de tiempo unix.
+        /// Obtiene el nombre de la reclamación para la época unix.
         /// </summary>
         string EpochClaimName { get; }
 

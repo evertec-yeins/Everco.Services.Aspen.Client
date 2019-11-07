@@ -41,7 +41,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
@@ -77,7 +77,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .Authenticate()
+                    .AuthenticateNoCache()
                     .GetClient();
             });
 
@@ -115,7 +115,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingApiKeyHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -135,14 +135,14 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signin.Headers")]
         public void NullOrEmptyApiKeyHeaderThrows()
         {
-            IList<IHeadersManager> apiKeyHeaderBehaviors = new List<IHeadersManager>()
+            IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiKeyHeader(() => null),
-                new MissingApiKeyHeader(() => string.Empty),
-                new MissingApiKeyHeader(() => "      ")
+                InvalidApiKeyHeader.WithHeaderBehavior(() => null),
+                InvalidApiKeyHeader.WithHeaderBehavior(() => string.Empty),
+                InvalidApiKeyHeader.WithHeaderBehavior(() => "      ")
             };
 
-            foreach (IHeadersManager behavior in apiKeyHeaderBehaviors)
+            foreach (IHeadersManager behavior in headerBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
@@ -166,7 +166,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader());
+                ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -185,9 +185,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> payloadHeaderBehaviors = new List<IHeadersManager>()
             {
-                new MissingPayloadHeader(() => null),
-                new MissingPayloadHeader(() => string.Empty),
-                new MissingPayloadHeader(() => "     ")
+                InvalidPayloadHeader.WithHeaderBehavior(() => null),
+                InvalidPayloadHeader.WithHeaderBehavior(() => string.Empty),
+                InvalidPayloadHeader.WithHeaderBehavior(() => "     ")
             };
 
             foreach (IHeadersManager headerBehavior in payloadHeaderBehaviors)
@@ -214,7 +214,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingPayloadHeader(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr"));
+                ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.WithHeaderBehavior(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr"));
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -228,12 +228,12 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Nonce")]
         public void MissingNonceThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingNoncePayloadHeader());
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidNoncePayloadClaim.AvoidingClaim());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -247,21 +247,21 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Nonce")]
         public void NullOrEmptyNonceThrows()
         {
-            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
-            {
-                new MissingNoncePayloadHeader(HeaderValueBehavior.Null),
-                new MissingNoncePayloadHeader(HeaderValueBehavior.Empty),
-                new MissingNoncePayloadHeader(HeaderValueBehavior.WhiteSpaces)
-            };
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => "     ")
+                                                                };
 
-            foreach (IHeadersManager behavior in payloadBehaviors)
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                    ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -276,20 +276,20 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Nonce")]
         public void InvalidNonceFormatThrows()
         {
-            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
-            {
-                new MissingNoncePayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingNoncePayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
-            };
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
+                                                                {
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
+                                                                };
 
-            foreach (IHeadersManager behavior in payloadBehaviors)
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                    ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -304,11 +304,11 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Nonce")]
         public void NonceAlreadyProcessedThrows()
         {
-            DuplicatedNonceGenerator nonceGenerator = new DuplicatedNonceGenerator();
-            ServiceLocator.Instance.RegisterNonceGenerator(nonceGenerator);
+            SingleUseNonceGenerator singleUseNonceGenerator = new SingleUseNonceGenerator();
+            ServiceLocator.Instance.RegisterNonceGenerator(singleUseNonceGenerator);
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
@@ -321,7 +321,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(client.AuthToken.Token, Is.Not.Null);
 
             // No se podrá autenticar la aplicación, cuando use el mismo nonce por segunda vez.
-            Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), nonceGenerator.GetNonce());
+            Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), singleUseNonceGenerator.GetNonce());
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 AutonomousApp.Initialize()
@@ -337,12 +337,12 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Epoch")]
         public void MissingEpochThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                ServiceLocator.Instance.RegisterHeadersManager(new MissingEpochPayloadHeader());
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidEpochPayloadClaim.AvoidingClaim());
                 AutonomousApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(AutonomousAppIdentity.Default)
@@ -356,21 +356,21 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Epoch")]
         public void NullOrEmptyEpochThrows()
         {
-            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
-                new MissingEpochPayloadHeader(HeaderValueBehavior.Null),
-                new MissingEpochPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingEpochPayloadHeader(HeaderValueBehavior.WhiteSpaces)
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => null),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => string.Empty),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "     ")
             };
 
-            foreach (IHeadersManager behavior in payloadBehaviors)
+            foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                    ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -385,21 +385,21 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Epoch")]
         public void InvalidEpochFormatThrows()
         {
-            IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
+            IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
-                new MissingEpochPayloadHeader(HeaderValueBehavior.UnexpectedFormat),
-                new MissingEpochPayloadHeader(HeaderValueBehavior.MinLengthRequired),
-                new MissingEpochPayloadHeader(HeaderValueBehavior.MaxLengthExceeded)
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "x"),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
             };
 
-            foreach (IHeadersManager behavior in payloadBehaviors)
+            foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                    ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -414,22 +414,73 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Autonomous.Signin.Headers")]
+        [Category("Headers.Payload.Epoch")]
         public void EpochExpiredThrows()
         {
-
-            int randomDays = new Random().Next(5, 10);
-            IList<IEpochGenerator> epochBehaviors = new List<IEpochGenerator>()
+            int randomDays = new Random().Next(2, 10);
+            AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                new DatePickerEpochGenerator(-randomDays),
-                new DatePickerEpochGenerator(randomDays),
-            };
+                ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(-randomDays));
+                AutonomousApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(AutonomousAppIdentity.Default)
+                    .AuthenticateNoCache()
+                    .GetClient();
+            });
 
-            foreach (IEpochGenerator behavior in epochBehaviors)
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochExceededThrows()
+        {
+
+            int randomDays = new Random().Next(2, 10);
+            AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                AspenException exception = Assert.Throws<AspenException>(() =>
+                ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(randomDays));
+                AutonomousApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(AutonomousAppIdentity.Default)
+                    .AuthenticateNoCache()
+                    .GetClient();
+            });
+
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochNegativeThrows()
+        {
+            double negativeSeconds = -DateTimeOffset.Now.ToUnixTimeSeconds();
+            AspenException exception = Assert.Throws<AspenException>(() =>
+            {
+                ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(negativeSeconds));
+                AutonomousApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(AutonomousAppIdentity.Default)
+                    .AuthenticateNoCache()
+                    .GetClient();
+            });
+
+            Assert.That(exception.EventId, Is.EqualTo("15850"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número.", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochZeroThrows()
+        {
+            AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    ServiceLocator.Instance.RegisterEpochGenerator(behavior);
+                    ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(0));
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Default)
@@ -437,10 +488,9 @@ namespace Everco.Services.Aspen.Client.Tests
                         .GetClient();
                 });
 
-                Assert.That(exception.EventId, Is.EqualTo("15851"));
-                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
-                StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
-            }
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
         }
 
         /// <summary>
@@ -450,11 +500,11 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Autonomous.Signin.Headers")]
         public void MissingApiVersionHeaderWorks()
         {
-            ServiceLocator.Instance.RegisterHeadersManager(new MissingApiVersionHeader());
+            ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
             IAutonomousApp client = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate()
+                .AuthenticateNoCache()
                 .GetClient();
 
             Assert.That(client, Is.Not.Null);
@@ -471,9 +521,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiVersionHeader(() => null),
-                new MissingApiVersionHeader(() => string.Empty),
-                new MissingApiVersionHeader(() => "     ")
+                InvalidApiVersionHeader.WithHeaderBehavior(() => null),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => string.Empty),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "     ")
             };
 
             foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
@@ -503,12 +553,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiVersionHeader(() => "abc"),
-                new MissingApiVersionHeader(() => Guid.NewGuid().ToString()),
-                new MissingApiVersionHeader(() => "123"),
-                new MissingApiVersionHeader(() => "1,0"),
-                new MissingApiVersionHeader(() => "1A"),
-                new MissingApiVersionHeader(() => "-1.0"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "abc"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => Guid.NewGuid().ToString()),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "123"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "1,0"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "1A"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "-1.0"),
 
             };
 
@@ -539,10 +589,10 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
             {
-                new MissingApiVersionHeader(() => "0.1"),
-                new MissingApiVersionHeader(() => "999999.999999"),
-                new MissingApiVersionHeader(() => "999999.999999.999999"),
-                new MissingApiVersionHeader(() => "999999.999999.999999.999999")
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "0.1"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999.999999")
             };
 
             foreach (IHeadersManager behavior in headerBehaviors)

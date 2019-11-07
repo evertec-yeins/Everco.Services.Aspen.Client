@@ -9,7 +9,6 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Collections.Generic;
-    using Everco.Services.Aspen.Entities;
     using Fluent;
     using Identities;
     using Newtonsoft.Json;

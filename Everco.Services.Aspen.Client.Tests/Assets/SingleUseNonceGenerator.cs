@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="DuplicatedNonceGenerator.cs" company="Evertec Colombia">
+// <copyright file="SingleUseNonceGenerator.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -13,7 +13,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// <summary>
     /// Implementa un generador de nonces duplicados a partir de la estructura <see cref="Guid"/>.
     /// </summary>
-    public class DuplicatedNonceGenerator : INonceGenerator
+    public class SingleUseNonceGenerator : INonceGenerator
     {
         /// <summary>
         /// Para uso interno.
@@ -21,9 +21,9 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         private readonly string nonce = null;
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="DuplicatedNonceGenerator" />.
+        /// Inicializa una nueva instancia de la clase <see cref="SingleUseNonceGenerator" />.
         /// </summary>
-        public DuplicatedNonceGenerator() => this.nonce = Guid.NewGuid().ToString("D");
+        public SingleUseNonceGenerator() => this.nonce = Guid.NewGuid().ToString("D");
 
         /// <summary>
         /// Obtiene el nombre con el que se agrega esta información a la solicitud.

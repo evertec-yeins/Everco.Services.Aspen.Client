@@ -33,7 +33,7 @@ namespace Everco.Services.Aspen.Client
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(response.Content) & response.ContentType != "text/html")
+            if (!string.IsNullOrWhiteSpace(response.Content) & !response.ContentType.Contains("text/html"))
             {
                 this.Content = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
             }

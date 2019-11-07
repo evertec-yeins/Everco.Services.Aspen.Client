@@ -7,6 +7,8 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
+    using System;
+    using System.Collections.Generic;
     using System.Net;
     using Auth;
     using Internals;
@@ -120,13 +122,25 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(this.GetHeaders(request.Parameters))}");
+            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
+            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
+            try
+            {
+                payload = this.JwtDecoder.Decode(payload);
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
+            }
+            catch (Exception)
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
+            }
+
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {this.GetBody(request.Parameters).DefaultIfNullOrEmpty("NONSET")}");
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)
             {
@@ -155,13 +169,25 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(this.GetHeaders(request.Parameters))}");
+            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
+            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
+            try
+            {
+                payload = this.JwtDecoder.Decode(payload);
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
+            }
+            catch (Exception)
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
+            }
+
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {this.GetBody(request.Parameters).DefaultIfNullOrEmpty("NONSET")}");
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)
             {

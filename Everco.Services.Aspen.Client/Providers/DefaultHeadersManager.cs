@@ -17,7 +17,6 @@ namespace Everco.Services.Aspen.Client.Providers
     /// <summary>
     /// Implementa las operaciones necesarias para establecer las cabeceras personalizadas requeridas por el servicio Aspen.
     /// </summary>
-    // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
     public class DefaultHeadersManager : IHeadersManager
     {
         /// <summary>
@@ -25,7 +24,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// </summary>
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="apiKey">ApiKey de la aplicación para incluir en la cabecera.</param>
-        public virtual void AddApiKeyHeader(IRestRequest request, string apiKey)
+        public void AddApiKeyHeader(IRestRequest request, string apiKey)
         {
             Throw.IfNull(request, nameof(request));
             Throw.IfNullOrEmpty(apiKey, nameof(apiKey));
@@ -56,7 +55,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para la aplicación.</param>
-        public virtual void AddSignedPayloadHeader(
+        public void AddSignedPayloadHeader(
             IRestRequest request,
             IJwtEncoder jwtEncoder,
             string apiSecret,
@@ -66,13 +65,10 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNull(jwtEncoder, nameof(jwtEncoder));
             Throw.IfNullOrEmpty(apiSecret, nameof(apiSecret));
             Throw.IfNullOrEmpty(token, nameof(token));
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() },
-                { "Token", token }
-            };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddTokenClaim(payload, token);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
@@ -101,12 +97,13 @@ namespace Everco.Services.Aspen.Client.Providers
             IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();
             Dictionary<string, object> payload = new Dictionary<string, object>
             {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() },
-                { "Token", token },
-                { "Username", username },
-                { "DeviceId", deviceInfo.DeviceId }
+                { ServiceLocator.Instance.PayloadClaimNames.UsernameClaimName, username },
             };
+
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddTokenClaim(payload, token);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
 
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
@@ -118,7 +115,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        public virtual void AddSigninPayloadHeader(
+        public void AddSigninPayloadHeader(
             IRestRequest request,
             IJwtEncoder jwtEncoder,
             string apiSecret)
@@ -126,12 +123,9 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNull(request, nameof(request));
             Throw.IfNull(jwtEncoder, nameof(jwtEncoder));
             Throw.IfNullOrEmpty(apiSecret, nameof(apiSecret));
-            Dictionary<string, object> payload = new Dictionary<string, object>
-            {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() }
-            };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
@@ -143,7 +137,7 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
-        public virtual void AddSigninPayloadHeader(
+        public void AddSigninPayloadHeader(
             IRestRequest request,
             IJwtEncoder jwtEncoder,
             string apiSecret,
@@ -160,14 +154,14 @@ namespace Everco.Services.Aspen.Client.Providers
 
             Dictionary<string, object> payload = new Dictionary<string, object>
             {
-                { ServiceLocator.Instance.NonceGenerator.Name, ServiceLocator.Instance.NonceGenerator.GetNonce() },
-                { ServiceLocator.Instance.EpochGenerator.Name, ServiceLocator.Instance.EpochGenerator.GetSeconds() },
-                { "DocType", userIdentity.DocType },
-                { "DocNumber", userIdentity.DocNumber },
-                { "Password", userIdentity.Password },
-                { "DeviceId", deviceInfo.DeviceId }
+                { ServiceLocator.Instance.PayloadClaimNames.PasswordClaimName, userIdentity.Password },
             };
 
+            ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
+            ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddDocTypeClaim(payload, userIdentity.DocType);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDocNumberClaim(payload, userIdentity.DocNumber);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }

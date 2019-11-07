@@ -48,6 +48,8 @@ namespace Everco.Services.Aspen.Client
             this.container.RegisterInstance<IEpochGenerator>(new UnixEpochGenerator());
             this.container.RegisterInstance<IHeaderElement>(new DefaultHeaderElement());
             this.container.RegisterInstance<IHeadersManager>(new DefaultHeadersManager());
+            this.container.RegisterInstance<IPayloadClaimElement>(new DefaultPayloadClaimElement());
+            this.container.RegisterInstance<IPayloadClaimsManager>(new DefaultPayloadClaimsManager());
             this.container.RegisterInstance<IJsonSerializer>(new JsonNetSerializer());
             this.container.RegisterInstance<IWebProxy>(new NullWebProxy());
             this.container.RegisterInstance<ILoggingProvider>(new NullLoggingProvider());
@@ -100,6 +102,11 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio.
         /// </summary>
         public IHeaderElement RequestHeaderNames => this.container?.GetInstance<IHeaderElement>();
+
+        /// <summary>
+        /// Obtiene la instancia del componente que se utiliza para agregar las reclamaciones en la carga útil requeridas por el servicio.
+        /// </summary>
+        public IPayloadClaimsManager PayloadClaimsManager => this.container?.GetInstance<IPayloadClaimsManager>();
 
         /// <summary>
         /// Obtiene una referencia que permite acceder al entorno de ejecución.
@@ -162,6 +169,26 @@ namespace Everco.Services.Aspen.Client
         }
 
         /// <summary>
+        /// Registra una instancia de <see cref="IPayloadClaimElement" /> que define los nombres que se utilizan para las reclamaciones usadas en la carga útil de una solicitud al servicio Aspen.
+        /// </summary>
+        /// <param name="payloadClaimNames">Instancia que implementa <see cref="IHeaderElement" />.</param>
+        public void RegisterPayloadClaimNames(IPayloadClaimElement payloadClaimNames)
+        {
+            Throw.IfNull(payloadClaimNames, nameof(payloadClaimNames));
+            this.RegisterInstance(payloadClaimNames: payloadClaimNames);
+        }
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IPayloadClaimsManager" /> que permite agregar las reclamaciones requeridas a la carga útil de la solicitud.
+        /// </summary>
+        /// <param name="payloadClaimsManager">Instancia que implementa <see cref="IPayloadClaimsManager" />.</param>
+        public void RegisterPayloadClaimsManager(IPayloadClaimsManager payloadClaimsManager)
+        {
+            Throw.IfNull(payloadClaimsManager, nameof(payloadClaimsManager));
+            this.RegisterInstance(payloadClaimsManager: payloadClaimsManager);
+        }
+
+        /// <summary>
         /// Registra una instancia de <see cref="IHeaderElement" /> para la generación de valores.
         /// </summary>
         /// <param name="requestHeaderNames">Instancia que implementa <see cref="IHeaderElement" />.</param>
@@ -198,7 +225,9 @@ namespace Everco.Services.Aspen.Client
         /// <param name="nonceGenerator">Instancia de <see cref="INonceGenerator"/> que se utiliza para inicializar el proveedor de valores nonce o <c>null</c> para utilizar la instancia predeterminada.</param>
         /// <param name="epochGenerator">Instancia de <see cref="IEpochGenerator"/> que se utiliza para inicializar el proveedor de valores epoch o <c>null</c> para utilizar la instancia predeterminada.</param>
         /// <param name="headersManager">Instancia de <see cref="IHeadersManager"/> que se utiliza para inicializar el proveedor de cabeceras para las solicitudes al servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="requestHeaderNames">Instancia de <see cref="IHeaderElement"/> que se utiliza para inicializar el proveedor los nombres de cabeceras o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="requestHeaderNames">Instancia de <see cref="IHeaderElement"/> que se utiliza para inicializar el proveedor de los nombres de cabeceras personalizadas o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="payloadClaimNames">Instancia de <see cref="IPayloadClaimElement"/> que se utiliza para inicializar el proveedor de los nombres para las reclamaciones usadas en la carga útil del servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="payloadClaimsManager">Instancia de <see cref="IPayloadClaimsManager"/> que se utiliza para inicializar el proveedor de reclamaciones de la carga útil o <c>null</c> para utilizar la instancia predeterminada.</param>
         /// <param name="jwtJsonSerializer">Instancia de <see cref="IJsonSerializer"/> que se utiliza para inicializar el proveedor de serialización y deserialización de JWT o <c>null</c> para utilizar la instancia predeterminada.</param>
         /// <param name="webProxy">Instancia de <see cref="IWebProxy"/> que se utiliza para inicializar el proveedor del servidor proxy o <c>null</c> para utilizar la instancia predeterminada.</param>
         /// <param name="loggingProvider">Instancia de <see cref="ILoggingProvider"/> que se utiliza para inicializar el proveedor de escritura de trazas de seguimiento o <c>null</c> para utilizar la instancia predeterminada.</param>
@@ -207,6 +236,8 @@ namespace Everco.Services.Aspen.Client
             IEpochGenerator epochGenerator = null,
             IHeadersManager headersManager = null,
             IHeaderElement requestHeaderNames = null,
+            IPayloadClaimElement payloadClaimNames = null,
+            IPayloadClaimsManager payloadClaimsManager = null,
             IJsonSerializer jwtJsonSerializer = null,
             IWebProxy webProxy = null,
             ILoggingProvider loggingProvider = null)
@@ -216,6 +247,8 @@ namespace Everco.Services.Aspen.Client
                 INonceGenerator instanceOfNonceGenerator = nonceGenerator ?? this.NonceGenerator ?? new GuidNonceGenerator();
                 IEpochGenerator instanceOfEpochGenerator = epochGenerator ?? this.EpochGenerator ?? new UnixEpochGenerator();
                 IHeaderElement instanceOfRequestHeaderNames = requestHeaderNames ?? this.RequestHeaderNames ?? new DefaultHeaderElement();
+                IPayloadClaimElement instanceOfPayloadClaimNames = payloadClaimNames ?? this.PayloadClaimNames ?? new DefaultPayloadClaimElement();
+                IPayloadClaimsManager instanceOfPayloadClaimsManager = payloadClaimsManager ?? this.PayloadClaimsManager ?? new DefaultPayloadClaimsManager();
                 IHeadersManager instanceOfHeadersManager = headersManager ?? this.HeadersManager ?? new DefaultHeadersManager();
                 IJsonSerializer instanceOfJwtJsonSerializer = jwtJsonSerializer ?? this.JwtJsonSerializer ?? new JsonNetSerializer();
                 IWebProxy instanceOfWebProxy = webProxy ?? this.WebProxy ?? new NullWebProxy();
@@ -233,6 +266,8 @@ namespace Everco.Services.Aspen.Client
                 this.container.RegisterInstance(instanceOfEpochGenerator);
                 this.container.RegisterInstance(instanceOfRequestHeaderNames);
                 this.container.RegisterInstance(instanceOfHeadersManager);
+                this.container.RegisterInstance(instanceOfPayloadClaimNames);
+                this.container.RegisterInstance(instanceOfPayloadClaimsManager);
                 this.container.RegisterInstance(instanceOfJwtJsonSerializer);
                 this.container.RegisterInstance(instanceOfWebProxy);
                 this.container.RegisterInstance(instanceOfLoggingProvider);

@@ -5,6 +5,7 @@
 // <author>dmontalvo</author>
 // <date>2019-09-24 10:00 AM</date>
 // ----------------------------------------------------------------------
+// ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
@@ -23,6 +24,13 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public class DelegatedSignedHeadersTests
     {
+        private IDelegatedApp delegatedClient = null;
+
+        public IDelegatedApp DelegatedClient => delegatedClient ?? (this.delegatedClient = DelegatedApp.Initialize()
+                                                                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                                                                        .WithIdentity(DelegatedAppIdentity.Default)
+                                                                        .Authenticate(DelegatedAppIdentity.Default)
+                                                                        .GetClient());
         /// <summary>
         /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
         /// </summary>
@@ -48,10 +56,43 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Delegated.Signed.Headers")]
+        [Category("Headers.Payload.Nonce")]
+        public void InvalidNonceFormatThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
+                                                                {
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                                                                    InvalidNoncePayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
+                                                                };
+
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Nonce' debe coincidir con el patrón", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.Nonce")]
+        public void MissingNonceThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidNoncePayloadClaim.AvoidingClaim());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío.", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Nonce")]
         public void NonceAlreadyProcessedThrows()
         {
-            ServiceLocator.Instance.RegisterNonceGenerator(new DuplicatedNonceGenerator());
+            ServiceLocator.Instance.RegisterNonceGenerator(new SingleUseNonceGenerator());
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Default)
@@ -66,7 +107,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Delegated.Signed.Headers")]
+        [Category("Headers.Payload.Token")]
         public void MissingAuthTokenThrows()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
@@ -76,7 +117,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
-            ServiceLocator.Instance.RegisterHeadersManager(new MissingAuthTokenClaimOnPayloadHeader());
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidTokenPayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -84,7 +125,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Delegated.Signed.Headers")]
+        [Category("Headers.Payload.Token")]
         public void NullOrEmptyAuthTokenThrows()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
@@ -93,17 +134,17 @@ namespace Everco.Services.Aspen.Client.Tests
                 .AuthenticateNoCache(DelegatedAppIdentity.Default)
                 .GetClient();
 
-            IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
-            {
-                new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.Null),
-                new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.Empty),
-                new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.WhiteSpaces)
-            };
+            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+                                                                {
+                                                                    InvalidTokenPayloadClaim.WithClaimBehavior(() => null),
+                                                                    InvalidTokenPayloadClaim.WithClaimBehavior(() => string.Empty),
+                                                                    InvalidTokenPayloadClaim.WithClaimBehavior(() => "    ")
+                                                                };
 
-            foreach (IHeadersManager behavior in headerBehaviors)
+            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 // Se intenta usar una operación que requiere el token de autenticación.
-                ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
@@ -112,7 +153,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
-        [Category("Delegated.Signed.Headers")]
+        [Category("Headers.Payload.Token")]
         public void InvalidAuthTokenFormatThrows()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
@@ -122,11 +163,123 @@ namespace Everco.Services.Aspen.Client.Tests
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
-            ServiceLocator.Instance.RegisterHeadersManager(new MissingAuthTokenClaimOnPayloadHeader(HeaderValueBehavior.UnexpectedFormat));
-            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() =>
+            {
+                IPayloadClaimsManager invalidFormatBehavior = InvalidTokenPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE");
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(invalidFormatBehavior);
+                client.Settings.GetDocTypes();
+            });
+
             Assert.That(exception.EventId, Is.EqualTo("20007"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void MissingEpochThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidEpochPayloadClaim.AvoidingClaim());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15852"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void NullOrEmptyEpochThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
+            {
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => null),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => string.Empty),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "     ")
+            };
+
+            foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void InvalidEpochFormatThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
+            {
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => "x"),
+                InvalidEpochPayloadClaim.WithClaimBehavior(() => $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}")
+            };
+
+            foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("15850"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número", exception.Message);
+            }
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochExpiredThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            int randomDays = new Random().Next(2, 10);
+            ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(-randomDays));
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochExceededThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            int randomDays = new Random().Next(2, 10);
+            ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(randomDays));
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochNegativeThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            double negativeSeconds = -DateTimeOffset.Now.ToUnixTimeSeconds();
+            ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(negativeSeconds));
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15850"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número.", exception.Message);
+        }
+
+        [Test]
+        [Category("Headers.Payload.Epoch")]
+        public void EpochZeroThrows()
+        {
+            IDelegatedApp client = this.DelegatedClient;
+            ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(0));
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15851"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
+            StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
         }
     }
 }
