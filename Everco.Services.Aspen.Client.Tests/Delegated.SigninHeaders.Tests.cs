@@ -11,6 +11,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Collections.Generic;
     using System.Net;
     using Assets;
+    using Everco.Services.Aspen.Client.Auth;
     using Fluent;
     using Identities;
     using NUnit.Framework;
@@ -35,7 +36,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Se emite un token de autenticación para un usuario cuando la credencial corresponde a una válida por el sistema.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Delegated.UserSignin")]
         public void UserSigninRequestWorks()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
@@ -52,11 +53,14 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Se produce una excepción de autenticación si la credencial del usuario no es válida.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void InvalidUserCredentialSigninRequestThrows()
+        [Category("Delegated.UserSignin")]
+        public void InvalidUserCredentialThrows()
         {
             string password = Guid.Empty.ToString();
-            UserIdentity invalidCredentialIdentity = new UserIdentity("CC", "52080323", password);
+            UserIdentity invalidCredentialIdentity = new UserIdentity(
+                UserIdentity.Default.DocType,
+                UserIdentity.Default.DocNumber,
+                password);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
@@ -76,8 +80,8 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Se produce una excepción de autenticación si el usuario no es reconocido en el sistema.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void UnrecognizedUserSigninRequestThrows()
+        [Category("Delegated.UserSignin")]
+        public void UnrecognizedUserThrows()
         {
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
@@ -102,8 +106,8 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Se produce una excepción de autenticación cuando el usario está bloqueado.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void LockoutUserSigninRequestThrows()
+        [Category("Delegated.UserSignin")]
+        public void UserLockoutThrows()
         {
             UserIdentity userIdentity = UserIdentity.Default;
             SqlDataContext.Default.EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
@@ -123,11 +127,11 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Se produce una excepción de autenticación cuando el usuario existe pero no tiene credenciales establecidas.
+        /// Se produce una excepción de autenticación cuando el usuario existe en el sistema pero no tiene credenciales establecidas.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void MissingCredentialUserProfileSigninRequestThrows()
+        [Category("Delegated.UserSignin")]
+        public void MissingUserCredentialProfilePropertiesThrows()
         {
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
@@ -142,16 +146,92 @@ namespace Everco.Services.Aspen.Client.Tests
                         .AuthenticateNoCache(tempUserIdentity)
                         .GetClient();
                 });
-
+            
+            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             Assert.That(exception.EventId, Is.EqualTo("97416"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
             StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
-            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
         }
 
+        /// <summary>
+        /// Se produce un error interno de servidor cuando el formato de la contraseña en el perfil del usuario no es reconocido por el sistema.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void SigninUsingApiKeyWithAutonomousScopeThrows()
+        [Category("Delegated.UserSignin")]
+        public void InvalidSecretFormatUserProfilePropertiesThrows()
+        {
+            string fixedDocType = "CC";
+            string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            string password = Guid.Empty.ToString();
+            IAppIdentity appIdentity = DelegatedAppIdentity.Default;
+            IUserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+            Dictionary<string, string> userProfile = new Dictionary<string, string>()
+                                                         {
+                                                             { "Secret", password },
+                                                             { "SecretFormat", "InvalidTypeName" }
+                                                         };
+            SqlDataContext.Default.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber, appIdentity.ApiKey, userProfile);
+            AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(appIdentity)
+                        .AuthenticateNoCache(tempUserIdentity)
+                        .GetClient();
+                });
+            
+            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            Assert.That(exception.EventId, Is.EqualTo("97417"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            StringAssert.IsMatch("No es posible verificar las credenciales del usuario.", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación por bloqueo de intentos inválidos.
+        /// </summary>
+        [Test]
+        [Category("Delegated.UserSignin")]
+        public void UserLockedOutForFailedAttemptsSignin()
+        {
+            string password = Guid.Empty.ToString();
+            IAppIdentity appIdentity = DelegatedAppIdentity.Default;
+            UserIdentity userIdentity = new UserIdentity(
+                UserIdentity.Default.DocType,
+                UserIdentity.Default.DocNumber,
+                password);
+
+            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+            int maxFailedPasswordAttempt = SqlDataContext.Default.GetAppMaxFailedPasswordAttempt(appIdentity.ApiKey);
+            
+            void Authenticate() =>
+                DelegatedApp.Initialize()
+                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .WithIdentity(appIdentity)
+                    .AuthenticateNoCache(userIdentity)
+                    .GetClient();
+
+            AspenException exception;
+            for (int index = 1; index < maxFailedPasswordAttempt; index++)
+            {
+                exception = Assert.Throws<AspenException>(Authenticate);
+                Assert.That(exception.EventId, Is.EqualTo("97414"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+                StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
+            }
+
+            exception = Assert.Throws<AspenException>(Authenticate);
+            Assert.That(exception.EventId, Is.EqualTo("97415"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("Usuario ha sido bloqueado por superar el número máximo de intentos de sesión inválidos", exception.Message);
+            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando la aplicación no coincide con el alcance esperado.
+        /// </summary>
+        [Test]
+        [Category("Delegated.UserSignin")]
+        public void ApiKeyScopeMismatchThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
@@ -167,14 +247,19 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("ApiKey no tiene permisos para realizar la operación. Alcance requerido: 'Delegated'", exception.Message);
         }
 
+        /// <summary>
+        /// Se produce una excepción de autenticación si el identificador de la aplicación no es reconocido en el sistema.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void InvalidApiKeyThrows()
+        [Category("Delegated.UserSignin")]
+        public void UnrecognizedApiKeyThrows()
         {
+            string randomApiKey = Guid.NewGuid().ToString();
+            string apiKeySecret = AutonomousAppIdentity.Default.ApiSecret;
+
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                string randomApiKey = Guid.NewGuid().ToString();
-                string apiKeySecret = AutonomousAppIdentity.Default.ApiSecret;
+                
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
@@ -187,17 +272,20 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("Identificador de ApiKey no válido para la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
         }
 
+        /// <summary>
+        /// Se produce una excepción de autenticación si el secreto de la aplicación es inválido.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
-        public void InvalidApiSecretThrows()
+        [Category("Delegated.UserSignin")]
+        public void InvalidApiKeyCredentialThrows()
         {
+            string recognizedApiKey = AutonomousAppIdentity.Default.ApiKey;
+            string randomApiSecret = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                string apiKey = AutonomousAppIdentity.Default.ApiKey;
-                string randomApiSecret = Guid.NewGuid().ToString();
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
-                    .WithIdentity(apiKey, randomApiSecret)
+                    .WithIdentity(recognizedApiKey, randomApiSecret)
                     .AuthenticateNoCache(UserIdentity.Default)
                     .GetClient();
             });
@@ -207,8 +295,11 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
         }
 
+        /// <summary>
+        /// Cuando falta el encabezado del identificador de la aplicación no funciona.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiKey")]
         public void MissingApiKeyHeaderThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
@@ -226,8 +317,11 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
         }
 
+        /// <summary>
+        /// Cuando el encabezado del identificador de la aplicación es nulo o vacío no funciona.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.ApiKey")]
         public void NullOrEmptyApiKeyHeaderThrows()
         {
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
@@ -255,8 +349,11 @@ namespace Everco.Services.Aspen.Client.Tests
             }
         }
 
+        /// <summary>
+        /// Cuando falta el encabezado de la carga útil no funciona.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.Payload")]
         public void MissingPayloadHeaderThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
@@ -274,8 +371,11 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
         }
 
+        /// <summary>
+        /// Cuando el valor del encabezado de la carga útil es nulo o vacío no funciona.
+        /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.Payload")]
         public void NullOrEmptyPayloadHeaderThrows()
         {
             IList<IHeadersManager> payloadBehaviors = new List<IHeadersManager>()
@@ -304,10 +404,10 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Cuando el valor del payload no es un jwt no funciona.
+        /// Cuando el valor del encabezado de la carga útil no tiene formato de un JWT no funciona.
         /// </summary>
         [Test]
-        [Category("Delegated.Signin.Headers")]
+        [Category("Headers.Payload")]
         public void InvalidPayloadSignatureThrows()
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
@@ -324,6 +424,130 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
         }
+
+        /// <summary>
+        /// Autenticar una aplicación sin la cabecera de la versión del API solicitada funciona.
+        /// </summary>
+        [Test]
+        [Category("Headers.ApiVersion")]
+        public void MissingApiVersionHeaderWorks()
+        {
+            ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
+            IDelegatedApp client = DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Default)
+                .AuthenticateNoCache(UserIdentity.Default)
+                .GetClient();
+
+            Assert.That(client, Is.Not.Null);
+            Assert.That(client.AuthToken, Is.Not.Null);
+            Assert.That(client.AuthToken.Token, Is.Not.Null);
+        }
+
+        /// <summary>
+        /// Autenticar una aplicación con valores nulos o vacíos en la cabecera de la versión del API solicitada no funciona.
+        /// </summary>
+        [Test]
+        [Category("Headers.ApiVersion")]
+        public void NullEmptyApiVersionHeaderThrows()
+        {
+            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
+            {
+                InvalidApiVersionHeader.WithHeaderBehavior(() => null),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => string.Empty),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "     ")
+            };
+
+            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
+                        .GetClient();
+                });
+
+                Assert.That(exception.EventId, Is.EqualTo("99001"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Autenticar una aplicación con valores inválidos en la cabecera de la versión del API solicitada no funciona.
+        /// </summary>
+        [Test]
+        [Category("Headers.ApiVersion")]
+        public void InvalidApiVersionHeaderFormatThrows()
+        {
+            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
+            {
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "abc"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => Guid.NewGuid().ToString()),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "123"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "1,0"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "1A"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "-1.0")
+            };
+
+            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
+                        .GetClient();
+                });
+
+                Assert.That(exception.EventId, Is.EqualTo("99001"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Autenticar una aplicación con valores no soportados en la cabecera de la versión del API no funciona.
+        /// </summary>
+        [Test]
+        [Category("Headers.ApiVersion")]
+        public void UnsupportedApiVersionHeaderThrows()
+        {
+            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
+            {
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "0.1"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999"),
+                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999.999999")
+            };
+
+            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
+                AspenException exception = Assert.Throws<AspenException>(() =>
+                {
+                    DelegatedApp.Initialize()
+                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .AuthenticateNoCache(UserIdentity.Default)
+                        .GetClient();
+                });
+
+                Assert.That(exception.EventId, Is.EqualTo("99005"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("no es un valor admitido para el encabezado personalizado 'X-PRO-Api-Version'", exception.Message);
+            }
+        }
+
+
+
+
+
 
         [Test]
         [Category("Headers.Payload.Nonce")]
@@ -870,125 +1094,6 @@ namespace Everco.Services.Aspen.Client.Tests
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Password' no puede ser nulo ni vacío", exception.Message);
-            }
-        }
-
-        /// <summary>
-        /// Autenticar una aplicación sin la cabecera de la versión del API solicitada funciona.
-        /// </summary>
-        [Test]
-        [Category("Headers.ApiVersion")]
-        public void MissingApiVersionHeaderWorks()
-        {
-            ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
-            IDelegatedApp client = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(UserIdentity.Default)
-                .GetClient();
-
-            Assert.That(client, Is.Not.Null);
-            Assert.That(client.AuthToken, Is.Not.Null);
-            Assert.That(client.AuthToken.Token, Is.Not.Null);
-        }
-
-        /// <summary>
-        /// Autenticar una aplicación con valores nulos o vacíos en la cabecera de la versión del API solicitada no funciona.
-        /// </summary>
-        [Test]
-        [Category("Headers.ApiVersion")]
-        public void NullEmptyApiVersionHeaderThrows()
-        {
-            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
-            {
-                InvalidApiVersionHeader.WithHeaderBehavior(() => null),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => string.Empty),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "     ")
-            };
-
-            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
-            {
-                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
-                AspenException exception = Assert.Throws<AspenException>(() =>
-                {
-                    DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(UserIdentity.Default)
-                        .GetClient();
-                });
-
-                Assert.That(exception.EventId, Is.EqualTo("99001"));
-                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-                StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
-            }
-        }
-
-        /// <summary>
-        /// Autenticar una aplicación con valores inválidos en la cabecera de la versión del API solicitada no funciona.
-        /// </summary>
-        [Test]
-        [Category("Headers.ApiVersion")]
-        public void InvalidApiVersionHeaderFormatThrows()
-        {
-            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
-            {
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "abc"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => Guid.NewGuid().ToString()),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "123"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "1,0"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "1A"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "-1.0")
-            };
-
-            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
-            {
-                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
-                AspenException exception = Assert.Throws<AspenException>(() =>
-                {
-                    DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(UserIdentity.Default)
-                        .GetClient();
-                });
-
-                Assert.That(exception.EventId, Is.EqualTo("99001"));
-                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-                StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
-            }
-        }
-
-        /// <summary>
-        /// Autenticar una aplicación con valores no soportados en la cabecera de la versión del API solicitada no funciona.
-        /// </summary>
-        [Test]
-        [Category("Headers.ApiVersion")]
-        public void UnsupportedApiVersionHeaderThrows()
-        {
-            IList<IHeadersManager> apiVersionHeaderBehaviors = new List<IHeadersManager>()
-            {
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "0.1"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999"),
-                InvalidApiVersionHeader.WithHeaderBehavior(() => "999999.999999.999999.999999")
-            };
-
-            foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
-            {
-                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
-                AspenException exception = Assert.Throws<AspenException>(() =>
-                {
-                    DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(DelegatedAppIdentity.Default)
-                        .AuthenticateNoCache(UserIdentity.Default)
-                        .GetClient();
-                });
-
-                Assert.That(exception.EventId, Is.EqualTo("99005"));
-                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
-                StringAssert.IsMatch("no es un valor admitido para el encabezado personalizado 'X-PRO-Api-Version'", exception.Message);
             }
         }
     }
