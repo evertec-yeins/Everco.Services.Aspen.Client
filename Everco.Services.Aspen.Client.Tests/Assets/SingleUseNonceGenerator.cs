@@ -11,7 +11,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using Providers;
 
     /// <summary>
-    /// Implementa un generador de nonces duplicados a partir de la estructura <see cref="Guid"/>.
+    /// Implementa un generador de nonces de un solo uso a partir de la estructura <see cref="Guid"/>.
     /// </summary>
     public class SingleUseNonceGenerator : INonceGenerator
     {
@@ -24,11 +24,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// Inicializa una nueva instancia de la clase <see cref="SingleUseNonceGenerator" />.
         /// </summary>
         public SingleUseNonceGenerator() => this.nonce = Guid.NewGuid().ToString("D");
-
-        /// <summary>
-        /// Obtiene el nombre con el que se agrega esta información a la solicitud.
-        /// </summary>
-        public string Name => "Nonce";
 
         /// <summary>
         /// Obtiene un número o cadena aleatoria para un único uso.

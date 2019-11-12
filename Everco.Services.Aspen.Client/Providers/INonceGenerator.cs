@@ -14,11 +14,6 @@ namespace Everco.Services.Aspen.Client.Providers
     public interface INonceGenerator
     {
         /// <summary>
-        /// Obtiene el nombre con el que se agrega esta información a la solicitud.
-        /// </summary>
-        string Name { get; }
-
-        /// <summary>
         /// Obtiene un número o cadena aleatoria para un único uso.
         /// </summary>
         /// <returns>Cadena de texto aleatoria para un único uso.</returns>

@@ -18,11 +18,6 @@ namespace Everco.Services.Aspen.Client.Providers
     public class GuidNonceGenerator : INonceGenerator
     {
         /// <summary>
-        /// Obtiene el nombre con el que se agrega esta información a la solicitud.
-        /// </summary>
-        public string Name => "Nonce";
-
-        /// <summary>
         /// Obtiene un número o cadena aleatoria para un único uso.
         /// </summary>
         /// <returns>

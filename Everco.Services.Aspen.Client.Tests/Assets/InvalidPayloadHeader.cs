@@ -34,17 +34,17 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         }
 
         /// <summary>
+        /// Crea una instancia de <see cref="IHeadersManager"/> donde se evita agregar el encabezado personalizado.
+        /// </summary>
+        /// <returns>Instancia de <see cref="IHeadersManager"/> con el comportamiento de personalizado.</returns>
+        public static IHeadersManager AvoidingHeader() => new InvalidPayloadHeader();
+
+        /// <summary>
         /// Crea una instancia de <see cref="IHeadersManager"/> con un comportamiento de personalizado para el encabezado.
         /// </summary>
         /// <param name="headerBehavior">El comportamiento del encabezado.</param>
         /// <returns>Instancia de <see cref="IHeadersManager"/> con el comportamiento de personalizado.</returns>
         public static IHeadersManager WithHeaderBehavior(Func<string> headerBehavior) => new InvalidPayloadHeader(headerBehavior);
-
-        /// <summary>
-        /// Crea una instancia de <see cref="IHeadersManager"/> donde se evita agregar el encabezado personalizado.
-        /// </summary>
-        /// <returns>Instancia de <see cref="IHeadersManager"/> con el comportamiento de personalizado.</returns>
-        public static IHeadersManager AvoidingHeader() => new InvalidPayloadHeader();
 
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para el servicio Aspen.

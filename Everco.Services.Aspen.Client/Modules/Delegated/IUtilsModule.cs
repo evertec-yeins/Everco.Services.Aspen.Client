@@ -11,7 +11,7 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
     using Entities;
 
     /// <summary>
-    /// Define las operaciones soportadas apara acceder a entidades de información relacionadas con parametrización del sistema.
+    /// Define las operaciones para utilidades varias soportadas para una aplicación con alcance de delegada.
     /// </summary>
     public interface IUtilsModule
     {
@@ -29,7 +29,7 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
         string Encrypt(string value);
 
         /// <summary>
-        /// Registra la información del crash generado en la aplicación.
+        /// Registra la información del crash (errores o bloqueos de sistema) generado por una aplicación.
         /// </summary>
         /// <param name="errorReport">Información del reporte de error generado en la aplicación.</param>
         /// <param name="userName">Información del último usuario que uso la aplicación antes de generarse el error.</param>

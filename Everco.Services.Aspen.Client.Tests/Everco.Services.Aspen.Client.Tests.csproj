@@ -4,6 +4,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="AutonomousAppTests.SigninHeaders.cs~RF1cb673d.TMP" />
     <None Remove="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>

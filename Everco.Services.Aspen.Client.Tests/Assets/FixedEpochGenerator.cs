@@ -39,11 +39,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         }
 
         /// <summary>
-        /// Obtiene el nombre con el que se agrega esta información a la solicitud.
-        /// </summary>
-        public string Name => "Epoch";
-
-        /// <summary>
         /// Inicializa un un generador de épocas a partir del número de días en <paramref name="days"/> que se agregarán a la fecha actual.
         /// </summary>
         /// <param name="days">El número de días de se agregarán o restarán a la época. El número puede ser negativo o positivo.</param>
