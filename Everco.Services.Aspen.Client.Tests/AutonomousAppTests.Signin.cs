@@ -9,6 +9,8 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Net;
+    using Everco.Services.Aspen.Client.Auth;
+    using Everco.Services.Aspen.Client.Tests.Assets;
     using Fluent;
     using Identities;
     using NUnit.Framework;
@@ -27,7 +29,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void AppSigninRequestWorks()
         {
-            IAutonomousApp client = AuthenticateNoCache();
+            IAutonomousApp client = GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
@@ -41,7 +43,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void UnrecognizedApiKeyThrows()
         {
             string randomApiKey = Guid.NewGuid().ToString();
-            string apiKeySecret = AutonomousAppIdentity.Default.ApiSecret;
+            string apiKeySecret = AutonomousAppIdentity.Master.ApiSecret;
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
@@ -63,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void InvalidAppCredentialThrows()
         {
-            string recognizedApiKey = AutonomousAppIdentity.Default.ApiKey;
+            string recognizedApiKey = AutonomousAppIdentity.Master.ApiKey;
             string invalidApiSecret = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
@@ -86,17 +88,50 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void ApiKeyScopeMismatchThrows()
         {
+            IAppIdentity delegatedAppIdentity = DelegatedAppIdentity.Master;
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .WithIdentity(delegatedAppIdentity)
                         .AuthenticateNoCache()
                         .GetClient();
                 });
             Assert.That(exception.EventId, Is.EqualTo("1000478"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
             StringAssert.IsMatch("ApiKey no tiene permisos para realizar la operación. Alcance requerido: 'Autonomous'", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando la aplicación esta inhabilitada.
+        /// </summary>
+        [Test]
+        [Category("Signin")]
+        public void ApiKeyDisabledWhenAppSigninRequestThrows()
+        {
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.DisableApp(appIdentity.ApiKey);
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
+            Assert.That(exception.EventId, Is.EqualTo("20006"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            StringAssert.IsMatch("ApiKey está desactivado. Póngase en contacto con el administrador", exception.Message);
+            SqlDataContext.EnableApp(appIdentity.ApiKey);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando la aplicación requiere cambiar su secreto.
+        /// </summary>
+        [Test]
+        [Category("Signin")]
+        public void AppRequiresChangeSecretWhenSigninRequestThrows()
+        {
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
+            Assert.That(exception.EventId, Is.EqualTo("20009"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.UpgradeRequired));
+            StringAssert.IsMatch("Necesita actualizar el secreto de la aplicación.", exception.Message);
+            SqlDataContext.EnsureAppNotRequiresChangeSecret(appIdentity.ApiKey);
         }
     }
 }

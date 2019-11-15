@@ -20,43 +20,33 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// Expone métodos para interactuar con la base de datos del servicio Aspen para fines de preparación de los escenarios de las pruebas automáticas.
     /// </summary>
     [SuppressMessage("Style", "IDE0063:Use simple 'using' statement", Justification = "Keep calm and ignore")]
-    public class SqlDataContext
+    public static class SqlDataContext
     {
-        /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private static SqlDataContext @default;
-
-        /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private readonly string connectionString;
-
         /// <summary>
         /// Prevents a default instance of the <see cref="SqlDataContext"/> class from being created.
         /// </summary>
-        private SqlDataContext()
+        static SqlDataContext()
         {
             IConfigurationBuilder builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false, true)
                 .AddJsonFile($"appsettings.{Environment.UserName}.json", true, true);
             IConfigurationRoot configuration = builder.Build();
-            this.connectionString = configuration.GetConnectionString("Sql:Aspen");
+            ConnectionString = configuration.GetConnectionString("Sql:Aspen");
         }
 
         /// <summary>
-        /// Obtiene la instancia predeterminada.
+        /// Obtiene la cadena de conexión usada para el acceso al origen de datos.
         /// </summary>
-        public static SqlDataContext Default => @default ?? (@default = new SqlDataContext());
+        public static string ConnectionString { get; }
 
         /// <summary>
         /// Crea un usuario en el sistema.
         /// </summary>
         /// <param name="docType">Tipo de documento del usuario.</param>
         /// <param name="docNumber">Número de documento del usuario.</param>
-        public void AddUserInfo(string docType, string docNumber)
+        public static void AddUserInfo(string docType, string docNumber)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -87,12 +77,201 @@ VALUES (@DocType, @DocNumber, 0, NULL, NULL, NULL, 0, NULL)
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="appKey">El identificador de la aplicación.</param>
         /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
-        public void AddUserInfo(string docType, string docNumber, string appKey, IDictionary<string, string> profileProperties)
+        public static void AddUserInfo(
+            string docType,
+            string docNumber,
+            string appKey,
+            IDictionary<string, string> profileProperties)
         {
-            this.AddUserInfo(docType, docNumber);
-            int userId = this.GetUserId(docType, docNumber);
-            int appId = this.GetAppId(appKey);
-            this.AddUserProfileProperties(userId, appId, profileProperties);
+            AddUserInfo(docType, docNumber);
+            int userId = GetUserId(docType, docNumber);
+            int appId = GetAppId(appKey);
+            AddUserProfileProperties(userId, appId, profileProperties);
+        }
+
+        /// <summary>
+        /// Inhabilita una aplicación en el sistema del servicio.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void DisableApp(string appKey)
+        {
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[Apps]
+   SET [Enabled] = 0
+WHERE [AppKey] = @AppKey
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Habilita una aplicación en el sistema del servicio.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnableApp(string appKey)
+        {
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[Apps]
+   SET [Enabled] = 1
+WHERE [AppKey] = @AppKey
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Se asegura una aplicación no requiera cambio de su secreto.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureAppNotRequiresChangeSecret(string appKey)
+        {
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[Apps]
+   SET [UpdateSecret] = 0
+WHERE [AppKey] = @AppKey
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Se asegura una aplicación requiera cambio de su secreto.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureAppRequiresChangeSecret(string appKey)
+        {
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[Apps]
+   SET [UpdateSecret] = 1
+WHERE [AppKey] = @AppKey
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Se asegura que el token de autenticación generado por una aplicación haya expirado.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureExpireAppAuthToken(string appKey)
+        {
+            int appId = GetAppId(appKey);
+            int randomDays = new Random().Next(2, 10);
+            DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddDays(-randomDays);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[AuthTokenApp]
+   SET [ExpiresAt] = @ExpiresAt
+WHERE [AppId] = @AppId
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("ExpiresAt", expiresAt);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Se asegura que el token de autenticación de un usuario haya expirado.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="deviceId">El identificador del dispositivo.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureExpireUserAuthToken(
+            string docType,
+            string docNumber,
+            string deviceId,
+            string appKey)
+        {
+            int userId = GetUserId(docType, docNumber);
+            int appId = GetAppId(appKey);
+            int randomDays = new Random().Next(2, 10);
+            DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddDays(-randomDays);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[AuthTokenUser]
+   SET [ExpiresAt] = @ExpiresAt
+ WHERE [AppId] = @AppId AND [UserId] = @UserId AND [DeviceId] = @DeviceId;
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("UserId", userId);
+                    command.Parameters.AddWithValue("DeviceId", deviceId);
+                    command.Parameters.AddWithValue("ExpiresAt", expiresAt);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Se asegura de alterar el token de autenticación de un usuario.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="deviceId">El identificador del dispositivo.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureMismatchUserAuthToken(
+            string docType,
+            string docNumber,
+            string deviceId,
+            string appKey)
+        {
+            int userId = GetUserId(docType, docNumber);
+            int appId = GetAppId(appKey);
+            string randomToken = $"{Guid.NewGuid():N}{Guid.NewGuid():N}";
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[AuthTokenUser]
+   SET [Token] = @Token
+ WHERE [AppId] = @AppId AND [UserId] = @UserId AND [DeviceId] = @DeviceId;
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("UserId", userId);
+                    command.Parameters.AddWithValue("DeviceId", deviceId);
+                    command.Parameters.AddWithValue("Token", randomToken);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         /// <summary>
@@ -100,9 +279,9 @@ VALUES (@DocType, @DocNumber, 0, NULL, NULL, NULL, 0, NULL)
         /// </summary>
         /// <param name="docType">Tipo de documento del usuario.</param>
         /// <param name="docNumber">Número de documento del usuario.</param>
-        public void EnsureUserIsLocked(string docType, string docNumber)
+        public static void EnsureUserIsLocked(string docType, string docNumber)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -118,8 +297,8 @@ UPDATE [dbo].[Users]
                 {
                     command.Parameters.AddWithValue("DocType", docType);
                     command.Parameters.AddWithValue("DocNumber", docNumber);
-                    command.Parameters.AddWithValue("LastLockoutDate", DateTimeOffset.Now);
-                    command.Parameters.AddWithValue("FailedPasswordAttemptWindowStart", DateTimeOffset.Now);
+                    command.Parameters.AddWithValue("LastLockoutDate", DateTimeOffset.UtcNow);
+                    command.Parameters.AddWithValue("FailedPasswordAttemptWindowStart", DateTimeOffset.UtcNow);
                     command.Parameters.AddWithValue("FailedPasswordAttemptCount", 10);
                     command.Parameters.AddWithValue("IsLockedOut", true);
                     command.ExecuteNonQuery();
@@ -132,9 +311,9 @@ UPDATE [dbo].[Users]
         /// </summary>
         /// <param name="docType">Tipo de documento del usuario.</param>
         /// <param name="docNumber">Número de documento del usuario.</param>
-        public void EnsureUserIsNotLocked(string docType, string docNumber)
+        public static void EnsureUserIsNotLocked(string docType, string docNumber)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -166,9 +345,9 @@ UPDATE [dbo].[Users]
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
         /// <returns>El identificador de la aplicación en el sistema.</returns>
-        public int GetAppId(string appKey)
+        public static int GetAppId(string appKey)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -194,9 +373,9 @@ WHERE [AppKey] = @AppKey
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
         /// <returns>Núméro máximo de intentos de autenticación inválidos permitidos</returns>
-        public int GetAppMaxFailedPasswordAttempt(string appKey)
+        public static int GetAppMaxFailedPasswordAttempt(string appKey)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -223,9 +402,9 @@ WHERE [AppKey] = @AppKey
         /// <param name="docType">Tipo de documento del usuario.</param>
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <returns>El identificador del usuario en el sistema.</returns>
-        public int GetUserId(string docType, string docNumber)
+        public static int GetUserId(string docType, string docNumber)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -247,14 +426,68 @@ WHERE [DocType] = @DocType AND [DocNumber] = @DocNumber
         }
 
         /// <summary>
+        /// Elimina el token de autenticación emitido por una aplicación.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void RemoveAppAuthToken(string appKey)
+        {
+            int appId = GetAppId(appKey);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+DELETE FROM [dbo].[AuthTokenApp]
+      WHERE [AppId] = @AppId
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Elimina el token de autenticación emitido por un usuario.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="deviceId">El identificador del dispositivo.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void RemoveUserAuthToken(
+            string docType,
+            string docNumber,
+            string deviceId,
+            string appKey)
+        {
+            int appId = GetAppId(appKey);
+            int userId = GetUserId(docType, docNumber);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+DELETE FROM [dbo].[AuthTokenUser]
+    WHERE [AppId] = @AppId AND [UserId] = @UserId AND [DeviceId] = @DeviceId;
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("UserId", userId);
+                    command.Parameters.AddWithValue("DeviceId", deviceId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Remueve a un usuario del sistema.
         /// </summary>
         /// <param name="docType">Tipo de documento del usuario.</param>
         /// <param name="docNumber">Número de documento del usuario.</param>
-        public void RemoveUserInfo(string docType, string docNumber)
+        public static void RemoveUserInfo(string docType, string docNumber)
         {
-            int userId = this.GetUserId(docType, docNumber);
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            int userId = GetUserId(docType, docNumber);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
@@ -277,9 +510,12 @@ DELETE FROM [dbo].[Users]
         /// <param name="userId">El identificador del usuario en el sistema.</param>
         /// <param name="appId">El identificador de la aplicación en el sistema.</param>
         /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
-        private void AddUserProfileProperties(int userId, int appId, IDictionary<string, string> profileProperties)
+        private static void AddUserProfileProperties(
+            int userId,
+            int appId,
+            IDictionary<string, string> profileProperties)
         {
-            using (SqlConnection connection = new SqlConnection(this.connectionString))
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 foreach ((string propertyName, string propertyValue) in profileProperties)

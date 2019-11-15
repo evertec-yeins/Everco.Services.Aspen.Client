@@ -94,15 +94,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
         {
             IDeviceInfo deviceInfo = new DeviceInfo();
-            Dictionary<string, object> payload = new Dictionary<string, object>
-                                                     {
-                                                         { ServiceLocator.Instance.PayloadClaimNames.TokenClaimName, token },
-                                                         { ServiceLocator.Instance.PayloadClaimNames.UsernameClaimName, username },
-                                                         { ServiceLocator.Instance.PayloadClaimNames.DeviceIdClaimName, deviceInfo.DeviceId }
-                                                     };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
+            ServiceLocator.Instance.PayloadClaimsManager.AddTokenClaim(payload, token);
+            ServiceLocator.Instance.PayloadClaimsManager.AddUsernameClaim(payload, username);
+            ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);
         }
@@ -133,16 +130,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         {
             IDeviceInfo deviceInfo = userIdentity.DeviceInfo ?? new DeviceInfo();
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
-
-            Dictionary<string, object> payload = new Dictionary<string, object>
-                                                     {
-                                                         { ServiceLocator.Instance.PayloadClaimNames.PasswordClaimName, userIdentity.Password },
-                                                     };
-
+            Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
             ServiceLocator.Instance.PayloadClaimsManager.AddDocTypeClaim(payload, userIdentity.DocType);
             ServiceLocator.Instance.PayloadClaimsManager.AddDocNumberClaim(payload, userIdentity.DocNumber);
+            ServiceLocator.Instance.PayloadClaimsManager.AddPasswordClaim(payload, userIdentity.Password);
             ServiceLocator.Instance.PayloadClaimsManager.AddDeviceIdClaim(payload, deviceInfo.DeviceId);
             string jwt = jwtEncoder.Encode(payload, apiSecret);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName, jwt);

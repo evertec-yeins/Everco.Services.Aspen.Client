@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System.Collections.Generic;
+    using Everco.Services.Aspen.Client.Fluent;
     using Everco.Services.Aspen.Entities;
     using NUnit.Framework;
 
@@ -24,7 +25,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetDocTypesWorks()
         {
-            IList<DocTypeInfo> docTypes = Client.Settings.GetDocTypes();
+            IAutonomousApp client = GetAutonomousClient();
+            IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
         }
 
@@ -35,7 +37,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetPaymentTypesWorks()
         {
-            IList<PaymentTypeInfo> paymentTypes = Client.Settings.GetPaymentTypes();
+            IAutonomousApp client = GetAutonomousClient();
+            IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
         }
 
@@ -46,7 +49,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetCarriersWorks()
         {
-            IList<CarrierInfo> carriers = Client.Settings.GetCarriers();
+            IAutonomousApp client = GetAutonomousClient();
+            IList<CarrierInfo> carriers = client.Settings.GetCarriers();
             CollectionAssert.IsNotEmpty(carriers);
         }
 
@@ -57,7 +61,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTopUpValuesWorks()
         {
-            IList<TopUpInfo> topUpValues = Client.Settings.GetTopUpValues();
+            IAutonomousApp client = GetAutonomousClient();
+            IList<TopUpInfo> topUpValues = client.Settings.GetTopUpValues();
             CollectionAssert.IsNotEmpty(topUpValues);
         }
 
@@ -68,7 +73,8 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTranTypesWorks()
         {
-            IList<TranTypeInfo> tranTypes = Client.Settings.GetTranTypes();
+            IAutonomousApp client = GetAutonomousClient();
+            IList<TranTypeInfo> tranTypes = client.Settings.GetTranTypes();
             CollectionAssert.IsNotEmpty(tranTypes);
         }
     }

@@ -9,6 +9,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using Auth;
     using Internals;
@@ -98,6 +99,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)
             {
@@ -144,6 +146,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)
             {

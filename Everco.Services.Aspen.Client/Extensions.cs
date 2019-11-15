@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client
     using System;
     using System.Collections.Generic;
     using System.ComponentModel;
+    using System.Linq;
     using System.Reflection;
     using Internals;
     using RestSharp;
@@ -19,6 +20,28 @@ namespace Everco.Services.Aspen.Client
     /// </summary>
     internal static class Extensions
     {
+        /// <summary>
+        /// Convierte el valor en <paramref name="input" /> al tipo especificado en <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">El tipo al que se convierte el valor en <paramref name="input" />.</typeparam>
+        /// <param name="input">Texto (entrada) que se desea convertir.</param>
+        /// <param name="defaultValue">valor de retorno si la conversión falla.</param>
+        /// <returns>
+        /// Instancia de <typeparamref name="T"/> o <paramref name="defaultValue" /> si la conversión falla.
+        /// </returns>
+        public static T Convert<T>(this string input, T defaultValue = default)
+        {
+            try
+            {
+                TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
+                return (T)converter.ConvertFromString(input);
+            }
+            catch (Exception)
+            {
+                return defaultValue;
+            }
+        }
+
         /// <summary>
         /// Obtiene la información de mapeo a donde se debe enviar una solicitud al servicio Aspen.
         /// </summary>
@@ -61,28 +84,6 @@ namespace Everco.Services.Aspen.Client
         }
 
         /// <summary>
-        /// Convierte el valor en <paramref name="input" /> al tipo especificado en <typeparamref name="T"/>.
-        /// </summary>
-        /// <typeparam name="T">El tipo al que se convierte el valor en <paramref name="input" />.</typeparam>
-        /// <param name="input">Texto (entrada) que se desea convertir.</param>
-        /// <param name="defaultValue">valor de retorno si la conversión falla.</param>
-        /// <returns>
-        /// Instancia de <typeparamref name="T"/> o <paramref name="defaultValue" /> si la conversión falla.
-        /// </returns>
-        public static T Convert<T>(this string input, T defaultValue = default)
-        {
-            try
-            {
-                TypeConverter converter = TypeDescriptor.GetConverter(typeof(T));
-                return (T)converter.ConvertFromString(input);
-            }
-            catch (Exception)
-            {
-                return defaultValue;
-            }
-        }
-
-        /// <summary>
         /// Retorna <paramref name="defaultValue" /> si <paramref name="input" /> es nulo o vacío.
         /// </summary>
         /// <param name="input">Texto a evaluar.</param>
@@ -93,5 +94,22 @@ namespace Everco.Services.Aspen.Client
         internal static string DefaultIfNullOrEmpty(
             this string input,
             string defaultValue = null) => string.IsNullOrWhiteSpace(input) ? defaultValue : input;
+
+        /// <summary>
+        /// Obtiene el valor de una cabecera de la respuesta.
+        /// </summary>
+        /// <param name="response">Instancia con la información de la respuesta.</param>
+        /// <param name="name">Nombre de la cabecera a buscar.</param>
+        /// <param name="comparisonType">Especifica cómo se compararán las cadenas.</param>
+        /// <returns>Valor de la cabecera si se encuentra o <see langword="null" /> si no se encuentra la cabecera en <paramref name="name" />.</returns>
+        internal static string GetHeader(
+            this IRestResponse response,
+            string name,
+            StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
+        {
+            return response
+                .Headers
+                .SingleOrDefault(h => h.Name.Equals(name, comparisonType))?.Value?.ToString();
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void UserSigninRequestWorks()
         {
-            IDelegatedApp client = AuthenticateNoCache();
+            IDelegatedApp client = GetDelegatedClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
@@ -45,15 +45,15 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             string password = Guid.Empty.ToString();
             UserIdentity invalidCredentialIdentity = new UserIdentity(
-                UserIdentity.Default.DocType,
-                UserIdentity.Default.DocNumber,
+                UserIdentity.Master.DocType,
+                UserIdentity.Master.DocNumber,
                 password);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
-                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(invalidCredentialIdentity)
                     .GetClient();
             });
@@ -79,7 +79,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
-                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(unrecognizedUserIdentity)
                     .GetClient();
             });
@@ -96,13 +96,13 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void UserLockoutThrows()
         {
-            UserIdentity userIdentity = UserIdentity.Default;
-            SqlDataContext.Default.EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
+            IUserIdentity userIdentity = UserIdentity.Master;
+            SqlDataContext.EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
-                    .WithIdentity(DelegatedAppIdentity.Default)
+                    .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(userIdentity)
                     .GetClient();
             });
@@ -110,7 +110,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.EventId, Is.EqualTo("97413"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
             StringAssert.IsMatch("Usuario está bloqueado por superar el número máximo de intentos de sesión inválidos", exception.Message);
-            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+            SqlDataContext.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
         }
 
         /// <summary>
@@ -124,17 +124,17 @@ namespace Everco.Services.Aspen.Client.Tests
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
             UserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
-            SqlDataContext.Default.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            SqlDataContext.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(DelegatedAppIdentity.Default)
+                        .WithIdentity(DelegatedAppIdentity.Master)
                         .AuthenticateNoCache(tempUserIdentity)
                         .GetClient();
                 });
             
-            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            SqlDataContext.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             Assert.That(exception.EventId, Is.EqualTo("97416"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
             StringAssert.IsMatch("Combinación de usuario y contraseña invalida. Por favor revise los valores ingresados e intente de nuevo", exception.Message);
@@ -150,14 +150,14 @@ namespace Everco.Services.Aspen.Client.Tests
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Default;
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             IUserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
             Dictionary<string, string> userProfile = new Dictionary<string, string>()
                                                          {
                                                              { "Secret", password },
                                                              { "SecretFormat", "InvalidTypeName" }
                                                          };
-            SqlDataContext.Default.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber, appIdentity.ApiKey, userProfile);
+            SqlDataContext.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber, appIdentity.ApiKey, userProfile);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
@@ -167,7 +167,7 @@ namespace Everco.Services.Aspen.Client.Tests
                         .GetClient();
                 });
             
-            SqlDataContext.Default.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            SqlDataContext.RemoveUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             Assert.That(exception.EventId, Is.EqualTo("97417"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
             StringAssert.IsMatch("No es posible verificar las credenciales del usuario.", exception.Message);
@@ -181,14 +181,14 @@ namespace Everco.Services.Aspen.Client.Tests
         public void UserLockedOutForFailedAttemptsSignin()
         {
             string password = Guid.Empty.ToString();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Default;
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             UserIdentity userIdentity = new UserIdentity(
-                UserIdentity.Default.DocType,
-                UserIdentity.Default.DocNumber,
+                UserIdentity.Master.DocType,
+                UserIdentity.Master.DocNumber,
                 password);
 
-            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
-            int maxFailedPasswordAttempt = SqlDataContext.Default.GetAppMaxFailedPasswordAttempt(appIdentity.ApiKey);
+            SqlDataContext.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+            int maxFailedPasswordAttempt = SqlDataContext.GetAppMaxFailedPasswordAttempt(appIdentity.ApiKey);
             
             void Authenticate() =>
                 DelegatedApp.Initialize()
@@ -210,7 +210,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.EventId, Is.EqualTo("97415"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
             StringAssert.IsMatch("Usuario ha sido bloqueado por superar el número máximo de intentos de sesión inválidos", exception.Message);
-            SqlDataContext.Default.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
+            SqlDataContext.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
         }
 
         /// <summary>
@@ -224,8 +224,8 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
-                        .WithIdentity(AutonomousAppIdentity.Default)
-                        .AuthenticateNoCache(UserIdentity.Default)
+                        .WithIdentity(AutonomousAppIdentity.Master)
+                        .AuthenticateNoCache(UserIdentity.Master)
                         .GetClient();
                 });
             Assert.That(exception.EventId, Is.EqualTo("1000478"));
@@ -241,14 +241,14 @@ namespace Everco.Services.Aspen.Client.Tests
         public void UnrecognizedApiKeyThrows()
         {
             string randomApiKey = Guid.NewGuid().ToString();
-            string apiKeySecret = AutonomousAppIdentity.Default.ApiSecret;
+            string apiKeySecret = AutonomousAppIdentity.Master.ApiSecret;
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .AuthenticateNoCache(UserIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Master)
                     .GetClient();
             });
 
@@ -264,20 +264,52 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void InvalidAppKeyCredentialThrows()
         {
-            string recognizedApiKey = AutonomousAppIdentity.Default.ApiKey;
+            string recognizedApiKey = AutonomousAppIdentity.Master.ApiKey;
             string randomApiSecret = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(recognizedApiKey, randomApiSecret)
-                    .AuthenticateNoCache(UserIdentity.Default)
+                    .AuthenticateNoCache(UserIdentity.Master)
                     .GetClient();
             });
 
             Assert.That(exception.EventId, Is.EqualTo("20007"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando la aplicación esta inhabilitada.
+        /// </summary>
+        [Test]
+        [Category("Signin")]
+        public void ApiKeyDisabledUserSigninRequestThrows()
+        {
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            SqlDataContext.DisableApp(appIdentity.ApiKey);
+            AspenException exception = Assert.Throws<AspenException>(() => GetDelegatedClient());
+            Assert.That(exception.EventId, Is.EqualTo("20006"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            StringAssert.IsMatch("ApiKey está desactivado. Póngase en contacto con el administrador", exception.Message);
+            SqlDataContext.EnableApp(appIdentity.ApiKey);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando la aplicación requiere cambiar su secreto.
+        /// </summary>
+        [Test]
+        [Category("Signin")]
+        public void AppRequiresChangeSecretWhenUserSigninRequestThrows()
+        {
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
+            AspenException exception = Assert.Throws<AspenException>(() => GetDelegatedClient());
+            Assert.That(exception.EventId, Is.EqualTo("20009"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.UpgradeRequired));
+            StringAssert.IsMatch("Necesita actualizar el secreto de la aplicación.", exception.Message);
+            SqlDataContext.EnsureAppNotRequiresChangeSecret(appIdentity.ApiKey);
         }
     }
 }

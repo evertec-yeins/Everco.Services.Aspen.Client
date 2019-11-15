@@ -10,7 +10,6 @@ namespace Everco.Services.Aspen.Client
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
     using Newtonsoft.Json;
@@ -42,9 +41,10 @@ namespace Everco.Services.Aspen.Client
             this.StatusDescription = response.StatusDescription ?? string.Empty;
             this.ResponseStatus = response.ResponseStatus;
             this.Message = this.StatusDescription;
-            this.HelpLink = GetHeader(response, "X-PRO-Response-Help");
+            this.HelpLink = response.GetHeader("X-PRO-Response-Help");
+            this.DumpLink = response.GetHeader("X-PRO-Response-Dump");
             this.Data["Uri"] = response.ResponseUri?.ToString();
-            this.Data["ResponseTime"] = GetHeader(response, "X-PRO-Response-Time");
+            this.Data["ResponseTime"] = response.GetHeader("X-PRO-Response-Time");
             this.Data["ResponseContentType"] = response.ContentType;
             Match match = Regex.Match(response.StatusDescription ?? string.Empty, @".*EventId\:?\s+\((?<EventId>\d+)\).*");
             {
@@ -64,6 +64,11 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la información de los datos incluidos en la respuesta generada por el servicio Aspen.
         /// </summary>
         public Dictionary<string, object> Content { get; private set; }
+
+        /// <summary>
+        /// Obtiene el enlace de la traza de seguimiento de la solicitud.
+        /// </summary>
+        public string DumpLink { get; private set; }
 
         /// <summary>
         /// Obtiene el identificador del evento emitido para el error por el servicio Aspen.
@@ -94,22 +99,5 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la descripción del estado HTTP devuelto por el servicio Aspen.
         /// </summary>
         public string StatusDescription { get; private set; }
-
-        /// <summary>
-        /// Obtiene el valor de una cabecera de la respuesta.
-        /// </summary>
-        /// <param name="response">Instancia con la información de la respuesta.</param>
-        /// <param name="name">Nombre de la cabecera a buscar.</param>
-        /// <param name="comparisonType">Especifica cómo se compararán las cadenas.</param>
-        /// <returns>Valor de la cabecera si se encuentra o <see langword="null" /> si no se encuentra la cabecera en <paramref name="name" />.</returns>
-        private static string GetHeader(
-            IRestResponse response,
-            string name,
-            StringComparison comparisonType = StringComparison.OrdinalIgnoreCase)
-        {
-            return response
-                   .Headers
-                   .SingleOrDefault(h => h.Name.Equals(name, comparisonType))?.Value?.ToString();
-        }
     }
 }

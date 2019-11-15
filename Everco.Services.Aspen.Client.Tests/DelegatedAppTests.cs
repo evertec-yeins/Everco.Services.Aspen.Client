@@ -20,15 +20,6 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class DelegatedAppTests
     {
         /// <summary>
-        /// Obtiene la instancia de un cliente para una aplicación con alcance de delegada.
-        /// </summary>
-        private static IDelegatedApp Client => DelegatedApp.Initialize()
-                                                    .RoutingTo(EnvironmentEndpointProvider.Default)
-                                                    .WithIdentity(DelegatedAppIdentity.Default)
-                                                    .Authenticate(UserIdentity.Default)
-                                                    .GetClient();
-
-        /// <summary>
         /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
         /// </summary>
         [SetUp]
@@ -38,14 +29,14 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor almacenado en memoria.
         /// </summary>
-        /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
-        private static IDelegatedApp AuthenticateNoCache() =>
+        /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
+        private static IDelegatedApp GetDelegatedClient() =>
             DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(DelegatedAppIdentity.Default)
-                .AuthenticateNoCache(UserIdentity.Default)
+                .WithIdentity(DelegatedAppIdentity.Master)
+                .AuthenticateNoCache(UserIdentity.Master)
                 .GetClient();
     }
 }

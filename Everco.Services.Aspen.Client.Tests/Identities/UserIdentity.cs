@@ -18,7 +18,12 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static UserIdentity @default = null;
+        private static IUserIdentity assistantIdentity = null;
+
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
+        private static IUserIdentity masterIdentity = null;
 
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="UserIdentity" />.
@@ -47,9 +52,18 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         /// <summary>
-        /// Obtiene la instancia predeterminada.
+        /// Obtiene la identidad de un usuario para fines de comparación.
         /// </summary>
-        public static UserIdentity Default => @default ?? (@default = new UserIdentity());
+        public static IUserIdentity Helper =>
+            assistantIdentity ?? (assistantIdentity = new UserIdentity(
+                                      "CC",
+                                      "79483129",
+                                      "colombia"));
+
+        /// <summary>
+        /// Obtiene la identidad de un usuario para la autenticación de las pruebas automatizadas.
+        /// </summary>
+        public static IUserIdentity Master => masterIdentity ?? (masterIdentity = new UserIdentity());
 
         /// <summary>
         /// Obtiene o establece la información del dispositivo asociado al usuario que intenta autenticar la solicitud.

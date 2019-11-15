@@ -24,7 +24,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetDocTypesWorks()
         {
-            IList<DocTypeInfo> docTypes = Client.Settings.GetDocTypes();
+            IList<DocTypeInfo> docTypes = GetDelegatedClient().Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
         }
 
@@ -35,7 +35,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetPaymentTypesWorks()
         {
-            IList<PaymentTypeInfo> paymentTypes = Client.Settings.GetPaymentTypes();
+            IList<PaymentTypeInfo> paymentTypes = GetDelegatedClient().Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
         }
 
@@ -46,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTopUpValuesWorks()
         {
-            IList<TopUpInfo> topUpValues = Client.Settings.GetTopUpValues();
+            IList<TopUpInfo> topUpValues = GetDelegatedClient().Settings.GetTopUpValues();
             CollectionAssert.IsNotEmpty(topUpValues);
         }
 
@@ -57,7 +57,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTranTypesWorks()
         {
-            IList<TranTypeInfo> tranTypes = Client.Settings.GetTranTypes();
+            IList<TranTypeInfo> tranTypes = GetDelegatedClient().Settings.GetTranTypes();
             CollectionAssert.IsNotEmpty(tranTypes);
         }
 
@@ -68,7 +68,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetAppMenuItemsWorks()
         {
-            IList<MenuItemInfo> menuItems = Client.Settings.GetMenu();
+            IList<MenuItemInfo> menuItems = GetDelegatedClient().Settings.GetMenu();
             CollectionAssert.IsNotEmpty(menuItems);
         }
 
@@ -79,7 +79,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetMiscellaneousSettingsWorks()
         {
-            MiscellaneousSettings miscellaneous = Client.Settings.GetMiscellaneousSettings();
+            MiscellaneousSettings miscellaneous = GetDelegatedClient().Settings.GetMiscellaneousSettings();
             CollectionAssert.IsNotEmpty(miscellaneous);
         }
     }

@@ -30,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingApiKeyHeaderWhenAppSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("20002"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
@@ -53,7 +53,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 ServiceLocator.Instance.RegisterHeadersManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("20002"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
@@ -68,7 +68,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingPayloadHeaderWhenAppSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("20002"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
@@ -91,7 +91,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager headerBehavior in payloadHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("20002"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
@@ -99,15 +99,15 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Una solicitud de autenticación con una carga útil inválida no funciona.
+        /// Una solicitud de autenticación con el formato inválido (se espera un JWT) en la cabecera de la carga útil genera una respuesta inválida.
         /// </summary>
         [Test]
         [Category("Signin.Headers.Payload")]
-        public void InvalidPayloadSignatureWhenAppSigninRequestThrows()
+        public void InvalidFormatPayloadWhenAppSigninRequestThrows()
         {
-            IHeadersManager invalidSignatureBehavior = InvalidPayloadHeader.WithHeaderBehavior(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr");
-            ServiceLocator.Instance.RegisterHeadersManager(invalidSignatureBehavior);
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            IHeadersManager invalidPayloadHeaderBehavior = InvalidPayloadHeader.WithHeaderBehavior(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr");
+            ServiceLocator.Instance.RegisterHeadersManager(invalidPayloadHeaderBehavior);
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("20007"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
@@ -121,7 +121,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingNonceWhenAppSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidNoncePayloadClaim.AvoidingClaim());
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
@@ -144,7 +144,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
@@ -167,7 +167,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Nonce' debe coincidir con el patrón", exception.Message);
@@ -185,14 +185,14 @@ namespace Everco.Services.Aspen.Client.Tests
             ServiceLocator.Instance.RegisterNonceGenerator(singleUseNonceGenerator);
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
-            IAutonomousApp client = AuthenticateNoCache();
+            IAutonomousApp client = GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
 
             // No se podrá autenticar la aplicación, cuando use el mismo nonce por segunda vez.
             Assert.AreEqual(ServiceLocator.Instance.NonceGenerator.GetNonce(), singleUseNonceGenerator.GetNonce());
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Nonce ya procesado para su aplicación", exception.Message);
@@ -206,7 +206,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingEpochWhenAppSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidEpochPayloadClaim.AvoidingClaim());
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
@@ -229,7 +229,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
@@ -255,7 +255,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("15850"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número.", exception.Message);
@@ -271,7 +271,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(-randomDays));
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
@@ -286,7 +286,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(randomDays));
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
@@ -301,7 +301,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             double negativeSeconds = -DateTimeOffset.Now.ToUnixTimeSeconds();
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(negativeSeconds));
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15850"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número.", exception.Message);
@@ -315,7 +315,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void EpochZeroWhenAppSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(0));
-            AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+            AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
@@ -326,10 +326,10 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         [Test]
         [Category("Signin.Headers.ApiVersion")]
-        public void MissingApiVersionHeaderWhenAppSigninRequestThrows()
+        public void MissingApiVersionHeaderWhenAppSigninRequestWorks()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
-            IAutonomousApp client = AuthenticateNoCache();
+            IAutonomousApp client = GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
@@ -352,7 +352,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager headerBehavior in apiVersionHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("99001"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
@@ -379,7 +379,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 ServiceLocator.Instance.RegisterHeadersManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("99001"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("no es un formato válido para el encabezado 'X-PRO-Api-Version'", exception.Message);
@@ -404,7 +404,7 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IHeadersManager behavior in headerBehaviors)
             {
                 ServiceLocator.Instance.RegisterHeadersManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => AuthenticateNoCache());
+                AspenException exception = Assert.Throws<AspenException>(() => GetAutonomousClient());
                 Assert.That(exception.EventId, Is.EqualTo("99005"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("no es un valor admitido para el encabezado personalizado 'X-PRO-Api-Version'", exception.Message);

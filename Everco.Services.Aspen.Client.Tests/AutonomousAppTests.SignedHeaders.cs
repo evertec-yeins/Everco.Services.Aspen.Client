@@ -25,23 +25,124 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class AutonomousAppTests
     {
         /// <summary>
-        /// Una operación que requiere firma cuando falta el nonce en la carga útil de la solicitud no funciona.
+        /// Una solicitud a una operación que requiere firma cuando falta la cabecera del ApiKey genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Signed.Headers.ApiKey")]
+        public void MissingApiKeyHeaderWhenAppSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("20002"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
+        }
+
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando la cabecera del ApiKey es nula o vacía genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Signed.Headers.ApiKey")]
+        public void NullOrEmptyApiKeyHeaderWhenAppSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
+                                                         {
+                                                             InvalidApiKeyHeader.WithHeaderBehavior(() => null),
+                                                             InvalidApiKeyHeader.WithHeaderBehavior(() => string.Empty),
+                                                             InvalidApiKeyHeader.WithHeaderBehavior(() => "      ")
+                                                         };
+
+            foreach (IHeadersManager behavior in headerBehaviors)
+            {
+                ServiceLocator.Instance.RegisterHeadersManager(behavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("20002"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Una solicitud de autenticación sin el encabezado de la carga útil no funciona.
+        /// </summary>
+        [Test]
+        [Category("Signed.Headers.Payload")]
+        public void MissingPayloadHeaderWhenUserSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("20002"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
+        }
+
+        /// <summary>
+        /// Una solicitud de autenticación con el encabezado de la carga útil nula o vacía no funciona.
+        /// </summary>
+        [Test]
+        [Category("Signed.Headers.Payload")]
+        public void NullOrEmptyPayloadHeaderWhenUserSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            IList<IHeadersManager> payloadHeaderBehaviors = new List<IHeadersManager>()
+            {
+                InvalidPayloadHeader.WithHeaderBehavior(() => null),
+                InvalidPayloadHeader.WithHeaderBehavior(() => string.Empty),
+                InvalidPayloadHeader.WithHeaderBehavior(() => "     ")
+            };
+
+            foreach (IHeadersManager headerBehavior in payloadHeaderBehaviors)
+            {
+                ServiceLocator.Instance.RegisterHeadersManager(headerBehavior);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+                Assert.That(exception.EventId, Is.EqualTo("20002"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("Se requiere la cabecera personalizada 'X-PRO-Auth-Payload'", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Una solicitud de autenticación con el formato inválido (se espera un JWT) en la cabecera de la carga útil genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Signed.Headers.Payload")]
+        public void InvalidFormatPayloadWhenUserSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            IHeadersManager invalidPayloadHeaderBehavior = InvalidPayloadHeader.WithHeaderBehavior(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr");
+            ServiceLocator.Instance.RegisterHeadersManager(invalidPayloadHeaderBehavior);
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("20007"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido", exception.Message);
+        }
+
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando falta el nonce en la carga útil de la solicitud no funciona.
         /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Nonce")]
-        public void MissingNonceSignedRequestThrows()
+        public void MissingNonceSignedRequestWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidNoncePayloadClaim.AvoidingClaim());
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un nonce como nulo o vacío en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Nonce")]
-        public void NullOrEmptyNonceThrows()
+        public void NullOrEmptyNonceWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidNoncePayloadClaim.WithClaimBehavior(() => null),
@@ -52,17 +153,21 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Nonce' no puede ser nulo ni vacío", exception.Message);
             }
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un nonce con formato inválido en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Nonce")]
-        public void InvalidNonceFormatThrows()
+        public void InvalidFormatNonceWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
             {
                 InvalidNoncePayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
@@ -72,44 +177,58 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Nonce' debe coincidir con el patrón", exception.Message);
             }
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un nonce que ya fue utilizado en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Nonce")]
-        public void NonceAlreadyProcessedThrows()
+        public void NonceAlreadyProcessedWhenSignedRequestThrows()
         {
+            // Autenticación de la aplicación.
+            IAutonomousApp client = GetAutonomousClient();
+
             // Se usa una operación luego de la autenticación con un nuevo nonce y debe funcionar.
             ServiceLocator.Instance.RegisterNonceGenerator(new SingleUseNonceGenerator());
-            IList<DocTypeInfo> docTypes = Client.Settings.GetDocTypes();
+            IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
 
             // Se una nuevamente el mismo nonce y debe fallar ya que se está reutilizando.
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Nonce ya procesado para su aplicación", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando falta el epoch en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void MissingEpochThrows()
+        public void MissingEpochWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidEpochPayloadClaim.AvoidingClaim());
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch como nulo o vacío en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void NullOrEmptyEpochThrows()
+        public void NullOrEmptyEpochWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidEpochPayloadClaim.WithClaimBehavior(() => null),
@@ -120,17 +239,21 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("'Epoch' no puede ser nulo ni vacío", exception.Message);
             }
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch con formato inválido en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void InvalidEpochFormatThrows()
+        public void InvalidFormatEpochWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidEpochPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
@@ -141,71 +264,84 @@ namespace Everco.Services.Aspen.Client.Tests
             foreach (IPayloadClaimsManager behavior in payloadHeaderBehaviors)
             {
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
-                AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+                AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15850"));
                 Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
                 StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número", exception.Message);
             }
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch que ya expiró en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void EpochExpiredThrows()
+        public void EpochExpiredWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(-randomDays));
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch muy adelante en el futuro en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void EpochExceededThrows()
+        public void EpochExceededWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(randomDays));
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch negativo en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void EpochNegativeThrows()
+        public void EpochNegativeWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             double negativeSeconds = -DateTimeOffset.Now.ToUnixTimeSeconds();
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(negativeSeconds));
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15850"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Formato de Epoch no es valido. Debe ser un número.", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un epoch igual a cero en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Epoch")]
-        public void EpochZeroThrows()
+        public void EpochZeroWhenSignedRequestThrows()
         {
+            IAutonomousApp client = GetAutonomousClient();
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(0));
-            AspenException exception = Assert.Throws<AspenException>(() => Client.Settings.GetDocTypes());
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.RequestedRangeNotSatisfiable));
             StringAssert.IsMatch("Epoch está fuera de rango admitido", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando falta el token de autenticación en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Token")]
-        public void MissingAuthTokenThrows()
+        public void MissingTokenWhenSignedRequestThrows()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate()
-                .GetClient();
-
-            // Se intenta usar una operación que requiere el token de autenticación.
+            IAutonomousApp client = GetAutonomousClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidTokenPayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -213,26 +349,23 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("'Token' no puede ser nulo ni vacío", exception.Message);
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando el token de autenticación es nulo o vacío en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Token")]
-        public void NullOrEmptyAuthTokenThrows()
+        public void NullOrEmptyTokenWhenSignedRequestThrows()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate()
-                .GetClient();
-
-            IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
+            IAutonomousApp client = GetAutonomousClient();
+            IList<IPayloadClaimsManager> tokenClaimBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidTokenPayloadClaim.WithClaimBehavior(() => null),
                 InvalidTokenPayloadClaim.WithClaimBehavior(() => string.Empty),
                 InvalidTokenPayloadClaim.WithClaimBehavior(() => "    ")
             };
 
-            foreach (IPayloadClaimsManager behavior in payloadBehaviors)
+            foreach (IPayloadClaimsManager behavior in tokenClaimBehaviors)
             {
-                // Se intenta usar una operación que requiere el token de autenticación.
                 ServiceLocator.Instance.RegisterPayloadClaimsManager(behavior);
                 AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
                 Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -241,18 +374,16 @@ namespace Everco.Services.Aspen.Client.Tests
             }
         }
 
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma cuando se establece un token de autenticación con formato inválido en la carga útil no funciona.
+        /// </summary>
         [Test]
         [Category("Signed.Headers.Payload.Token")]
-        public void InvalidAuthTokenFormatThrows()
+        public void InvalidFormatTokenWhenSignedRequestThrows()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Default)
-                .Authenticate()
-                .GetClient();
-
-            // Se intenta usar una operación que requiere el token de autenticación.
-            ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidTokenPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"));
+            IAutonomousApp client = GetAutonomousClient();
+            IPayloadClaimsManager invalidTokenClaimBehavior = InvalidTokenPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE");
+            ServiceLocator.Instance.RegisterPayloadClaimsManager(invalidTokenClaimBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20007"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));

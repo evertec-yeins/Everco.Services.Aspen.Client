@@ -20,15 +20,6 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class AutonomousAppTests
     {
         /// <summary>
-        /// Obtiene la instancia de un cliente para una aplicación con alcance de delegada.
-        /// </summary>
-        private static IAutonomousApp Client => AutonomousApp.Initialize()
-            .RoutingTo(EnvironmentEndpointProvider.Default)
-            .WithIdentity(AutonomousAppIdentity.Default)
-            .Authenticate()
-            .GetClient();
-
-        /// <summary>
         /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
         /// </summary>
         [SetUp]
@@ -38,13 +29,13 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// Obtiene un cliente para la aplicación autónoma de pruebas a partir de la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
-        private static IAutonomousApp AuthenticateNoCache() =>
+        private static IAutonomousApp GetAutonomousClient() =>
             AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Default)
+                .WithIdentity(AutonomousAppIdentity.Master)
                 .AuthenticateNoCache()
                 .GetClient();
     }
