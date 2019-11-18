@@ -40,6 +40,23 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
+        /// Una solicitud a una operación que requiere firma si el secreto de la aplicación no es válido se genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Signed")]
+        public void InvalidAppCredentialWhenAppSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            string invalidApiSecret = Guid.NewGuid().ToString();
+            IHeadersManager invalidAppSecretBehavior = InvalidPayloadHeader.WithCustomAppSecret(invalidApiSecret);
+            ServiceLocator.Instance.RegisterHeadersManager(invalidAppSecretBehavior);
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("20007"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido. Invalid signature. ¿Está utilizando las credenciales proporcionadas?", exception.Message);
+        }
+
+        /// <summary>
         /// Una solicitud a una operación que requiere firma cuando la aplicación fue deshabilitada genera una respuesta inválida.
         /// </summary>
         [Test]
@@ -109,16 +126,16 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Se produce una excepción de autenticación cuando se usa un token de autenticación emitido por otra aplicación.
+        /// Se produce una excepción de autenticación cuando se usa token de autenticación emitido para la aplicación A en la firma de la aplicación B.
         /// </summary>
         [Test]
         [Category("Signed")]
-        public void MismatchSignatureWhenAppSignedRequestThrows()
+        public void MismatchTokenBetweenAppsWhenAppSignedRequestThrows()
         {
-            IAppIdentity appMasterIdentity = AutonomousAppIdentity.Master;
+            IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
             IAutonomousApp clientAppMaster = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(appMasterIdentity)
+                .WithIdentity(appIdentityMaster)
                 .AuthenticateNoCache()
                 .GetClient();
 
@@ -126,10 +143,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken, Is.Not.Null);
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
-            IAppIdentity appHelperIdentity = AutonomousAppIdentity.Helper;
+            IAppIdentity appIdentityHelper = AutonomousAppIdentity.Helper;
             IAutonomousApp clientAppHelper = AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(appHelperIdentity)
+                .WithIdentity(appIdentityHelper)
                 .AuthenticateNoCache()
                 .GetClient();
 
@@ -140,6 +157,22 @@ namespace Everco.Services.Aspen.Client.Tests
             IPayloadClaimsManager mismatchTokenClaimBehavior = InvalidTokenPayloadClaim.WithClaimBehavior(() => clientAppHelper.AuthToken.Token);
             ServiceLocator.Instance.RegisterPayloadClaimsManager(mismatchTokenClaimBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => clientAppMaster.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("15846"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
+            StringAssert.IsMatch("No coinciden los datos recibidos del token vs los valores esperados. ¿Se modificaron los valores en tránsito o está utilizando el ApiKey en otra aplicación?", exception.Message);
+        }
+
+        /// <summary>
+        /// Se produce una excepción de autenticación cuando no coincide el token emitido por un usuario vs el token enviado en la firma.
+        /// </summary>
+        [Test]
+        [Category("Signed")]
+        public void MismatchTokenSignatureWhenAppSignedRequestThrows()
+        {
+            IAutonomousApp client = GetAutonomousClient();
+            IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
+            SqlDataContext.EnsureMismatchAppAuthToken(appIdentityMaster.ApiKey);
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15846"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
             StringAssert.IsMatch("No coinciden los datos recibidos del token vs los valores esperados. ¿Se modificaron los valores en tránsito o está utilizando el ApiKey en otra aplicación?", exception.Message);

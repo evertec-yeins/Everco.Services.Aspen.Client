@@ -124,7 +124,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
             UserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
-            SqlDataContext.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
+            SqlDataContext.EnsureUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
@@ -157,7 +157,12 @@ namespace Everco.Services.Aspen.Client.Tests
                                                              { "Secret", password },
                                                              { "SecretFormat", "InvalidTypeName" }
                                                          };
-            SqlDataContext.AddUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber, appIdentity.ApiKey, userProfile);
+            SqlDataContext.EnsureUserAndProfileInfo(
+                tempUserIdentity.DocType,
+                tempUserIdentity.DocNumber,
+                appIdentity.ApiKey,
+                userProfile);
+
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()

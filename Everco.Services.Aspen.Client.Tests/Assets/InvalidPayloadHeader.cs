@@ -8,7 +8,6 @@
 namespace Everco.Services.Aspen.Client.Tests.Assets
 {
     using System;
-    using System.Collections.Generic;
     using Auth;
     using Everco.Services.Aspen.Client.Providers;
     using JWT;
@@ -19,6 +18,11 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// </summary>
     internal class InvalidPayloadHeader : InvalidHeadersManager
     {
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
+        private readonly string customAppSecret = null;
+
         /// <summary>
         /// Impide que se cree una instancia predeterminada de la clase <see cref="InvalidPayloadHeader" />.
         /// </summary>
@@ -35,10 +39,26 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         }
 
         /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="InvalidHeadersManager"/>.
+        /// </summary>
+        /// <param name="customAppSecret">Un secreto personalizado para la aplicación.</param>
+        private InvalidPayloadHeader(string customAppSecret)
+        {
+            this.customAppSecret = customAppSecret;
+        }
+
+        /// <summary>
         /// Crea una instancia de <see cref="IHeadersManager"/> donde se evita agregar el encabezado personalizado.
         /// </summary>
         /// <returns>Instancia de <see cref="IHeadersManager"/> con el comportamiento de personalizado.</returns>
         public static IHeadersManager AvoidingHeader() => new InvalidPayloadHeader();
+
+        /// <summary>
+        /// Crea una instancia de <see cref="IHeadersManager"/> con un comportamiento de personalizado para el encabezado.
+        /// </summary>
+        /// <param name="customAppSecret">Un secreto personalizado para la aplicación.</param>
+        /// <returns>Instancia de <see cref="IHeadersManager"/> con el comportamiento de personalizado.</returns>
+        public static IHeadersManager WithCustomAppSecret(string customAppSecret) => new InvalidPayloadHeader(customAppSecret);
 
         /// <summary>
         /// Crea una instancia de <see cref="IHeadersManager"/> con un comportamiento de personalizado para el encabezado.
@@ -60,6 +80,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             string apiSecret,
             string token)
         {
+            if (!string.IsNullOrEmpty(this.customAppSecret))
+            {
+                base.AddSignedPayloadHeader(request, jwtEncoder, this.customAppSecret, token);
+                return;
+            }
+
             this.AddPayloadHeader(request);
         }
 
@@ -78,6 +104,12 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             string token,
             string username)
         {
+            if (!string.IsNullOrEmpty(this.customAppSecret))
+            {
+                base.AddSignedPayloadHeader(request, jwtEncoder, this.customAppSecret, token, username);
+                return;
+            }
+
             this.AddPayloadHeader(request);
         }
 

@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using Assets;
     using Everco.Services.Aspen.Client.Auth;
@@ -37,6 +38,23 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.EventId, Is.EqualTo("20005"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("Identificador de ApiKey no válido para la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
+        }
+
+        /// <summary>
+        /// Una solicitud a una operación que requiere firma si el secreto de la aplicación no es válido se genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Signed")]
+        public void InvalidAppCredentialWhenAppSignedRequestThrows()
+        {
+            IDelegatedApp client = GetDelegatedClient();
+            string invalidApiSecret = Guid.NewGuid().ToString();
+            IHeadersManager invalidAppSecretBehavior = InvalidPayloadHeader.WithCustomAppSecret(invalidApiSecret);
+            ServiceLocator.Instance.RegisterHeadersManager(invalidAppSecretBehavior);
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
+            Assert.That(exception.EventId, Is.EqualTo("20007"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido. Invalid signature. ¿Está utilizando las credenciales proporcionadas?", exception.Message);
         }
 
         /// <summary>
@@ -161,7 +179,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         [Test]
         [Category("Signed")]
-        public void MismatchTokenSignatureBetweenUsersWhenUserSignedRequestThrows()
+        public void MismatchTokenBetweenUsersWhenUserSignedRequestThrows()
         {
             IAppIdentity commonAppIdentity = DelegatedAppIdentity.Master;
 
@@ -205,6 +223,11 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity commonUserIdentity = UserIdentity.Master;
             
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
+            SqlDataContext.EnsureUserAndProfileInfo(
+                commonUserIdentity.DocType,
+                commonUserIdentity.DocNumber,
+                appIdentityMaster.ApiKey);
+
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
@@ -216,6 +239,11 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
+            SqlDataContext.EnsureUserAndProfileInfo(
+                commonUserIdentity.DocType,
+                commonUserIdentity.DocNumber,
+                appIdentityHelper.ApiKey);
+
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
@@ -243,6 +271,10 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = UserIdentity.Master;
+            SqlDataContext.EnsureUserAndProfileInfo(
+                userIdentityMaster.DocType,
+                userIdentityMaster.DocNumber,
+                appIdentityMaster.ApiKey);
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
@@ -255,6 +287,10 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
             IUserIdentity userIdentityHelper = UserIdentity.Helper;
+            SqlDataContext.EnsureUserAndProfileInfo(
+                userIdentityHelper.DocType,
+                userIdentityHelper.DocNumber,
+                appIdentityHelper.ApiKey);
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
