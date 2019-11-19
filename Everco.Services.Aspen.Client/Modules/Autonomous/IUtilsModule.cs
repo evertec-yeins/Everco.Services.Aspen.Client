@@ -11,7 +11,7 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
     using Entities;
 
     /// <summary>
-    /// Define las operaciones soportadas apara acceder a entidades de información relacionadas con parametrización del sistema.
+    /// Define las operaciones para utilidades varias soportadas para una aplicación con alcance de autónoma.
     /// </summary>
     public interface IUtilsModule
     {

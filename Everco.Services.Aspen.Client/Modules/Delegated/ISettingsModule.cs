@@ -16,37 +16,37 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
     public interface ISettingsModule
     {
         /// <summary>
-        /// Obtiene la lista de tipos de documento soportados por el servicio Aspen.
+        /// Obtiene la lista de tipos de documento soportados para la aplicación.
         /// </summary>
         /// <returns>Lista de tipos de documento soportados.</returns>
         IList<DocTypeInfo> GetDocTypes();
 
         /// <summary>
-        /// Obtiene la lista de operadores de telefonía móvil soportados por el servicio Aspen.
+        /// Obtiene la lista de operadores de telefonía móvil soportados para la aplicación.
         /// </summary>
         /// <returns>Lista de operadores de telefonía soportados.</returns>
         IList<CarrierInfo> GetCarriers();
 
         /// <summary>
-        /// Obtiene la lista de los tipos de transacción para una aplicación.
+        /// Obtiene la lista de los tipos de transacción soportados para la aplicación.
         /// </summary>
         /// <returns>Lista de tipos de transacción soportados.</returns>
         IList<TranTypeInfo> GetTranTypes();
 
         /// <summary>
-        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta soportados para la aplicación.
         /// </summary>
         /// <returns>Lista de <see cref="PaymentTypeInfo"/> con los tipos de pago para la aplicación solicitante.</returns>
         IList<PaymentTypeInfo> GetPaymentTypes();
 
         /// <summary>
-        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// Obtiene los valores admitidos de recarga por operador soportados para la aplicación.
         /// </summary>
         /// <returns>Lista de <see cref="TopUpInfo"/> con los valores admitidos de recarga por operador para la aplicación solicitante.</returns>
         IList<TopUpInfo> GetTopUpValues();
 
         /// <summary>
-        /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
+        /// Obtiene la lista de opciones que representan el menú de la aplicación móvil.
         /// </summary>
         /// <returns>Lista de opciones de menú.</returns>
         IList<MenuItemInfo> GetMenu();

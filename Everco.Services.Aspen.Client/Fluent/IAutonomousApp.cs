@@ -25,15 +25,21 @@ namespace Everco.Services.Aspen.Client.Fluent
         IUtilsModule Utils { get; }
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
+        /// Envía al servicio una solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
         ISession<IAutonomousApp> Authenticate();
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
+        /// Envía al servicio una solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
         ISession<IAutonomousApp> AuthenticateNoCache();
+
+        /// <summary>
+        /// Envía una solicitud al servicio para actualizar el secreto de la aplicación. 
+        /// </summary>
+        /// <param name="newSecret">El nuevo secreto para la aplicación.</param>
+        void UpdateApiSecret(string newSecret);
     }
 }

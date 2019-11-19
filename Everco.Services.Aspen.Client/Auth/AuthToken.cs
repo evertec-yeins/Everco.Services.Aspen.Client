@@ -44,7 +44,7 @@ namespace Everco.Services.Aspen.Client.Auth
         /// </summary>
         [JsonProperty("jti")]
         public string Token { get; set; }
-        
+
         /// <summary>
         /// Obtiene el texto que se muestra en el depurador para la clase.
         /// </summary>

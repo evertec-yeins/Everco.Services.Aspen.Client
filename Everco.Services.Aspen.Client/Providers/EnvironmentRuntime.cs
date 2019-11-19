@@ -24,7 +24,7 @@ namespace Everco.Services.Aspen.Client.Providers
                 .DefaultIfNullOrEmpty(Environment.MachineName);
             this.EnvironmentName = environmentValue.Trim().ToUpper();
         }
-        
+
         /// <summary>
         /// Obtiene el nombre del entorno a partir del valor de la variable de entorno "ASPEN:ENVIRONMENT".
         /// </summary>
@@ -58,5 +58,5 @@ namespace Everco.Services.Aspen.Client.Providers
             return false;
 #pragma warning restore 162
         }
-    }    
+    }
 }

@@ -31,8 +31,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<CarrierInfo> GetCarriers()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Telcos}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.Carriers);
             return this.Execute<List<CarrierInfo>>(request);
         }
 
@@ -44,19 +43,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDocTypes()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.DocTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.DocTypes);
             return this.Execute<List<DocTypeInfo>>(request);
         }
-        
+
         /// <summary>
         /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
         /// </summary>
         /// <returns>Lista de opciones de menú.</returns>
         public IList<MenuItemInfo> GetMenu()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Menu}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.MenuItems);
             return this.Execute<List<MenuItemInfo>>(request);
         }
 
@@ -68,8 +65,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public MiscellaneousSettings GetMiscellaneousSettings()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.Miscellaneous}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.Miscellaneous);
             return this.Execute<MiscellaneousSettings>(request);
         }
 
@@ -81,21 +77,19 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<PaymentTypeInfo> GetPaymentTypes()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.PaymentTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.PaymentTypes);
             return this.Execute<List<PaymentTypeInfo>>(request);
         }
 
         /// <summary>
-        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
+        /// Obtiene los valores admitidos de recarga por operador para la aplicación solicitante
         /// </summary>
         /// <returns>
         /// Lista de <see cref="TopUpInfo" /> con los valores admitidos de recarga por operador para la aplicación solicitante.
         /// </returns>
         public IList<TopUpInfo> GetTopUpValues()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.TopUp}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.TopUp);
             return this.Execute<List<TopUpInfo>>(request);
         }
 
@@ -107,8 +101,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<TranTypeInfo> GetTranTypes()
         {
-            string resource = $"{Routes.DelegatedRoot}{Routes.Resources.TranTypes}";
-            IRestRequest request = new AspenRequest(resource, Method.GET);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.TranTypes);
             return this.Execute<List<TranTypeInfo>>(request);
         }
     }

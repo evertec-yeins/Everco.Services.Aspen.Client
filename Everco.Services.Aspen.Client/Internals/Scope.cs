@@ -10,7 +10,7 @@ namespace Everco.Services.Aspen.Client.Internals
     /// <summary>
     /// Define el acceso permitido para una aplicación.
     /// </summary>    
-    public enum Scope
+    internal enum Scope
     {
         /// <summary>
         /// La aplicación puede solicitar datos de cualquier tarjetahabiente.
@@ -20,6 +20,11 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <summary>
         /// La aplicación solo puede solicitar datos del tarjetahabiente para el que se emitió el token de autenticación.
         /// </summary>
-        Delegated
+        Delegated,
+
+        /// <summary>
+        /// El acceso está permitido para cualquiera que alcance el recurso.
+        /// </summary>
+        Anonymous
     }
 }

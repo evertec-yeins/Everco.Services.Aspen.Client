@@ -18,7 +18,7 @@ namespace Everco.Services.Aspen.Client.Internals
         BypassCache,
 
         /// <summary>
-        /// Establece que se utolice la cache si el recurso está disponible; de lo contrario, envía la solicitud y almacena en la cache el token de autenticación.
+        /// Establece que se utilice la cache si el recurso está disponible; de lo contrario, envía la solicitud y almacena en la cache el token de autenticación.
         /// </summary>
         CacheIfAvailable
     }

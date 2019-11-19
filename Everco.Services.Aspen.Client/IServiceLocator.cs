@@ -42,6 +42,16 @@ namespace Everco.Services.Aspen.Client
         INonceGenerator NonceGenerator { get; }
 
         /// <summary>
+        /// Obtiene la instancia del servicio que se utiliza para obtener los nombres que se utilizan para las reclamaciones usadas en la carga útil de una solicitud al servicio Aspen.
+        /// </summary>
+        IPayloadClaimElement PayloadClaimNames { get; }
+
+        /// <summary>
+        /// Obtiene la instancia del componente que se utiliza para agregar las reclamaciones en la carga útil requeridas por el servicio.
+        /// </summary>
+        IPayloadClaimsManager PayloadClaimsManager { get; }
+
+        /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio Aspen.
         /// </summary>
         IHeaderElement RequestHeaderNames { get; }
@@ -55,7 +65,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del proxy para la conexión con el servicio de Aspen.
         /// </summary>
         IWebProxy WebProxy { get; }
-        
+
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator"/> para la generación de valores Epoch.
         /// </summary>
@@ -67,7 +77,7 @@ namespace Everco.Services.Aspen.Client
         /// </summary>
         /// <param name="headersManager">Instancia que implementa <see cref="IHeadersManager"/>.</param>
         void RegisterHeadersManager(IHeadersManager headersManager);
-        
+
         /// <summary>
         /// Registra una instancia de <see cref="IJsonSerializer"/> que permite serializar valores en el Payload.
         /// </summary>
@@ -87,7 +97,19 @@ namespace Everco.Services.Aspen.Client
         void RegisterNonceGenerator(INonceGenerator nonceGenerator);
 
         /// <summary>
-        /// Registra una instancia de <see cref="IHeaderElement"/> para la generación de valores.
+        /// Registra una instancia de <see cref="IPayloadClaimElement"/> que define los nombres que se utilizan para las reclamaciones usadas en la carga útil de una solicitud al servicio Aspen.
+        /// </summary>
+        /// <param name="payloadClaimNames">Instancia que implementa <see cref="IPayloadClaimElement"/>.</param>
+        void RegisterPayloadClaimNames(IPayloadClaimElement payloadClaimNames);
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IPayloadClaimsManager"/> que permite agregar las reclamaciones requeridas a la carga útil de la solicitud.
+        /// </summary>
+        /// <param name="payloadClaimsManager">Instancia que implementa <see cref="IPayloadClaimsManager"/>.</param>
+        void RegisterPayloadClaimsManager(IPayloadClaimsManager payloadClaimsManager);
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IHeaderElement"/> que define los nombres que se utilizan en las cabeceras personalizadas de las solicitudes al servicio Aspen.
         /// </summary>
         /// <param name="requestHeaderNames">Instancia que implementa <see cref="IHeaderElement"/>.</param>
         void RegisterRequestHeaderNames(IHeaderElement requestHeaderNames);
@@ -99,7 +121,7 @@ namespace Everco.Services.Aspen.Client
         void RegisterWebProxy(IWebProxy webProxy);
 
         /// <summary>
-        /// Restablece esta instancia con los valores predeterminados.
+        /// Restablece esta instancia a los valores predeterminados.
         /// </summary>
         void Reset();
     }

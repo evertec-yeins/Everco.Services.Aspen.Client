@@ -15,11 +15,6 @@ namespace Everco.Services.Aspen.Client.Providers
     public class UnixEpochGenerator : IEpochGenerator
     {
         /// <summary>
-        /// Obtiene el nombre con el que se agrega esta información a la solicitud.
-        /// </summary>
-        public string Name => "Epoch";
-
-        /// <summary>
         /// Obtiene el número de segundos que han transcurrido desde 1970-01-01T00:00:00Z
         /// </summary>
         /// <returns>
