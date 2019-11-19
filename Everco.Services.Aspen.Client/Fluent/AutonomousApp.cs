@@ -113,6 +113,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         /// <param name="cache">La política para manejar el caché.</param>
         /// <returns>Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.</returns>
+        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
         private ISession<IAutonomousApp> Authenticate(CachePolicy cache)
         {
             if (cache == CachePolicy.CacheIfAvailable)

@@ -71,7 +71,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         public IDeviceInfo DeviceInfo { get; }
 
         /// <summary>
-        /// Obtiene  el número de documento asociado con el usuario que intenta autenticar la solicitud.
+        /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.
         /// </summary>
         public string DocNumber { get; }
 
