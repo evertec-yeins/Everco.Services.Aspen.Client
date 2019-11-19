@@ -55,6 +55,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del proxy para la conexión con el servicio de Aspen.
         /// </summary>
         IWebProxy WebProxy { get; }
+        
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator"/> para la generación de valores Epoch.
         /// </summary>
@@ -66,6 +67,7 @@ namespace Everco.Services.Aspen.Client
         /// </summary>
         /// <param name="headersManager">Instancia que implementa <see cref="IHeadersManager"/>.</param>
         void RegisterHeadersManager(IHeadersManager headersManager);
+        
         /// <summary>
         /// Registra una instancia de <see cref="IJsonSerializer"/> que permite serializar valores en el Payload.
         /// </summary>

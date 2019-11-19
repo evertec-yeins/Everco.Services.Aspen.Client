@@ -151,6 +151,7 @@ namespace Everco.Services.Aspen.Client.Providers
 
             this.AddPayloadHeader(request, jwtEncoder.Encode(payload, apiSecret));
         }
+        
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
         /// </summary>
@@ -185,6 +186,7 @@ namespace Everco.Services.Aspen.Client.Providers
 
             this.AddPayloadHeader(request, jwtEncoder.Encode(payload, apiSecret));
         }
+
         /// <summary>
         /// Agrega la cabecera con el payload requerido por el servicio Aspen.
         /// </summary>

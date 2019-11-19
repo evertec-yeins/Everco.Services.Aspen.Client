@@ -152,6 +152,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             return this.JwtDecoder.Decode(jwt, this.AppIdentity.ApiSecret, true);
         }
+        
         /// <summary>
         /// Inicializa la instancia del tipo <see cref="RestSharp.RestClient"/> que se utilza para enviar las solicitudes al servicio Aspen.
         /// </summary>
