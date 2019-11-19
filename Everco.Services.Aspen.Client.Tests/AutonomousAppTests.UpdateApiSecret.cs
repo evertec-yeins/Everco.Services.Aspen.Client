@@ -35,6 +35,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string currentApiSecret = appIdentity.ApiSecret;
             string newApiSecret = this.GetRandomSecret();
 
+            Assert.That(newApiSecret.Length, Is.GreaterThanOrEqualTo(128));
             Assert.DoesNotThrow(() => AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(apiKey, currentApiSecret)
