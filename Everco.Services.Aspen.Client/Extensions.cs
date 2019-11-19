@@ -12,7 +12,7 @@ namespace Everco.Services.Aspen.Client
     using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
-    using Internals;
+    using Everco.Services.Aspen.Client.Internals;
     using RestSharp;
 
     /// <summary>
@@ -48,7 +48,6 @@ namespace Everco.Services.Aspen.Client
         /// <param name="mapping">Campo en donde se busca la información de mapeo.</param>
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
         /// <returns>Instancia de KeyValuePair&lt;System.String, Method&gt; con los valores extraidos del campo.</returns>
-        /// <exception cref="InvalidOperationException">Missing EndPointMappingInfoAttribute for {mapping}</exception>
         public static KeyValuePair<string, Method> GetEndPointMappingInfo(this EndpointMapping mapping, Scope scope)
         {
             string keyName = $"GetEndPointMappingInfo.{scope}.{mapping}";

@@ -32,7 +32,7 @@ namespace Everco.Services.Aspen.Client.Internals
         private static readonly List<string> keys;
 
         /// <summary>
-        /// Inicializa la clase <see cref="CacheStore" />.
+        /// Inicializa los miembros estáticos de la clase <see cref="CacheStore"/>
         /// </summary>
         static CacheStore()
         {

@@ -6,6 +6,7 @@
 // <date>2019-01-02 04:56 PM</date>
 // ----------------------------------------------------------------------
 // ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace Everco.Services.Aspen.Client
 {
     using System;
