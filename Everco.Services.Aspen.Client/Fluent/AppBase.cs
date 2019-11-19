@@ -57,14 +57,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         private IJwtValidator validator;
 
         /// <summary>
+        /// Obtiene la información de la identidad de la aplicación.
+        /// </summary>
+        public IAppIdentity AppIdentity { get; internal set; }
+
+        /// <summary>
         /// Obtiene el token de autenticación emitido para la sesión.
         /// </summary>
         public IAuthToken AuthToken { get; internal set; }
-
-        /// <summary>
-        /// Obtiene la información de la identidad de la aplicación.
-        /// </summary>
-        protected IAppIdentity AppIdentity { get; private set; }
 
         /// <summary>
         /// Para uso interno.
@@ -106,17 +106,32 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <summary>
         /// Establece la Url base para las solicitudes al servicio Aspen.
         /// </summary>
-        /// <param name="baseUrl">La Url base para las solicitudes realizadas hacia al servicio Aspen. Ejemplo: <a>http://localhost/api</a></param>
+        /// <param name="url">La Url base para las solicitudes realizadas hacia al servicio Aspen. Ejemplo: <a>http://localhost/api</a></param>
         /// <param name="timeout">El tiempo de espera (en segundos) para las respuesta de las solicitudes al servicio. Valor predeterminado: 15 segundos.</param>
         /// <returns>Instancia de <see cref="IAppIdentity{TFluent}"/> que permite establecer los datos de conexión con el servicio.</returns>
-        public IAppIdentity<TFluent> RoutingTo(string baseUrl, int? timeout = null)
+        public IAppIdentity<TFluent> RoutingTo(string url, int? timeout = null)
         {
-            Throw.IfNullOrEmpty(nameof(baseUrl), baseUrl);
-            this.endpoint = new Uri(baseUrl.TrimEnd('/'), UriKind.Absolute);
+            Throw.IfNullOrEmpty(url, nameof(url));
+            this.endpoint = new Uri(url.TrimEnd('/'), UriKind.Absolute);
             int defaultTimeout = 15;
             int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
             this.timeout = TimeSpan.FromSeconds(waitForSeconds);
             return this;
+        }
+
+        /// <summary>
+        /// Establece la URL para las solicitudes al servicio ASPEN.
+        /// </summary>
+        /// <param name="url">La URL para las solicitudes hacia al API de ASPEN realizadas por esta instancia de cliente. Ejemplo: <a>http://localhost/api</a>.</param>
+        /// <param name="timeout">El tiempo de espera para las respuesta de las solicitudes al servicio o <c>null</c> para establecer el valor predeterminado (15 segundos)</param>
+        /// <returns>
+        /// Instancia de <see cref="T:Everco.Services.Aspen.Client.Fluent.IAppIdentity`1" /> que permite establecer los datos de conexión con el servicio.
+        /// </returns>
+        public IAppIdentity<TFluent> RoutingTo(Uri url, TimeSpan? timeout = null)
+        {
+            Throw.IfNull(nameof(url), nameof(url));
+            int? waitForSeconds = Convert.ToInt32(timeout?.TotalSeconds);
+            return this.RoutingTo(url.ToString(), waitForSeconds);
         }
 
         /// <summary>
@@ -160,12 +175,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         /// <param name="parameters">Parámetros de la solicitud.</param>
         /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
-        protected string GetBody(IEnumerable<Parameter> parameters)
+        protected Dictionary<string, object> GetBody(IEnumerable<Parameter> parameters)
         {
-            Parameter body = parameters.FirstOrDefault(item => item.Type == ParameterType.RequestBody);
-            return body != null
-                ? JsonConvert.SerializeObject(body.Value, Formatting.Indented)
-                : string.Empty;
+            return parameters
+                .Where(item => item.Type == ParameterType.GetOrPost | item.Type == ParameterType.RequestBody)
+                .ToDictionary(p => p.Name, p => p.Value);
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace Everco.Services.Aspen.Client.Providers
     public interface IEndpointProvider
     {
         /// <summary>
-        /// Obtiene la Url base para las solicitudes realizadas hacia el servicio Aspen.
+        /// Obtiene la URL base para las solicitudes hacia al API de ASPEN.
         /// </summary>
         string Url { get; }
 

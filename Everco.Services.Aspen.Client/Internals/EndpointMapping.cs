@@ -21,6 +21,12 @@ namespace Everco.Services.Aspen.Client.Internals
         Signin,
 
         /// <summary>
+        /// Operación de actualización del secreto de una aplicación.
+        /// </summary>
+        [EndPointMappingInfo("/auth/secret", Method.POST)]
+        ApiSecret,
+
+        /// <summary>
         /// Operación para cifrar una cadena de texto usando el algoritmo de cifrado del servicio.
         /// </summary>
         [EndPointMappingInfo("/utils/crypto", Method.POST)]

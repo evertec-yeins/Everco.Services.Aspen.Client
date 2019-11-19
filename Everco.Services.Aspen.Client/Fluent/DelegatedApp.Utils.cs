@@ -8,6 +8,8 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
+    using System.Net.Mime;
+
     using Entities;
     using Everco.Services.Aspen.Client.Auth;
     using Internals;
@@ -38,7 +40,10 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(value, "value");
             }
 
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.Encrypt);
+            IRestRequest request = new AspenRequest(
+                Scope.Anonymous,
+                EndpointMapping.Encrypt,
+                contentType: "application/x-www-form-urlencoded");
             request.AddParameter("Input", value);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             IRestResponse response = this.RestClient.Execute(request);
@@ -76,7 +81,10 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(userName, "userName");
             }
 
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.AppCrash);
+            IRestRequest request = new AspenRequest(
+                Scope.Anonymous,
+                EndpointMapping.AppCrash,
+                contentType: "application/x-www-form-urlencoded");
             request.AddParameter("ErrorReport", errorReport);
             request.AddParameter("Username", userName);
             IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();

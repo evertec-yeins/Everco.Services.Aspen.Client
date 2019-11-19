@@ -39,14 +39,17 @@ namespace Everco.Services.Aspen.Client.Fluent
                 Throw.IfNullOrEmpty(value, "value");
             }
 
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.Encrypt);
+            IRestRequest request = new AspenRequest(
+                Scope.Anonymous,
+                EndpointMapping.Encrypt,
+                contentType: "application/x-www-form-urlencoded");
             request.AddParameter("Input", value);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(this.GetHeaders(request.Parameters))}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {this.GetBody(request.Parameters).DefaultIfNullOrEmpty("NONSET")}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(this.GetBody(request.Parameters))}");
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");

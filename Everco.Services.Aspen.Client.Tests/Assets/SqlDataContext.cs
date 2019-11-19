@@ -14,11 +14,8 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using System.Data;
     using System.Data.SqlClient;
     using System.Diagnostics.CodeAnalysis;
-    using System.Dynamic;
     using System.Linq;
-
     using Microsoft.Extensions.Configuration;
-
     using Newtonsoft.Json;
 
     /// <summary>
@@ -45,93 +42,33 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         public static string ConnectionString { get; }
 
         /// <summary>
-        /// Crea un usuario en el sistema; si el usuario ya existe, se asegura que no esté bloqueado.
+        /// Verifica que el tipo de formato de secreto de la aplicación es de tipo encriptado.
         /// </summary>
-        /// <param name="docType">Tipo de documento del usuario.</param>
-        /// <param name="docNumber">Número de documento del usuario.</param>
-        public static void EnsureUserInfo(string docType, string docNumber)
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <returns><c>true</c> cuando el formato de secreto es encriptado; de lo contrario <c>false</c>.</returns>
+        public static bool AppSecretFormatIsEncrypted(string appKey)
         {
-            int userId = GetUserId(docType, docNumber);
-            if (userId > 0)
-            {
-                EnsureUserIsNotLocked(docType, docNumber);
-                return;
-            }
-
             using (SqlConnection connection = new SqlConnection(ConnectionString))
             {
                 connection.Open();
                 string commandText = @"
-INSERT INTO [dbo].[Users] (
-	[DocType],
-	[DocNumber],
-	[IsLockedOut],
-	[LastLoginDate],
-	[LastPasswordChangedDate],
-	[LastLockoutDate],
-	[FailedPasswordAttemptCount],
-	[FailedPasswordAttemptWindowStart])
-VALUES (@DocType, @DocNumber, 0, NULL, NULL, NULL, 0, NULL)
+SELECT
+    [AppId],
+	[SecretFormat]
+FROM [dbo].[Apps]
+WHERE [AppKey] = @AppKey
 ";
                 using (SqlCommand command = new SqlCommand(commandText, connection))
                 {
-                    command.Parameters.AddWithValue("DocType", docType);
-                    command.Parameters.AddWithValue("DocNumber", docNumber);
-                    command.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    using (SqlDataReader reader = command.ExecuteReader(CommandBehavior.CloseConnection))
+                    {
+                        reader.Read();
+                        int secretFormat = reader.HasRows ? reader.GetInt32("SecretFormat") : 0;
+                        return secretFormat == 1;
+                    }
                 }
             }
-        }
-
-        /// <summary>
-        /// Crea un usuario con un perfil predeterminado en el sistema; si el usuario ya existe, se asegura que no esté bloqueado y se sobreescriben los datos del perfil.
-        /// </summary>
-        /// <param name="docType">Tipo de documento del usuario.</param>
-        /// <param name="docNumber">Número de documento del usuario.</param>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        public static void EnsureUserAndProfileInfo(
-            string docType,
-            string docNumber,
-            string appKey)
-        {
-            EnsureUserInfo(docType, docNumber);
-            int userId = GetUserId(docType, docNumber);
-            int appId = GetAppId(appKey);
-            var pinNumberInfo = new
-                                    {
-                                        PinNumber = "141414",
-                                        PinFormat = "Clear",
-                                        DeviceId = $@"{Environment.UserDomainName}\{Environment.UserName}",
-                                        LastUpdateAt = DateTime.Now
-                                    };
-            Dictionary<string, string> profileProperties = new Dictionary<string, string>()
-                                                               {
-                                                                   { "LastName", "Maribel" },
-                                                                   { "FirstName", "Marquez Sosa" },
-                                                                   { "Secret", "colombia" },
-                                                                   { "SecretFormat", "Clear" },
-                                                                   { "Email", "daniel.montalvo@evertecinc.com" },
-                                                                   { "PinMetadata", JsonConvert.SerializeObject(pinNumberInfo, Formatting.None) }
-                                                               };
-            AddUserProfileProperties(userId, appId, profileProperties);
-        }
-
-        /// <summary>
-        /// Crea un usuario con un perfil predeterminado en el sistema; si el usuario ya existe, se asegura que no esté bloqueado y se sobreescriben los datos del perfil.
-        /// </summary>
-        /// <param name="docType">Tipo de documento del usuario.</param>
-        /// <param name="docNumber">Número de documento del usuario.</param>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
-        public static void EnsureUserAndProfileInfo(
-            string docType,
-            string docNumber,
-            string appKey,
-            IDictionary<string, string> profileProperties)
-        {
-            EnsureUserInfo(docType, docNumber);
-            int userId = GetUserId(docType, docNumber);
-            int appId = GetAppId(appKey);
-            AddUserProfileProperties(userId, appId, profileProperties);
         }
 
         /// <summary>
@@ -339,6 +276,96 @@ UPDATE [dbo].[AuthTokenUser]
                     command.Parameters.AddWithValue("UserId", userId);
                     command.Parameters.AddWithValue("DeviceId", deviceId);
                     command.Parameters.AddWithValue("Token", randomToken);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Crea un usuario con un perfil predeterminado en el sistema; si el usuario ya existe, se asegura que no esté bloqueado y se sobreescriben los datos del perfil.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public static void EnsureUserAndProfileInfo(
+            string docType,
+            string docNumber,
+            string appKey)
+        {
+            EnsureUserInfo(docType, docNumber);
+            int userId = GetUserId(docType, docNumber);
+            int appId = GetAppId(appKey);
+            var pinNumberInfo = new
+            {
+                PinNumber = "141414",
+                PinFormat = "Clear",
+                DeviceId = $@"{Environment.UserDomainName}\{Environment.UserName}",
+                LastUpdateAt = DateTime.Now
+            };
+            Dictionary<string, string> profileProperties = new Dictionary<string, string>()
+                                                               {
+                                                                   { "LastName", "Maribel" },
+                                                                   { "FirstName", "Marquez Sosa" },
+                                                                   { "Secret", "colombia" },
+                                                                   { "SecretFormat", "Clear" },
+                                                                   { "Email", "daniel.montalvo@evertecinc.com" },
+                                                                   { "PinMetadata", JsonConvert.SerializeObject(pinNumberInfo, Formatting.None) }
+                                                               };
+            AddUserProfileProperties(userId, appId, profileProperties);
+        }
+
+        /// <summary>
+        /// Crea un usuario con un perfil predeterminado en el sistema; si el usuario ya existe, se asegura que no esté bloqueado y se sobreescriben los datos del perfil.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
+        public static void EnsureUserAndProfileInfo(
+            string docType,
+            string docNumber,
+            string appKey,
+            IDictionary<string, string> profileProperties)
+        {
+            EnsureUserInfo(docType, docNumber);
+            int userId = GetUserId(docType, docNumber);
+            int appId = GetAppId(appKey);
+            AddUserProfileProperties(userId, appId, profileProperties);
+        }
+
+        /// <summary>
+        /// Crea un usuario en el sistema; si el usuario ya existe, se asegura que no esté bloqueado.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        public static void EnsureUserInfo(string docType, string docNumber)
+        {
+            int userId = GetUserId(docType, docNumber);
+            if (userId > 0)
+            {
+                EnsureUserIsNotLocked(docType, docNumber);
+                return;
+            }
+
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+INSERT INTO [dbo].[Users] (
+	[DocType],
+	[DocNumber],
+	[IsLockedOut],
+	[LastLoginDate],
+	[LastPasswordChangedDate],
+	[LastLockoutDate],
+	[FailedPasswordAttemptCount],
+	[FailedPasswordAttemptWindowStart])
+VALUES (@DocType, @DocNumber, 0, NULL, NULL, NULL, 0, NULL)
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("DocType", docType);
+                    command.Parameters.AddWithValue("DocNumber", docNumber);
                     command.ExecuteNonQuery();
                 }
             }
@@ -569,6 +596,32 @@ DELETE FROM [dbo].[Users]
                 using (SqlCommand command = new SqlCommand(commandText, connection))
                 {
                     command.Parameters.AddWithValue("UserId", userId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Restaura el secreto de una aplicación.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="apiSecret">El secreto en claro para la aplicación.</param>
+        public static void RestoreApiSecret(string appKey, string apiSecret)
+        {
+            int appId = GetAppId(appKey);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = @"
+UPDATE [dbo].[Apps]
+   SET [Secret] = @Secret,
+	   [SecretFormat] = 0
+ WHERE [AppId] = @AppId
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("Secret", apiSecret);
                     command.ExecuteNonQuery();
                 }
             }
