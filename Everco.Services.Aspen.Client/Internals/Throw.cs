@@ -173,6 +173,7 @@ namespace Everco.Services.Aspen.Client.Internals
                 throw new ArgumentException(Resources.EmptyCollectionMessage, argumentName);
             }
         }
+        
         /// <summary>
         /// Genera una excepción <exception cref="ArgumentOutOfRangeException"/> cuando el argumento no está dentro del rango inclusivo. 
         /// </summary>

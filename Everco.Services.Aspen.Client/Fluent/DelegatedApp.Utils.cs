@@ -64,6 +64,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(resource, Method.GET);
             return this.Execute<List<DocTypeInfo>>(request);
         }
+        
         /// <summary>
         /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
         /// </summary>

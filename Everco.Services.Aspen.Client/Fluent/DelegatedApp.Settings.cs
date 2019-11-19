@@ -48,6 +48,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(resource, Method.GET);
             return this.Execute<List<DocTypeInfo>>(request);
         }
+        
         /// <summary>
         /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
         /// </summary>

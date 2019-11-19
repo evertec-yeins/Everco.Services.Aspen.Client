@@ -69,6 +69,7 @@ namespace Everco.Services.Aspen.Client.Providers
             IRestRequest request, 
             IJwtEncoder jwtEncoder, 
             string apiSecret);
+        
         /// <summary>
         /// Agrega la cabecera con los datos de la carga útil necesarios para autenticar a un usuario en el servicio Aspen.
         /// </summary>

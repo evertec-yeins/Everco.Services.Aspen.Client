@@ -6,6 +6,7 @@
 // <date>2019-01-02 04:56 PM</date>
 // ----------------------------------------------------------------------
 // ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 namespace Everco.Services.Aspen.Client
 {
     using System;
@@ -94,6 +95,7 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la descripción del estado HTTP devuelto por el servicio Aspen.
         /// </summary>
         public string StatusDescription { get; private set; }
+        
         /// <summary>
         /// Obtiene el valor de una cabecera de la respuesta.
         /// </summary>

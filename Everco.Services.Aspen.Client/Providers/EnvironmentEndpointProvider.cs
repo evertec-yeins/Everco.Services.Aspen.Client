@@ -14,39 +14,36 @@ namespace Everco.Services.Aspen.Client.Providers
     /// </summary>
     public class EnvironmentEndpointProvider : IEndpointProvider
     {
-        #region Internal
-
         /// <summary>
-        /// Para uso interno;
+        /// Para uso interno.
         /// </summary>
         private const string EnvironmentName = "ASPEN:PUBLIC_SERVICE_URL";
 
         /// <summary>
-        /// Para uso interno;
+        /// Para uso interno.
         /// </summary>
         private const string NonSet = "NONSET";
 
         /// <summary>
-        /// Para uso interno;
+        /// Para uso interno.
         /// </summary>
         private static IEndpointProvider localEndpoint;
 
         /// <summary>
-        /// Para uso interno;
+        /// Para uso interno.
         /// </summary>
         private static IEndpointProvider publicEndpoint;
-
-        #endregion
 
         /// <summary>
         /// Impide que se cree una instancia predeterminada de la clase <see cref="EnvironmentEndpointProvider" />.
         /// </summary>
-        private EnvironmentEndpointProvider() : this($"{Environment.GetEnvironmentVariable("ASPEN:PUBLIC_SERVICE_URL")}/api", null)
+        private EnvironmentEndpointProvider()  
+            : this($"{Environment.GetEnvironmentVariable("ASPEN:PUBLIC_SERVICE_URL")}/api", null)
         {
         }
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="EnvironmentEndpointProvider"/>
+        /// Inicializa una nueva instancia de la clase <see cref="EnvironmentEndpointProvider"/>.
         /// </summary>
         /// <param name="baseUrl">La Url base del servicio.</param>
         /// <param name="timeout">El tiempo de espera (en segundos) para las respuesta de las solicitudes al servicio. Valor predeterminado: 15 segundos.</param>
