@@ -66,22 +66,22 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         public static IUserIdentity Master => masterIdentity ?? (masterIdentity = new UserIdentity());
 
         /// <summary>
-        /// Obtiene o establece la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
+        /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
         /// </summary>
         public IDeviceInfo DeviceInfo { get; }
 
         /// <summary>
-        /// Obtiene o establece el número de documento asociado con el usuario que intenta autenticar la solicitud.
+        /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.
         /// </summary>
         public string DocNumber { get; }
 
         /// <summary>
-        /// Obtiene o establece el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
+        /// Obtiene el tipo de documento asociado con el usuario que intenta autenticar la solicitud.
         /// </summary>
         public string DocType { get; }
 
         /// <summary>
-        /// Obtiene o establece la clave de acceso del usuario que intenta autenticar la solicitud.
+        /// Obtiene la clave de acceso del usuario que intenta autenticar la solicitud.
         /// </summary>
         public string Password { get; }
     }
