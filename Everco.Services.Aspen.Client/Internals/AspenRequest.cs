@@ -73,5 +73,19 @@ namespace Everco.Services.Aspen.Client.Internals
                 mappingInfo.GetEndPointMappingInfo(scope).Value)
         {
         }
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="AspenRequest"/>
+        /// </summary>
+        /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
+        /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
+        /// <param name="endpointParameters">The endpoint parameters.</param>
+        internal AspenRequest(Scope scope, EndpointMapping mappingInfo, EndpointParameters endpointParameters) : this(
+            new PlaceholderFormatter(
+                mappingInfo.GetEndPointMappingInfo(scope).Key,
+                endpointParameters).ToString(), 
+            mappingInfo.GetEndPointMappingInfo(scope).Value)
+        {
+        }
     }
 }

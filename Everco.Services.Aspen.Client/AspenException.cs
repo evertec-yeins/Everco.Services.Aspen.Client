@@ -33,11 +33,9 @@ namespace Everco.Services.Aspen.Client
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(response.Content) &
-                response.ContentType != null &&
-                !response.ContentType.Contains("text/html"))
+            if (response.ContentType != null && !response.ContentType.Contains("text/html"))
             {
-                this.Content = JsonConvert.DeserializeObject<Dictionary<string, object>>(response.Content);
+                this.Content = response.Content;
             }
 
             this.StatusCode = response.StatusCode;
@@ -66,7 +64,7 @@ namespace Everco.Services.Aspen.Client
         /// <summary>
         /// Obtiene la información de los datos incluidos en la respuesta generada por el servicio Aspen.
         /// </summary>
-        public Dictionary<string, object> Content { get; private set; }
+        public string Content { get; private set; }
 
         /// <summary>
         /// Obtiene el enlace de la traza de seguimiento de la solicitud.

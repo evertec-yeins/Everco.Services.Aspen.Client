@@ -84,6 +84,42 @@ namespace Everco.Services.Aspen.Client.Internals
         /// Operación para obtener los valores misceláneos de la aplicación.
         /// </summary>
         [EndPointMappingInfo("/resx/miscs", Method.GET)]
-        Miscellaneous
+        Miscellaneous,
+
+        /// <summary>
+        /// Operación para obtener las cuentas asociadas a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]", Method.GET)]
+        AccountsByUser,
+
+        /// <summary>
+        /// Operación para obtener las cuentas asociadas al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts", Method.GET)]
+        AccountsFromCurrentUser,
+
+        /// <summary>
+        /// Operación para obtener los saldos de una cuenta asociada a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]/@[AccountId]/balances", Method.GET)]
+        BalancesByUser,
+
+        /// <summary>
+        /// Operación para obtener los saldos de una cuenta asociada al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[AccountId]/balances", Method.GET)]
+        BalancesFromCurrentUser,
+
+        /// <summary>
+        /// Operación para obtener los movimientos de una cuenta asociada a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]/@[AccountId]/@[AccountTypeId]/statements", Method.GET)]
+        StatementsByUser,
+
+        /// <summary>
+        /// Operación para obtener los movimientos de una cuenta asociada al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[AccountId]/@[AccountTypeId]/statements", Method.GET)]
+        StatementsFromCurrentUser,
     }
 }

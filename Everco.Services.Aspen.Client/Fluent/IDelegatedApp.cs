@@ -26,6 +26,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         IUtilsModule Utils { get; }
 
         /// <summary>
+        /// Obtiene un objeto que permite acceder a la información relacionada con las consultas del sistema Aspen.
+        /// </summary>
+        IInquiriesModule Inquiries { get; }
+
+        /// <summary>
         /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación firmada con las credenciales de un usuario.
         /// </summary>
         /// <param name="docType">El tipo de documento del usuario que firma la solicitud de autenticación.</param>

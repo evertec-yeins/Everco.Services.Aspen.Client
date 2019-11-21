@@ -25,6 +25,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         IUtilsModule Utils { get; }
 
         /// <summary>
+        /// Obtiene un objeto que permite acceder a la información relacionada con las consultas del sistema Aspen.
+        /// </summary>
+        IInquiriesModule Inquiries { get; }
+
+        /// <summary>
         /// Envía al servicio una solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>

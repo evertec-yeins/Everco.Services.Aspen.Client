@@ -30,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void UserSigninRequestWorks()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);

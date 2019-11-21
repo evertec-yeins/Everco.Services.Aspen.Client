@@ -30,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void UnrecognizedApiKeyWhenAppSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             string unrecognizedApiKey = Guid.NewGuid().ToString();
             IHeadersManager apiKeyHeaderBehavior = InvalidApiKeyHeader.WithHeaderBehavior(() => unrecognizedApiKey);
             ServiceLocator.Instance.RegisterHeadersManager(apiKeyHeaderBehavior);
@@ -47,7 +47,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void InvalidAppCredentialWhenAppSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             string invalidApiSecret = Guid.NewGuid().ToString();
             IHeadersManager invalidAppSecretBehavior = InvalidPayloadHeader.WithCustomAppSecret(invalidApiSecret);
             ServiceLocator.Instance.RegisterHeadersManager(invalidAppSecretBehavior);
@@ -64,7 +64,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void MismatchDeviceIdWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IPayloadClaimsManager randomDeviceIdClaimBehavior = InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => $"MyRandomDevice-{new Random().Next(999999, 9999999)}");
             ServiceLocator.Instance.RegisterPayloadClaimsManager(randomDeviceIdClaimBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -80,7 +80,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void NotFoundUsernameWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             IPayloadClaimsManager randomUsernameClaimBehavior = InvalidUsernamePayloadClaim.WithClaimBehavior(() => $"{fixedDocType}-{randomDocNumber}");
@@ -98,7 +98,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void ApiKeyDisabledWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             SqlDataContext.DisableApp(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -115,7 +115,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void NotFoundValidTokenWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             UserAuthToken authToken = client.AuthToken as UserAuthToken;
             Assert.That(authToken, Is.Not.Null);
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
@@ -138,7 +138,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void TokenProvidedExpiredWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             UserAuthToken authToken = client.AuthToken as UserAuthToken;
             Assert.That(authToken, Is.Not.Null);
             Assert.That(authToken.DeviceId, Is.Not.Empty);
@@ -164,7 +164,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void AppRequiresChangeSecretWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -316,7 +316,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void MismatchUsernameWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IUserIdentity userIdentityHelper = UserIdentity.Helper;
             IPayloadClaimsManager mismatchUsernameClaimBehavior = InvalidUsernamePayloadClaim.WithClaimBehavior(() => $"{userIdentityHelper.DocType}-{userIdentityHelper.DocNumber}");
             ServiceLocator.Instance.RegisterPayloadClaimsManager(mismatchUsernameClaimBehavior);
@@ -333,7 +333,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void MismatchTokenWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = UserIdentity.Master;
             SqlDataContext.EnsureMismatchUserAuthToken(

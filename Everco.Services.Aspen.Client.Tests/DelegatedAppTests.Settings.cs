@@ -24,7 +24,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetDocTypesWorks()
         {
-            IList<DocTypeInfo> docTypes = GetDelegatedClient().Settings.GetDocTypes();
+            IList<DocTypeInfo> docTypes = this.GetDelegatedClient().Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
         }
 
@@ -35,7 +35,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetPaymentTypesWorks()
         {
-            IList<PaymentTypeInfo> paymentTypes = GetDelegatedClient().Settings.GetPaymentTypes();
+            IList<PaymentTypeInfo> paymentTypes = this.GetDelegatedClient().Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
         }
 
@@ -46,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTopUpValuesWorks()
         {
-            IList<TopUpInfo> topUpValues = GetDelegatedClient().Settings.GetTopUpValues();
+            IList<TopUpInfo> topUpValues = this.GetDelegatedClient().Settings.GetTopUpValues();
             CollectionAssert.IsNotEmpty(topUpValues);
         }
 
@@ -57,7 +57,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTranTypesWorks()
         {
-            IList<TranTypeInfo> tranTypes = GetDelegatedClient().Settings.GetTranTypes();
+            IList<TranTypeInfo> tranTypes = this.GetDelegatedClient().Settings.GetTranTypes();
             CollectionAssert.IsNotEmpty(tranTypes);
         }
 
@@ -68,7 +68,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetAppMenuItemsWorks()
         {
-            IList<MenuItemInfo> menuItems = GetDelegatedClient().Settings.GetMenu();
+            IList<MenuItemInfo> menuItems = this.GetDelegatedClient().Settings.GetMenu();
             CollectionAssert.IsNotEmpty(menuItems);
         }
 
@@ -79,7 +79,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetMiscellaneousSettingsWorks()
         {
-            MiscellaneousSettings miscellaneous = GetDelegatedClient().Settings.GetMiscellaneousSettings();
+            MiscellaneousSettings miscellaneous = this.GetDelegatedClient().Settings.GetMiscellaneousSettings();
             CollectionAssert.IsNotEmpty(miscellaneous);
         }
     }

@@ -26,7 +26,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Utils")]
         public void GetDefaultDocTypesWorks()
         {
-            IList<DocTypeInfo> defaultDocTypes = GetDelegatedClient().Utils.GetDefaultDocTypes();
+            IList<DocTypeInfo> defaultDocTypes = this.GetDelegatedClient().Utils.GetDefaultDocTypes();
             CollectionAssert.IsNotEmpty(defaultDocTypes);
         }
 
@@ -37,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Utils")]
         public void EncryptValueWorks()
         {
-            string encryptedValue = GetDelegatedClient().Utils.Encrypt("colombia");
+            string encryptedValue = this.GetDelegatedClient().Utils.Encrypt("colombia");
             Assert.IsNotEmpty(encryptedValue);
         }
 
@@ -56,7 +56,7 @@ namespace Everco.Services.Aspen.Client.Tests
             };
 
             string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.Indented);
-            Assert.DoesNotThrow(() => GetDelegatedClient().Utils.SaveAppCrash(errorReport, Environment.UserName));
+            Assert.DoesNotThrow(() => this.GetDelegatedClient().Utils.SaveAppCrash(errorReport, Environment.UserName));
         }
     }
 }
