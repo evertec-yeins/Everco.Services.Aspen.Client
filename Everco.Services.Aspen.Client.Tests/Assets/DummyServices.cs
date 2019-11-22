@@ -20,16 +20,10 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     public class DummyServices : IDisposable
     {
         /// <summary>
-        /// Los procesos que fueron iniciados por cada servicio de prueba.
-        /// </summary>
-        private readonly Dictionary<string, Process> linqProcessStarted = null;
-
-        /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="DummyServices" />.
         /// </summary>
         public DummyServices()
         {
-            this.linqProcessStarted = new Dictionary<string, Process>();
             this.DummyFilesPath = Path.Join(Directory.GetCurrentDirectory(), @"Assets\Dummies");
         }
 
@@ -43,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// </summary>
         public void Dispose()
         {
-            IEnumerable<Process> processes = this.linqProcessStarted.Select(pair => pair.Value);
+            Process[] processes = Process.GetProcessesByName("lprun");
             foreach (Process process in processes)
             {
                 process.Kill(true);
@@ -52,7 +46,6 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             }
 
             Directory.GetFiles(this.DummyFilesPath, "*.flag", SearchOption.TopDirectoryOnly).ToList().ForEach(File.Delete);
-            this.linqProcessStarted.Clear();
         }
 
         /// <summary>
@@ -63,7 +56,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         {
             foreach (FileInfo dummyFileInfo in this.GetDummyFiles())
             {
-                this.AddAndStartProcess(dummyFileInfo);
+                this.StartProcess(dummyFileInfo);
             }
 
             return this;
@@ -76,41 +69,8 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         public DummyServices StartBifrostService()
         {
             FileInfo dummyFileInfo = this.GetDummyFileInfo("RabbitMQ.Services.Bifrost.linq");
-            this.AddAndStartProcess(dummyFileInfo);
+            this.StartProcess(dummyFileInfo);
             return this;
-        }
-
-        /// <summary>
-        /// Inicia y agrega a la colección actual, un proceso a partir de la información del archivo de servicio ficticio.
-        /// </summary>
-        /// <param name="dummyFileInfo">La información del archivo ficticio.</param>
-        private void AddAndStartProcess(FileInfo dummyFileInfo)
-        {
-            string key = dummyFileInfo.Name;
-            if (this.linqProcessStarted.ContainsKey(key))
-            {
-                return;
-            }
-
-            ProcessStartInfo startInfo = new ProcessStartInfo("lprun.exe")
-                                             {
-                                                 WindowStyle = ProcessWindowStyle.Minimized,
-                                                 Arguments = dummyFileInfo.FullName
-                                             };
-
-            this.linqProcessStarted.Add(key, Process.Start(startInfo));
-
-            DateTime waitTime = DateTime.Now.AddSeconds(10);
-            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dummyFileInfo.FullName);
-            string flagFilePath = Path.Join(dummyFileInfo.Directory?.FullName, $"{fileNameWithoutExtension}.flag");
-            
-            do
-            {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
-                Console.WriteLine($@"[INFO] - [{DateTime.Now:HH:mm:ss}] Starting Dummy Service => {dummyFileInfo.Name}");
-            }
-            while (!File.Exists(flagFilePath) && waitTime > DateTime.Now);
-            Console.WriteLine($@"[INFO] - [{DateTime.Now:HH:mm:ss}] Started Dummy Service => {dummyFileInfo.Name}");
         }
 
         /// <summary>
@@ -128,6 +88,34 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         {
             return Directory.GetFiles(this.DummyFilesPath, "*.linq", SearchOption.TopDirectoryOnly)
                 .Select(path => new FileInfo(path));
+        }
+
+        /// <summary>
+        /// Inicia y agrega a la colección actual, un proceso a partir de la información del archivo de servicio ficticio.
+        /// </summary>
+        /// <param name="dummyFileInfo">La información del archivo ficticio.</param>
+        private void StartProcess(FileInfo dummyFileInfo)
+        {
+            string key = dummyFileInfo.Name;
+            ProcessStartInfo startInfo = new ProcessStartInfo("lprun.exe")
+                                             {
+                                                 WindowStyle = ProcessWindowStyle.Minimized,
+                                                 Arguments = dummyFileInfo.FullName
+                                             };
+            Process.Start(startInfo);
+
+            // Aquí se pretende dar una espera, hasta comprobar que el servicio realmente inició.
+            DateTime waitTime = DateTime.Now.AddSeconds(10);
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dummyFileInfo.FullName);
+            string flagFilePath = Path.Join(dummyFileInfo.Directory?.FullName, $"{fileNameWithoutExtension}.flag");
+            
+            do
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+                Console.WriteLine($@"[INFO] - [{DateTime.Now:HH:mm:ss}] Starting Dummy Service => {dummyFileInfo.Name}");
+            }
+            while (!File.Exists(flagFilePath) && waitTime > DateTime.Now);
+            Console.WriteLine($@"[INFO] - [{DateTime.Now:HH:mm:ss}] Started Dummy Service => {dummyFileInfo.Name}");
         }
     }
 }

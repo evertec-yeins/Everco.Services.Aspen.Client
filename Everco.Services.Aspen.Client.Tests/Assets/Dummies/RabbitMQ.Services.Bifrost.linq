@@ -34,7 +34,7 @@ void Main()
 		{
 			using (IModel channel = connection.CreateModel())
 			{
-				// El exchange ya existe, no se necesita declararlo.
+				// Nota: use esta línea para crear el exchange si aún no existe. No se necesita declararlo por segunda vez.
 				//channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
 				this.GetCardHolder(channel);
 				this.GetBalances(channel);
@@ -61,6 +61,159 @@ void Main()
 
 string Exchange => "easy_net_q_rpc";
 
+readonly List<CardHolder> CardHolders = new List<CardHolder>()
+{
+	new CardHolder()
+	{
+		PersonId = 120134,
+		DocType = "CC",
+		DocNumber = "52080323"
+	},
+	new CardHolder()
+	{
+		PersonId = 1244133,
+		DocType = "CC",
+		DocNumber = "79483129"
+	},
+	new CardHolder()
+	{
+		PersonId = 1376155,
+		DocType = "NIT",
+		DocNumber = "75717277"
+	},
+	new CardHolder()
+	{
+		PersonId = 1080,
+		DocType = "CE",
+		DocNumber = "203467"
+	},
+	new CardHolder()
+	{
+		PersonId = 844842,
+		DocType = "TI",
+		DocNumber = "94030704708"
+	},
+	new CardHolder()
+	{
+		PersonId = 339319,
+		DocType = "CC",
+		DocNumber = "52150900"
+	},
+	new CardHolder()
+	{
+		PersonId = 1222995,
+		DocType = "CC",
+		DocNumber = "3262308"
+	},
+	new CardHolder()
+	{
+		PersonId = 94837,
+		DocType = "CC",
+		DocNumber = "52582664"
+	},
+	new CardHolder()
+	{
+		PersonId = 94837,
+		DocType = "CC",
+		DocNumber = "52582664"
+	}
+};
+
+Dictionary<string, List<Account>> Accounts = new Dictionary<string, List<Account>>()
+{
+	{ 
+		"CC-52080323",
+		new List<Account>()
+		{
+			new Account()
+			{
+				CustomerId = 904,
+				CustomerTypeId = 1,
+				CustomerTypeName = "AFILIADO",
+				CustomerStatusId = 1,
+				CustomerStatusName = "CLIENTE TIENE TARJETA",
+				CardId = 84,
+				CardStatusId = null,
+				CardStatusName = "OK",
+				CardEnabled = true,
+				Pan = "6039597499604889",
+				AccountTypeId = "80",
+				AccountTypeName = "Monedero General",
+				AccountNumber = "603959749960488980"
+			},
+			new Account()
+			{
+				CustomerId = 904,
+				CustomerTypeId = 1,
+				CustomerTypeName = "AFILIADO",
+				CustomerStatusId = 1,
+				CustomerStatusName = "CLIENTE TIENE TARJETA",
+				CardId = 84,
+				CardStatusId = null,
+				CardStatusName = "OK",
+				CardEnabled = true,
+				Pan = "6039597499604889",
+				AccountTypeId = "81",
+				AccountTypeName = "Subsidio familiar",
+				AccountNumber = "603959749960488981"
+			},
+			new Account()
+			{
+				CustomerId = 904,
+				CustomerTypeId = 1,
+				CustomerTypeName = "AFILIADO",
+				CustomerStatusId = 1,
+				CustomerStatusName = "CLIENTE TIENE TARJETA",
+				CardId = 84,
+				CardStatusId = null,
+				CardStatusName = "OK",
+				CardEnabled = true,
+				Pan = "6039597499604889",
+				AccountTypeId = "82",
+				AccountTypeName = "Subsidio Educativo",
+				AccountNumber = "603959749960488982"
+			},
+			new Account()
+			{
+				CustomerId = 904,
+				CustomerTypeId = 1,
+				CustomerTypeName = "AFILIADO",
+				CustomerStatusId = 1,
+				CustomerStatusName = "CLIENTE TIENE TARJETA",
+				CardId = 84,
+				CardStatusId = null,
+				CardStatusName = "OK",
+				CardEnabled = true,
+				Pan = "6039597499604889",
+				AccountTypeId = "83",
+				AccountTypeName = "Bonos",
+				AccountNumber = "603959749960488983"
+			},
+			new Account()
+			{
+				CustomerId = 904,
+				CustomerTypeId = 1,
+				CustomerTypeName = "AFILIADO",
+				CustomerStatusId = 1,
+				CustomerStatusName = "CLIENTE TIENE TARJETA",
+				CardId = 84,
+				CardStatusId = null,
+				CardStatusName = "OK",
+				CardEnabled = true,
+				Pan = "6039597499604889",
+				AccountTypeId = "84",
+				AccountTypeName = "Viveres General",
+				AccountNumber = "603959749960488984"
+			}
+		}
+	}
+};
+
+Dictionary<string, List<Statement>> Statements = new Dictionary<string, List<Statement>>()
+{
+	{ "CC-52080323", Statement.GetRandomStatements() }
+};
+
 void GetCardHolder(IModel channel)
 {
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CardHolderRequest:Processa.RabbitMQ.Services.Bifrost";
@@ -69,28 +222,7 @@ void GetCardHolder(IModel channel)
 		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
-		
-		response.CardHolders = new List<CardHolder>()
-		{
-			new CardHolder()
-			{
-				Address = "Dummy Address",
-				CardLabel = "Dummy Card Label",
-				Creation = DateTime.Now,
-				PersonId = LongRandom(10000000, 10000000000000),
-				CityCode = "00",
-				CityName = "Dummy City Name",
-				Code = "00",
-				CustomerGroup = "Dummy Customer Group",
-				DocNumber = request.DocNumber,
-				DocType = request.DocType,
-				Email = "dummy@dummy.com.co",
-				FirstName = "Pedro",
-				LastName = "Pablo",
-				RegionName = "Dummy Region Name",
-				Telephone = (new Random()).Next(999999, 999999999).ToString()
-			}
-		};
+		response.CardHolders = CardHolders.Where(ch => ch.DocType == request.DocType & ch.DocNumber == request.DocNumber).ToList();
 
 		if (request.DocNumber.StartsWith("0"))
 		{
@@ -105,30 +237,15 @@ void GetBalances(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.BalanceRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (BalanceRequest request, BalanceResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
-		response.Accounts = new List<Account>()
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
 		{
-			new Account()
-			{
-				AccountNumber = (new Random()).Next(999999, 999999999).ToString().PadLeft(16, '0'),
-				AccountBalance = 100000000,
-				AccountTypeId = "80",
-				AccountTypeName = "Monedero General",
-				CardEnabled = true,
-				CardId = 14141414,
-				CardStatusId = "0",
-				CardStatusName = "Active",
-				CustomerId = LongRandom(10000000, 10000000000000),
-				CustomerStatusId = 0,
-				CustomerStatusName = "Dummy Customer Status",
-				CustomerTypeId = LongRandom(10000000, 10000000000000),
-				CustomerTypeName = "Dummy Customer Type",
-				Pan = (new Random()).Next(999999, 999999999).ToString().PadLeft(16, '0')
-			}
-		};
+			response.Accounts = accounts;
+		}
 
 		if (request.DocNumber.StartsWith("0"))
 		{
@@ -147,26 +264,11 @@ void GetMiniStatements(IModel channel)
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
-		response.Statements = new List<Statement>()
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Statements.TryGetValue(key, out List<Statement> statements))
 		{
-			new Statement()
-			{
-				CardAcceptorName = "Pedro Pablo",
-				Amount = 10000,
-				CardAcceptorId = "14141414",
-				Category = "Debit",
-				ExtendedTransactionType = "0",
-				FromAccountNumber = (new Random()).Next(999999, 999999999).ToString().PadLeft(16, '0'),
-				FromAccountTypeId = "80",
-				FromAccountTypeName = "Monedero General",
-				Name = "Transferencia de fondos",
-				ToAccountNumber = (new Random()).Next(999999, 999999999).ToString().PadLeft(16, '0'),
-				ToAccountTypeId = "81",
-				ToAccountTypeName = "Subsidio Familiar",
-				TransactionDate = DateTime.Now,
-				TransactionType = string.Empty
-			}
-		};
+			response.Statements = statements.Where(s => Regex.IsMatch(s.FromAccountTypeId, request.AccountTypeId)).ToList();
+		}
 
 		if (request.DocNumber.StartsWith("0"))
 		{
@@ -246,6 +348,22 @@ class CardHolderResponse : IResponse
 
 class CardHolder
 {
+	public CardHolder()
+	{
+		this.Code = new Random().Next(9999999, 999999999).ToString("0000000000000000");
+		this.FirstName = "Maribel";
+		this.LastName = "Marquez Sosa";
+		this.CardLabel = "MARIBEL MARQUEZ S.";
+		this.Telephone = null;
+		this.Address = null;
+		this.Email = null;
+		this.CityCode = "11001";
+		this.CityName = "Bogotá";
+		this.RegionName = "Bogotá";
+		this.CustomerGroup = "01";
+		this.Creation = DateTime.Now.AddYears(-(new Random().Next(3, 20)));
+	}
+	
 	public string Address { get; set; }
 	public string CardLabel { get; set; }
 	public string CityCode { get; set; }
@@ -273,6 +391,11 @@ class BalanceRequest : IRequest
 
 class BalanceResponse : IResponse
 {
+	public BalanceResponse()
+	{
+		this.Accounts = Enumerable.Empty<Account>().ToList();
+	}
+	
 	public string CorrelationalId { get; set; }
 	public int ResponseCode { get; set; } = (int)HttpStatusCode.OK;
 	public string ResponseMessage { get; set; } = HttpStatusCode.OK.ToString();
@@ -282,6 +405,11 @@ class BalanceResponse : IResponse
 
 class Account
 {
+	public Account()
+	{
+		this.AccountBalance = 2000000;
+	}
+	
 	public long CustomerId { get; set; }
 	public long CustomerTypeId { get; set; }
 	public string CustomerTypeName { get; set; }
@@ -309,6 +437,11 @@ class MiniStatementsRequest : IRequest
 
 class MiniStatementsResponse : IResponse
 {
+	public MiniStatementsResponse()
+	{
+		this.Statements = Enumerable.Empty<Statement>().ToList();
+	}
+	
 	public string CorrelationalId { get; set; }
 	public int ResponseCode { get; set; } = (int)HttpStatusCode.OK;
 	public string ResponseMessage { get; set; } = HttpStatusCode.OK.ToString();
@@ -318,6 +451,24 @@ class MiniStatementsResponse : IResponse
 
 class Statement
 {
+	public Statement()
+	{
+		this.Name = "Transferencia de fondos";
+		this.Category = Accounting.Debit.ToString();
+		this.Amount = 10000;
+		this.CardAcceptorId = "141414";
+		this.CardAcceptorName = "Acme Corporation";
+		this.TransactionType = "40";
+		this.ExtendedTransactionType = "9100";
+		this.TransactionDate = DateTime.Now.AddDays(-(new Random().Next(2, 10)));
+		this.FromAccountTypeId = "80";
+		this.FromAccountTypeName = "Monedero General";
+		this.FromAccountNumber = $"{(new Random()).Next(1000000, 9999999)}{(new Random()).Next(1000000, 9999999)}80";
+		this.ToAccountTypeId = "80";
+		this.ToAccountTypeName = "Monedero General";
+		this.ToAccountNumber = $"{(new Random()).Next(1000000, 9999999)}{(new Random()).Next(1000000, 9999999)}80";
+	}
+	
 	public string Name { get; set; }
 	public string Category { get; set; }
 	public Decimal Amount { get; set; }
@@ -332,13 +483,21 @@ class Statement
 	public string ToAccountNumber { get; set; }
 	public string TransactionType { get; set; }
 	public string ExtendedTransactionType { get; set; }
+
+	internal static List<Statement> GetRandomStatements()
+	{
+		List<Statement> statements = Enumerable.Empty<Statement>().ToList();
+		for (int index = 1; index <= 10; index++)
+		{
+			statements.Add(new Statement());
+		}
+		
+		return statements;
+	}
 }
 
-long LongRandom(long min, long max, Random rand = null)
+enum Accounting
 {
-	rand = rand ?? new Random();
-    long result = rand.Next((Int32)(min >> 32), (Int32)(max >> 32));
-    result = (result << 32);
-    result = result | (long)rand.Next((Int32)min, (Int32)max);
-    return result;
+	Debit = 0,
+	Credit = 1
 }

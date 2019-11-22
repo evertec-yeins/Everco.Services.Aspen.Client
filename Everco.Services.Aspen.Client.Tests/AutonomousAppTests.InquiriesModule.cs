@@ -24,7 +24,7 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class AutonomousAppTests
     {
         /// <summary>
-        /// Obttener las cuentas de un usuario produce una salida válida.
+        /// Obtener las cuentas de un usuario produce una salida válida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -33,7 +33,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
             IUserIdentity userIdentity = UserIdentity.Master;
             string docType = userIdentity.DocType;
@@ -45,7 +45,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obttener las cuentas de un usuario que no existe produce una salida válida.
+        /// Obtener las cuentas de un usuario que no existe produce una salida válida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -54,7 +54,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
@@ -65,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obttener los saldos de una cuenta asociada a un usuario produce una salida válida.
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida válida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -74,7 +74,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
             IUserIdentity userIdentity = UserIdentity.Master;
             string docType = userIdentity.DocType;
@@ -86,6 +86,81 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotNull(tupAccountInfo);
             string accountId = tupAccountInfo.SourceAccountId;
             Assert.DoesNotThrow(() => client.Inquiries.GetBalances(docType, docNumber, accountId));
+        }
+
+        /// <summary>
+        /// Obtener los saldos de una cuenta de un usuario que no existe produce una salida válida.
+        /// </summary>|
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetBalancesFromUnrecognizedUserRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+
+            string fixedDocType = "CC";
+            string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            string randomAccountId = new Random().Next(99, 9999).ToString();
+
+            IList<BalanceInfo> GetBalance() => client.Inquiries.GetBalances(fixedDocType, randomDocNumber, randomAccountId);
+            Assert.DoesNotThrow(() => GetBalance());
+            CollectionAssert.IsEmpty(GetBalance());
+        }
+
+        /// <summary>
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetStatementsRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+
+            IUserIdentity userIdentity = UserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo tupAccountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(tupAccountInfo);
+            string accountId = tupAccountInfo.SourceAccountId;
+            IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
+            CollectionAssert.IsNotEmpty(balances);
+            
+            // Los últimos movimientos por toda las cuentas...
+            Assert.DoesNotThrow(() => client.Inquiries.GetStatements(docType, docNumber, accountId));
+
+            // Los movimientos de una cuenta específica...
+            string accountTypeId = balances.First().TypeId;
+            Assert.IsNotEmpty(accountTypeId);
+            Assert.DoesNotThrow(() => client.Inquiries.GetStatements(docType, docNumber, accountId, accountTypeId));
+        }
+
+        /// <summary>
+        /// Obtener los saldos de una cuenta de un usuario que no existe produce una salida válida.
+        /// </summary>|
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetStatementsFromUnrecognizedUserRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+
+            string fixedDocType = "CC";
+            string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            string randomAccountId = new Random().Next(99, 9999).ToString();
+
+            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(fixedDocType, randomDocNumber, randomAccountId);
+            Assert.DoesNotThrow(() => GetStatements());
+            CollectionAssert.IsEmpty(GetStatements());
         }
     }
 }

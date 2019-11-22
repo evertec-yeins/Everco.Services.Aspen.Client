@@ -26,7 +26,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         public AutonomousAppTests()
         {
-            this.dummyServices = new DummyServices().StartAllServices();
+            this.dummyServices = new DummyServices().StartBifrostService();
         }
 
         /// <summary>
