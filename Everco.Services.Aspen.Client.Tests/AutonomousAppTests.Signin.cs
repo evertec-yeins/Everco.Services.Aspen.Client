@@ -8,13 +8,15 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
-    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Fluent;
     using Identities;
+    using Identity;
     using NUnit.Framework;
     using Providers;
+    using IAppIdentity = Auth.IAppIdentity;
 
     /// <summary>
     /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de autónoma.
@@ -132,6 +134,32 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.UpgradeRequired));
             StringAssert.IsMatch("Necesita actualizar el secreto de la aplicación.", exception.Message);
             SqlDataContext.EnsureAppNotRequiresChangeSecret(appIdentity.ApiKey);
+        }
+
+        [Test]
+        public void SecureIdentityWorks()
+        {
+            SecureIdentity identity = new SecureIdentity();
+            List<string> input = new List<string>();
+            for (int index = 0; index < 5; index++)
+            {
+                input.Add(Guid.NewGuid().ToString("P"));
+            }
+
+            string clearText = string.Join(' ', input);
+            string encryptedText = identity.Encrypt(clearText);
+            string result = identity.Decrypt(encryptedText);
+            Assert.That(result, Is.EqualTo(clearText));
+        }
+
+        [Test]
+        public void SecureLongTextIdentityWorks()
+        {
+            string clearText = TestContext.CurrentContext.Random.GetString(500);
+            SecureIdentity identity = new SecureIdentity();
+            string encryptedText = identity.Encrypt(clearText);
+            string result = identity.Decrypt(encryptedText);
+            Assert.That(result, Is.EqualTo(clearText));
         }
     }
 }

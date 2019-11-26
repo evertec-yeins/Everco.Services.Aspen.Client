@@ -9,9 +9,20 @@ namespace Everco.Services.Aspen.Client.Identity
 {
     using System;
 
+    /// <summary>
+    /// Obtiene  la información que se utiliza para autenticar la solicitud en el servicio Aspen de variables de ambiente.
+    /// </summary>
     public class EnvironmentIdentity : IAppIdentity
     {
-        public EnvironmentIdentity(string apiKeyEnvName, string apiSecretEnvName)
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="EnvironmentIdentity"/>
+        /// </summary>
+        /// <param name="apiKeyEnvName">Nombre de la variable de ambiente de donde se obtiene el valor del ApiKey.</param>
+        /// <param name="apiSecretEnvName">Nombre de la variable de ambiente de donde se obtiene el valor del ApiSecret.</param>
+        /// <exception cref="ArgumentNullException">apiKeyEnvName o apiSecretEnvName son nulas, vacías o están compuestas solo de caracteres en blanco.</exception>
+        public EnvironmentIdentity(
+            string apiKeyEnvName = "ASPEN:APIKEY", 
+            string apiSecretEnvName = "ASPEN:APISECRET")
         {
             if (string.IsNullOrWhiteSpace(apiKeyEnvName))
             {
