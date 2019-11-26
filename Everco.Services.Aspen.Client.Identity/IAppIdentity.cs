@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="IAppIdentity.cs" company="Processa">
+// <copyright file="IAppIdentity.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -8,7 +8,7 @@
 namespace Everco.Services.Aspen.Client.Identity
 {
     /// <summary>
-    /// Define la información que se utiliza para autenticar la solicitud en el servicio Aspen.
+    /// Define la información de identidad de una aplicación para autenticar las solicitudes al servicio ASPEN.
     /// </summary>
     /// <remarks>Estos valores son proporcionados por Evertec Colombia.</remarks>
     public interface IAppIdentity

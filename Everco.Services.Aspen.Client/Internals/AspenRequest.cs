@@ -55,8 +55,8 @@ namespace Everco.Services.Aspen.Client.Internals
             string accept = "application/json",
             string contentType = "application/json; charset=utf-8",
             DataFormat dataFormat = DataFormat.Json) : this(
-                mappingInfo.GetEndPointMappingInfo(scope).Key,
-                mappingInfo.GetEndPointMappingInfo(scope).Value,
+                mappingInfo.GetEndPointMappingInfo(scope).Resource,
+                mappingInfo.GetEndPointMappingInfo(scope).Method,
                 accept,
                 contentType,
                 dataFormat)
@@ -69,8 +69,20 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
         /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
         internal AspenRequest(Scope scope, EndpointMapping mappingInfo) : this(
-                mappingInfo.GetEndPointMappingInfo(scope).Key,
-                mappingInfo.GetEndPointMappingInfo(scope).Value)
+                mappingInfo.GetEndPointMappingInfo(scope).Resource,
+                mappingInfo.GetEndPointMappingInfo(scope).Method)
+        {
+        }
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="AspenRequest"/>
+        /// </summary>
+        /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
+        /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
+        /// <param name="endpointParameters">La colección de parámetros para el endpoint.</param>
+        internal AspenRequest(Scope scope, EndpointMapping mappingInfo, EndpointParameters endpointParameters) : this(
+            new PlaceholderFormatter(mappingInfo.GetEndPointMappingInfo(scope).Resource, endpointParameters).ToString(), 
+            mappingInfo.GetEndPointMappingInfo(scope).Method)
         {
         }
     }

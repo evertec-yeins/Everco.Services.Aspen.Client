@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="EnvironmentIdentity.cs" company="Processa">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
@@ -10,7 +10,7 @@ namespace Everco.Services.Aspen.Client.Identity
     using System;
 
     /// <summary>
-    /// Obtiene  la información que se utiliza para autenticar la solicitud en el servicio Aspen de variables de ambiente.
+    /// Representa la información de la identidad de una aplicación a partir de las variables de ambiente del sistema.
     /// </summary>
     public class EnvironmentIdentity : IAppIdentity
     {

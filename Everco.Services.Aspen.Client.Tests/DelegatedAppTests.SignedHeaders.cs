@@ -30,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.ApiKey")]
         public void MissingApiKeyHeaderWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20002"));
@@ -45,7 +45,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.ApiKey")]
         public void NullOrEmptyApiKeyHeaderWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IHeadersManager> headerBehaviors = new List<IHeadersManager>()
                                                          {
                                                              InvalidApiKeyHeader.WithHeaderBehavior(() => null),
@@ -70,7 +70,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload")]
         public void MissingPayloadHeaderWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20002"));
@@ -85,7 +85,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload")]
         public void NullOrEmptyPayloadHeaderWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IHeadersManager> payloadHeaderBehaviors = new List<IHeadersManager>()
             {
                 InvalidPayloadHeader.WithHeaderBehavior(() => null),
@@ -110,7 +110,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload")]
         public void InvalidFormatPayloadWhenUserSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IHeadersManager invalidPayloadHeaderBehavior = InvalidPayloadHeader.WithHeaderBehavior(() => "Lorem ipsum dolor sit amet, consetetur sadipscing elitr");
             ServiceLocator.Instance.RegisterHeadersManager(invalidPayloadHeaderBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -126,7 +126,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Nonce")]
         public void MissingNonceWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidNoncePayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -141,7 +141,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Nonce")]
         public void NullOrEmptyNonceWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
                                                                 {
                                                                     InvalidNoncePayloadClaim.WithClaimBehavior(() => null),
@@ -166,7 +166,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Nonce")]
         public void InvalidFormatNonceWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
                                                                 {
                                                                     InvalidNoncePayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
@@ -195,7 +195,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando...
@@ -215,7 +215,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -236,7 +236,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
@@ -263,7 +263,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Token")]
         public void InvalidFormatTokenWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IPayloadClaimsManager invalidFormatBehavior = InvalidTokenPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE");
             ServiceLocator.Instance.RegisterPayloadClaimsManager(invalidFormatBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -279,7 +279,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void MissingEpochWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidEpochPayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -294,7 +294,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void NullOrEmptyEpochWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidEpochPayloadClaim.WithClaimBehavior(() => null),
@@ -319,7 +319,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void InvalidFormatEpochWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadHeaderBehaviors = new List<IPayloadClaimsManager>()
             {
                 InvalidEpochPayloadClaim.WithClaimBehavior(() => "x"),
@@ -346,7 +346,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void EpochExpiredWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(-randomDays));
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -362,7 +362,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void EpochExceededWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             int randomDays = new Random().Next(2, 10);
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromDatePicker(randomDays));
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -378,7 +378,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void EpochNegativeWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             double negativeSeconds = -DateTimeOffset.Now.ToUnixTimeSeconds();
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(negativeSeconds));
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -394,7 +394,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Epoch")]
         public void EpochZeroWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterEpochGenerator(FixedEpochGenerator.FromStaticSeconds(0));
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15851"));
@@ -409,7 +409,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.DeviceId")]
         public void MissingDeviceIdWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidDeviceIdPayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -424,7 +424,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.DeviceId")]
         public void NullOrEmptyDeviceIdWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
                                                                 {
                                                                     InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => null),
@@ -449,7 +449,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.DeviceId")]
         public void InvalidFormatDeviceIdWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>
                                                                 {
                                                                     InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => "gXjyhrYqannHUA$LLV&7guTHmF&1X5JB$Uobx3@!rPn9&x4BzE"),
@@ -473,7 +473,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Username")]
         public void MissingUsernameWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             ServiceLocator.Instance.RegisterPayloadClaimsManager(InvalidUsernamePayloadClaim.AvoidingClaim());
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15852"));
@@ -488,7 +488,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Username")]
         public void NullOrEmptyUsernameWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
                                                                 {
                                                                     InvalidUsernamePayloadClaim.WithClaimBehavior(() => null),
@@ -513,7 +513,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Username")]
         public void InvalidFormatUsernameWhenSignedRequestThrows()
         {
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()
                                                                 {
                                                                     InvalidUsernamePayloadClaim.WithClaimBehavior(() => "CC|123456"),

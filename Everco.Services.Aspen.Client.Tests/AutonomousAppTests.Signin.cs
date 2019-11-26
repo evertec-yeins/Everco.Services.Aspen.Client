@@ -31,7 +31,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void AppSigninRequestWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);

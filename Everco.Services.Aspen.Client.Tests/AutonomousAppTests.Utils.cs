@@ -25,7 +25,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Utils")]
         public void GetDefaultDocTypesWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<DocTypeInfo> defaultDocTypes = client.Utils.GetDefaultDocTypes();
             CollectionAssert.IsNotEmpty(defaultDocTypes);
         }
@@ -37,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Utils")]
         public void EncryptValueWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             string encryptedValue = client.Utils.Encrypt("colombia");
             Assert.IsNotEmpty(encryptedValue);
         }

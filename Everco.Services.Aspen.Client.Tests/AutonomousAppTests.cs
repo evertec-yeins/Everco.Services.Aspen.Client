@@ -5,11 +5,10 @@
 // <author>dmontalvo</author>
 // <date>2019-09-24 10:00 AM</date>
 // ----------------------------------------------------------------------
-// ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Providers;
+    using Everco.Services.Aspen.Client.Auth;
+    using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using NUnit.Framework;
 
@@ -17,26 +16,27 @@ namespace Everco.Services.Aspen.Client.Tests
     /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de autónoma.
     /// </summary>
     [TestFixture]
-    public partial class AutonomousAppTests
+    public partial class AutonomousAppTests : AppBaseTests
     {
         /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
+        /// Los procesos que fueron iniciados por cada servicio de prueba.
         /// </summary>
-        [SetUp]
-        public void Setup()
+        private readonly DummyServices dummyServices = null;
+
+        /// <summary>
+        /// Inicializa una nueva instancia de la clase <see cref="AutonomousAppTests" />.
+        /// </summary>
+        public AutonomousAppTests()
         {
-            ServiceLocator.Instance.Reset();
+            this.dummyServices = new DummyServices().StartBifrostService();
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>
-        /// Obtiene un cliente para la aplicación autónoma de pruebas a partir de la solicitud de generación de un token de autenticación.
+        /// Finaliza una instancia de la clase <see cref="AutonomousAppTests" />.
         /// </summary>
-        /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
-        private static IAutonomousApp GetAutonomousClient() =>
-            AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Master)
-                .AuthenticateNoCache()
-                .GetClient();
+        ~AutonomousAppTests() => this.dummyServices.Dispose();
     }
 }

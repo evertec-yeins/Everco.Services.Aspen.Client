@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="UserIdentity.cs" company="Evertec Colombia">
+// <copyright file="RecognizedUserIdentity.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
@@ -13,12 +13,12 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
     /// <summary>
     /// Implementa la información de la identidad de un usuario de pruebas para autenticar las solicitudes en el servicio Aspen.
     /// </summary>
-    internal class UserIdentity : IUserIdentity
+    internal class RecognizedUserIdentity : IUserIdentity
     {
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static IUserIdentity assistantIdentity = null;
+        private static IUserIdentity helperIdentity = null;
 
         /// <summary>
         /// Para uso interno.
@@ -26,13 +26,13 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         private static IUserIdentity masterIdentity = null;
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="UserIdentity" />.
+        /// Inicializa una nueva instancia de la clase <see cref="RecognizedUserIdentity" />.
         /// </summary>
         /// <param name="docType">El tipo de documento del usuario.</param>
         /// <param name="docNumber">El número de documento del usuario.</param>
         /// <param name="password">La clave de acceso del usuario.</param>
         /// <param name="deviceInfo">La información del dispositivo.</param>
-        public UserIdentity(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
+        public RecognizedUserIdentity(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
         {
             this.DocType = docType;
             this.DocNumber = docNumber;
@@ -41,9 +41,9 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         /// <summary>
-        /// Impide que se cree una instancia predeterminada de la clase <see cref="UserIdentity" />.
+        /// Impide que se cree una instancia predeterminada de la clase <see cref="RecognizedUserIdentity" />.
         /// </summary>
-        private UserIdentity()
+        private RecognizedUserIdentity()
         {
             this.DocType = "CC";
             this.DocNumber = "52080323";
@@ -55,7 +55,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// Obtiene la identidad de un usuario para fines de comparación.
         /// </summary>
         public static IUserIdentity Helper =>
-            assistantIdentity ?? (assistantIdentity = new UserIdentity(
+            helperIdentity ?? (helperIdentity = new RecognizedUserIdentity(
                                       "CC",
                                       "79483129",
                                       "colombia"));
@@ -63,7 +63,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// <summary>
         /// Obtiene la identidad de un usuario para la autenticación de las pruebas automatizadas.
         /// </summary>
-        public static IUserIdentity Master => masterIdentity ?? (masterIdentity = new UserIdentity());
+        public static IUserIdentity Master => masterIdentity ?? (masterIdentity = new RecognizedUserIdentity());
 
         /// <summary>
         /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
