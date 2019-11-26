@@ -61,7 +61,7 @@ void Main()
 
 string Exchange => "easy_net_q_rpc";
 
-readonly List<CardHolder> CardHolders = new List<CardHolder>()
+List<CardHolder> CardHolders => new List<CardHolder>()
 {
 	new CardHolder()
 	{
@@ -85,7 +85,7 @@ readonly List<CardHolder> CardHolders = new List<CardHolder>()
 	{
 		PersonId = 1080,
 		DocType = "CE",
-		DocNumber = "203467"
+		DocNumber = "203467"	
 	},
 	new CardHolder()
 	{
@@ -119,7 +119,7 @@ readonly List<CardHolder> CardHolders = new List<CardHolder>()
 	}
 };
 
-Dictionary<string, List<Account>> Accounts = new Dictionary<string, List<Account>>()
+Dictionary<string, List<Account>> Accounts => new Dictionary<string, List<Account>>()
 {
 	{ 
 		"CC-52080323",
@@ -209,10 +209,61 @@ Dictionary<string, List<Account>> Accounts = new Dictionary<string, List<Account
 	}
 };
 
-Dictionary<string, List<Statement>> Statements = new Dictionary<string, List<Statement>>()
+Dictionary<string, List<Statement>> statements = null;
+Dictionary<string, List<Statement>> Statements
 {
-	{ "CC-52080323", Statement.GetRandomStatements() }
-};
+	get
+	{
+		if (statements != null)
+		{
+			return statements;
+		}
+		
+		List<Statement> GetRandomStatements()
+		{
+			List<Statement> statements = Enumerable.Empty<Statement>().ToList();
+			Random random = new Random();
+			int randomIndex = random.Next(1, 5);
+			for (int index = 1; index <= randomIndex; index++)
+			{
+				statements.Add(new Statement("80", "Monedero General"));
+			}
+
+			randomIndex = random.Next(1, 5);
+			for (int index = 1; index <= randomIndex; index++)
+			{
+				statements.Add(new Statement("81", "Subsidio familiar"));
+			}
+
+			randomIndex = random.Next(1, 5);
+			for (int index = 1; index <= randomIndex; index++)
+			{
+				statements.Add(new Statement("82", "Subsidio Educativo"));
+			}
+
+			randomIndex = random.Next(1, 5);
+			for (int index = 1; index <= randomIndex; index++)
+			{
+				statements.Add(new Statement("83", "Bonos"));
+			}
+
+			randomIndex = random.Next(1, 5);
+			for (int index = 1; index <= randomIndex; index++)
+			{
+				statements.Add(new Statement("84", "Viveres General"));
+			}
+
+			return statements.OrderBy(x => x.TransactionDate).ToList();
+		}
+		
+		statements = new Dictionary<string, List<Statement>>()
+		{
+			{ "CC-52080323", GetRandomStatements() }
+		};
+		
+		return statements;
+	}
+}
 
 void GetCardHolder(IModel channel)
 {
@@ -453,6 +504,9 @@ class Statement
 {
 	public Statement()
 	{
+		string accountTypeId = "80";
+		string accountTypeName = "Monedero General";
+		Random random = new Random();
 		this.Name = "Transferencia de fondos";
 		this.Category = Accounting.Debit.ToString();
 		this.Amount = 10000;
@@ -460,13 +514,28 @@ class Statement
 		this.CardAcceptorName = "Acme Corporation";
 		this.TransactionType = "40";
 		this.ExtendedTransactionType = "9100";
-		this.TransactionDate = DateTime.Now.AddDays(-(new Random().Next(2, 10)));
-		this.FromAccountTypeId = "80";
-		this.FromAccountTypeName = "Monedero General";
-		this.FromAccountNumber = $"{(new Random()).Next(1000000, 9999999)}{(new Random()).Next(1000000, 9999999)}80";
-		this.ToAccountTypeId = "80";
-		this.ToAccountTypeName = "Monedero General";
-		this.ToAccountNumber = $"{(new Random()).Next(1000000, 9999999)}{(new Random()).Next(1000000, 9999999)}80";
+		this.TransactionDate = DateTime.Now
+			.AddDays(-(random.Next(2, 10)))
+			.AddHours(random.Next(0, 24))
+			.AddMinutes(random.Next(0, 60))
+			.AddSeconds(random.Next(0, 60));
+		this.FromAccountTypeId = accountTypeId;
+		this.FromAccountTypeName = accountTypeName;
+		this.FromAccountNumber = $"{random.Next(1000000, 9999999)}{random.Next(1000000, 9999999)}{accountTypeId}";
+		this.ToAccountTypeId = accountTypeId;
+		this.ToAccountTypeName = accountTypeName;
+		this.ToAccountNumber = $"{random.Next(1000000, 9999999)}{random.Next(1000000, 9999999)}{accountTypeId}";
+	}
+	
+	public Statement(string accountTypeId, string accountTypeName) : this()
+	{
+		Random random = new Random();
+		this.FromAccountTypeId = accountTypeId;
+		this.FromAccountTypeName = accountTypeName;
+		this.FromAccountNumber = $"{random.Next(1000000, 9999999)}{random.Next(1000000, 9999999)}{accountTypeId}";
+		this.ToAccountTypeId = accountTypeId;
+		this.ToAccountTypeName = accountTypeName;
+		this.ToAccountNumber = $"{random.Next(1000000, 9999999)}{random.Next(1000000, 9999999)}{accountTypeId}";
 	}
 	
 	public string Name { get; set; }
@@ -483,17 +552,6 @@ class Statement
 	public string ToAccountNumber { get; set; }
 	public string TransactionType { get; set; }
 	public string ExtendedTransactionType { get; set; }
-
-	internal static List<Statement> GetRandomStatements()
-	{
-		List<Statement> statements = Enumerable.Empty<Statement>().ToList();
-		for (int index = 1; index <= 10; index++)
-		{
-			statements.Add(new Statement());
-		}
-		
-		return statements;
-	}
 }
 
 enum Accounting

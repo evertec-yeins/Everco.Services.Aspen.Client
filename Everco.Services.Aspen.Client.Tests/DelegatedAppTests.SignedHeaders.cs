@@ -195,7 +195,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando...
@@ -215,7 +215,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -236,7 +236,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(UserIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
 
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()

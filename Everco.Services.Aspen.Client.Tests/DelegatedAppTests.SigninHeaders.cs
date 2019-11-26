@@ -36,7 +36,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -67,7 +67,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(UserIdentity.Master)
+                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 
@@ -90,7 +90,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -121,7 +121,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(UserIdentity.Master)
+                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 

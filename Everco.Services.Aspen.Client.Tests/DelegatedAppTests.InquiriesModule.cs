@@ -10,14 +10,9 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
-    using Everco.Services.Aspen.Client.Auth;
-    using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Entities;
     using Fluent;
-    using Identities;
     using NUnit.Framework;
-    using Providers;
 
     /// <summary>
     /// Implementa las pruebas unitarias de las consultas de los productos financieros del usuario autenticado.
@@ -25,7 +20,6 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public partial class DelegatedAppTests
     {
-
         /// <summary>
         /// Obtener las cuentas de usuario actual produce una salida válida.|
         /// </summary>
@@ -34,13 +28,15 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetAccountsRequestWorks()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-
-            IList<AccountExtendedInfo> GetAccounts() => client.Inquiries.GetAccounts();
-            Assert.DoesNotThrow(() => GetAccounts());
-            CollectionAssert.IsNotEmpty(GetAccounts());
+            IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
+            CollectionAssert.IsNotEmpty(accounts);
+            Assert.That(accounts.Count, Is.EqualTo(1));
+            IList<AccountProperty> properties = accounts.First().Properties.ToList();
+            Assert.That(properties.Count, Is.EqualTo(4));
+            Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranName"), Is.Not.Null);
+            Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranDate"), Is.Not.Null);
+            Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranCardAcceptor"), Is.Not.Null);
+            Assert.That(properties.SingleOrDefault(p => p.Key == "CardStatusName"), Is.Not.Null);
         }
 
         /// <summary>
@@ -51,10 +47,6 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetBalancesRequestWorks()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-
             IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
             CollectionAssert.IsNotEmpty(accounts);
             AccountInfo tupAccountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
@@ -71,10 +63,6 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetBalancesUnrecognizedAccountRequestWorks()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-            
             string randomAccountId = new Random().Next(99, 9999).ToString();
             IList<BalanceExtendedInfo> GetBalances() => client.Inquiries.GetBalances(randomAccountId);
             Assert.DoesNotThrow(() => GetBalances());
@@ -89,10 +77,6 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetStatementsRequestWorks()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-
             IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
             CollectionAssert.IsNotEmpty(accounts);
             AccountInfo tupAccountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
@@ -119,10 +103,6 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetStatementsUnrecognizedAccountRequestWorks()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-
             string randomAccountId = new Random().Next(99, 9999).ToString();
             IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(randomAccountId);
             Assert.DoesNotThrow(() => GetStatements());

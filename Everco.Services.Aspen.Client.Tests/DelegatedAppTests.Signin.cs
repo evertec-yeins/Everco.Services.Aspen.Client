@@ -44,9 +44,9 @@ namespace Everco.Services.Aspen.Client.Tests
         public void InvalidUserCredentialThrows()
         {
             string password = Guid.Empty.ToString();
-            UserIdentity invalidCredentialIdentity = new UserIdentity(
-                UserIdentity.Master.DocType,
-                UserIdentity.Master.DocNumber,
+            RecognizedUserIdentity invalidCredentialIdentity = new RecognizedUserIdentity(
+                RecognizedUserIdentity.Master.DocType,
+                RecognizedUserIdentity.Master.DocNumber,
                 password);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
@@ -73,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
-            UserIdentity unrecognizedUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+            RecognizedUserIdentity unrecognizedUserIdentity = new RecognizedUserIdentity(fixedDocType, randomDocNumber, password);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
@@ -96,7 +96,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signin")]
         public void UserLockoutThrows()
         {
-            IUserIdentity userIdentity = UserIdentity.Master;
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
             SqlDataContext.EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
@@ -123,7 +123,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string fixedDocType = "CC";
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
-            UserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+            RecognizedUserIdentity tempUserIdentity = new RecognizedUserIdentity(fixedDocType, randomDocNumber, password);
             SqlDataContext.EnsureUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
@@ -151,7 +151,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string randomDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string password = Guid.Empty.ToString();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            IUserIdentity tempUserIdentity = new UserIdentity(fixedDocType, randomDocNumber, password);
+            IUserIdentity tempUserIdentity = new RecognizedUserIdentity(fixedDocType, randomDocNumber, password);
             Dictionary<string, string> userProfile = new Dictionary<string, string>()
                                                          {
                                                              { "Secret", password },
@@ -187,9 +187,9 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             string password = Guid.Empty.ToString();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            UserIdentity userIdentity = new UserIdentity(
-                UserIdentity.Master.DocType,
-                UserIdentity.Master.DocNumber,
+            RecognizedUserIdentity userIdentity = new RecognizedUserIdentity(
+                RecognizedUserIdentity.Master.DocType,
+                RecognizedUserIdentity.Master.DocNumber,
                 password);
 
             SqlDataContext.EnsureUserIsNotLocked(userIdentity.DocType, userIdentity.DocNumber);
@@ -230,7 +230,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
-                        .AuthenticateNoCache(UserIdentity.Master)
+                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
             Assert.That(exception.EventId, Is.EqualTo("1000478"));
@@ -253,7 +253,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -276,7 +276,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(recognizedApiKey, randomApiSecret)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 

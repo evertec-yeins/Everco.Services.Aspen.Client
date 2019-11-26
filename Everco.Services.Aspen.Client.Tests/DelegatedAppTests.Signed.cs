@@ -119,7 +119,7 @@ namespace Everco.Services.Aspen.Client.Tests
             UserAuthToken authToken = client.AuthToken as UserAuthToken;
             Assert.That(authToken, Is.Not.Null);
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            IUserIdentity userIdentity = UserIdentity.Master;
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
             SqlDataContext.RemoveUserAuthToken(
                 userIdentity.DocType,
                 userIdentity.DocNumber,
@@ -144,7 +144,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(authToken.DeviceId, Is.Not.Empty);
             Assert.That(authToken.Expired, Is.False);
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            IUserIdentity userIdentity = UserIdentity.Master;
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
             SqlDataContext.EnsureExpireUserAuthToken(
                 userIdentity.DocType,
                 userIdentity.DocNumber,
@@ -183,7 +183,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity commonAppIdentity = DelegatedAppIdentity.Master;
 
-            IUserIdentity userIdentityMaster = UserIdentity.Master;
+            IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
@@ -194,7 +194,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken, Is.Not.Null);
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
-            IUserIdentity userIdentityHelper = UserIdentity.Helper;
+            IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
@@ -220,7 +220,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void MismatchBetweenAppsWhenUserSignedRequestThrows()
         {
-            IUserIdentity commonUserIdentity = UserIdentity.Master;
+            IUserIdentity commonUserIdentity = RecognizedUserIdentity.Master;
             
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             SqlDataContext.EnsureUserAndProfileInfo(
@@ -270,7 +270,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MismatchTokenBetweenAppsAndUsersWhenUserSignedRequestThrows()
         {
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
-            IUserIdentity userIdentityMaster = UserIdentity.Master;
+            IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             SqlDataContext.EnsureUserAndProfileInfo(
                 userIdentityMaster.DocType,
                 userIdentityMaster.DocNumber,
@@ -286,7 +286,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
-            IUserIdentity userIdentityHelper = UserIdentity.Helper;
+            IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             SqlDataContext.EnsureUserAndProfileInfo(
                 userIdentityHelper.DocType,
                 userIdentityHelper.DocNumber,
@@ -317,7 +317,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MismatchUsernameWhenUserSignedRequestThrows()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            IUserIdentity userIdentityHelper = UserIdentity.Helper;
+            IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             IPayloadClaimsManager mismatchUsernameClaimBehavior = InvalidUsernamePayloadClaim.WithClaimBehavior(() => $"{userIdentityHelper.DocType}-{userIdentityHelper.DocNumber}");
             ServiceLocator.Instance.RegisterPayloadClaimsManager(mismatchUsernameClaimBehavior);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -335,7 +335,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
-            IUserIdentity userIdentityMaster = UserIdentity.Master;
+            IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             SqlDataContext.EnsureMismatchUserAuthToken(
                 userIdentityMaster.DocType,
                 userIdentityMaster.DocNumber,

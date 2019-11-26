@@ -47,21 +47,21 @@ namespace Everco.Services.Aspen.Client
         /// </summary>
         /// <param name="mapping">Campo en donde se busca la información de mapeo.</param>
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
-        /// <returns>Instancia de KeyValuePair&lt;System.String, Method&gt; con los valores extraidos del campo.</returns>
-        public static KeyValuePair<string, Method> GetEndPointMappingInfo(this EndpointMapping mapping, Scope scope)
+        /// <returns>Tupla donde <c>Resource</c> representa el endpoint de la solicitud y <c>Method</c> el método HTTP esperado por la solicitud.</returns>
+        public static (string Resource, Method Method) GetEndPointMappingInfo(this EndpointMapping mapping, Scope scope)
         {
             string keyName = $"GetEndPointMappingInfo.{scope}.{mapping}";
-            object currentValue = AppDomain.CurrentDomain.GetData(keyName);
-            if (currentValue != null)
+
+            if (AppDomain.CurrentDomain.GetData(keyName) is KeyValuePair<string, Method> currentValue)
             {
-                return (KeyValuePair<string, Method>)currentValue;
+                return (currentValue.Key, currentValue.Value);
             }
 
             EndPointMappingInfoAttribute attribute = typeof(EndpointMapping).GetField(mapping.ToString()).GetCustomAttribute<EndPointMappingInfoAttribute>();
 
             if (attribute == null)
             {
-                throw new InvalidOperationException($"Missing EndPointMappingInfoAttribute for {mapping}");
+                throw new InvalidOperationException($"Missing endpoint mapping attribute for: '{mapping}'");
             }
 
             string prefix = string.Empty;
@@ -74,12 +74,19 @@ namespace Everco.Services.Aspen.Client
                 case Scope.Delegated:
                     prefix = "/me";
                     break;
+
+                case Scope.Anonymous:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException($"The application scope type: '{scope}' unavailable for validation.");
             }
 
             string resource = $"{prefix}/{attribute.Url.TrimStart('/').TrimEnd('/')}";
-            KeyValuePair<string, Method> kvp = new KeyValuePair<string, Method>(resource, attribute.Method);
-            AppDomain.CurrentDomain.SetData(keyName, kvp);
-            return kvp;
+            Method method = attribute.Method;
+            KeyValuePair<string, Method> endpointMappingInfo = new KeyValuePair<string, Method>(resource, method);
+            AppDomain.CurrentDomain.SetData(keyName, endpointMappingInfo);
+            return (resource, method);
         }
 
         /// <summary>

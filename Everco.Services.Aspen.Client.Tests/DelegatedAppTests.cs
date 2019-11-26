@@ -7,7 +7,9 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
+    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
+    using Everco.Services.Aspen.Client.Tests.Identities;
 
     /// <summary>
     /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de delegada.
@@ -25,6 +27,9 @@ namespace Everco.Services.Aspen.Client.Tests
         public DelegatedAppTests()
         {
             this.dummyServices = new DummyServices().StartBifrostService();
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>

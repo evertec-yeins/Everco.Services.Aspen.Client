@@ -7,7 +7,9 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
+    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
+    using Everco.Services.Aspen.Client.Tests.Identities;
     using NUnit.Framework;
 
     /// <summary>
@@ -27,6 +29,9 @@ namespace Everco.Services.Aspen.Client.Tests
         public AutonomousAppTests()
         {
             this.dummyServices = new DummyServices().StartBifrostService();
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>
