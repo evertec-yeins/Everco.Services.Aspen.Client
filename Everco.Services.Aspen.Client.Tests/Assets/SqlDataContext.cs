@@ -628,6 +628,31 @@ UPDATE [dbo].[Apps]
         }
 
         /// <summary>
+        /// Establece una clave en la configuración personalizadas de la aplicación.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="key">El nombre de la clave.</param>
+        /// <param name="value">El valor para la clave.</param>
+        public static void SetAppSettingsKey(string appKey, string key, string value)
+        {
+            int appId = GetAppId(appKey);
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+                string commandText = $@"
+UPDATE [dbo].[Apps]
+   SET [JsonSettings] = JSON_MODIFY([JsonSettings], '$.appSettings.""{key}""', '{value}')
+WHERE[AppId] = @AppId;
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Agrega las propiedades del perfil a un usuario.
         /// </summary>
         /// <param name="userId">El identificador del usuario en el sistema.</param>

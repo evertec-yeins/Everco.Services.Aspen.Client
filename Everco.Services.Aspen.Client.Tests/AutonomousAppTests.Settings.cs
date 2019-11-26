@@ -25,7 +25,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetDocTypesWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<DocTypeInfo> docTypes = client.Settings.GetDocTypes();
             CollectionAssert.IsNotEmpty(docTypes);
         }
@@ -37,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetPaymentTypesWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
         }
@@ -49,7 +49,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetCarriersWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<CarrierInfo> carriers = client.Settings.GetCarriers();
             CollectionAssert.IsNotEmpty(carriers);
         }
@@ -61,7 +61,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTopUpValuesWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<TopUpInfo> topUpValues = client.Settings.GetTopUpValues();
             CollectionAssert.IsNotEmpty(topUpValues);
         }
@@ -73,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetTranTypesWorks()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IList<TranTypeInfo> tranTypes = client.Settings.GetTranTypes();
             CollectionAssert.IsNotEmpty(tranTypes);
         }

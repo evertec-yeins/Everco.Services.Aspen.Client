@@ -29,7 +29,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void UnrecognizedApiKeyWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             string unrecognizedApiKey = Guid.NewGuid().ToString();
             IHeadersManager apiKeyHeaderBehavior = InvalidApiKeyHeader.WithHeaderBehavior(() => unrecognizedApiKey);
             ServiceLocator.Instance.RegisterHeadersManager(apiKeyHeaderBehavior);
@@ -46,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void InvalidAppCredentialWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             string invalidApiSecret = Guid.NewGuid().ToString();
             IHeadersManager invalidAppSecretBehavior = InvalidPayloadHeader.WithCustomAppSecret(invalidApiSecret);
             ServiceLocator.Instance.RegisterHeadersManager(invalidAppSecretBehavior);
@@ -63,7 +63,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void ApiKeyDisabledWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.DisableApp(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -80,7 +80,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void NotFoundValidTokenWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.RemoveAppAuthToken(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -96,7 +96,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void TokenProvidedExpiredWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             AuthToken authToken = client.AuthToken as AuthToken;
             Assert.That(authToken, Is.Not.Null);
             Assert.That(authToken.Expired, Is.False);
@@ -115,7 +115,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void AppRequiresChangeSecretWhenUserSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
@@ -169,7 +169,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed")]
         public void MismatchTokenSignatureWhenAppSignedRequestThrows()
         {
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
             SqlDataContext.EnsureMismatchAppAuthToken(appIdentityMaster.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());

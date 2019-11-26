@@ -84,6 +84,60 @@ namespace Everco.Services.Aspen.Client.Internals
         /// Operación para obtener los valores misceláneos de la aplicación.
         /// </summary>
         [EndPointMappingInfo("/resx/miscs", Method.GET)]
-        Miscellaneous
+        Miscellaneous,
+
+        /// <summary>
+        /// Operación para obtener las cuentas asociadas a un usuario a partir del documento de identidad.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]", Method.GET)]
+        AccountsByUserIdentity,
+
+        /// <summary>
+        /// Operación para obtener las cuentas asociadas a un usuario a partir alias de registro.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/channel/@[ChannelId]/alias/@[EnrollmentAlias]", Method.GET)]
+        AccountsByAlias,
+
+        /// <summary>
+        /// Operación para obtener las cuentas asociadas al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts", Method.GET)]
+        AccountsFromCurrentUser,
+
+        /// <summary>
+        /// Operación para obtener los saldos de una cuenta asociada a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]/@[AccountId]/balances", Method.GET)]
+        BalancesByUserIdentity,
+
+        /// <summary>
+        /// Operación para obtener los saldos de una cuenta asociada a un usuario a partir alias de registro.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/channel/@[ChannelId]/alias/@[EnrollmentAlias]/id/@[AccountId]/balances", Method.GET)]
+        BalancesByAlias,
+
+        /// <summary>
+        /// Operación para obtener los saldos de una cuenta asociada al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[AccountId]/balances", Method.GET)]
+        BalancesFromCurrentUser,
+
+        /// <summary>
+        /// Operación para obtener los movimientos de una cuenta asociada a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]/@[AccountId]/@[AccountTypeId]/statements", Method.GET)]
+        StatementsByUserIdentity,
+
+        /// <summary>
+        /// Operación para obtener los movimientos de una cuenta asociada al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/@[AccountId]/@[AccountTypeId]/statements", Method.GET)]
+        StatementsFromCurrentUser,
+
+        /// <summary>
+        /// Operación para obtener los movimientos de una cuenta asociada a un usuario a partir alias de registro.
+        /// </summary>
+        [EndPointMappingInfo("/inquires/accounts/channel/@[ChannelId]/alias/@[EnrollmentAlias]/id/@[AccountId]/type/@[AccountTypeId]/statements", Method.GET)]
+        StatementsByAlias,
     }
 }

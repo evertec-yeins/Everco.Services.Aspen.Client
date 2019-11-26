@@ -185,7 +185,7 @@ namespace Everco.Services.Aspen.Client.Tests
             ServiceLocator.Instance.RegisterNonceGenerator(singleUseNonceGenerator);
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
@@ -329,7 +329,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingApiVersionHeaderWhenAppSigninRequestWorks()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
-            IAutonomousApp client = GetAutonomousClient();
+            IAutonomousApp client = this.GetAutonomousClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);

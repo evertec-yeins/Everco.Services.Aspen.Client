@@ -141,7 +141,12 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
+            string responseContent = responseContentType.Contains("text/html")
+                                         ? "[TEXT/HTML]"
+                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)
@@ -190,7 +195,12 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {response.Content.DefaultIfNullOrEmpty("NONSET")}");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
+            string responseContent = responseContentType.Contains("text/html")
+                                         ? "[TEXT/HTML]"
+                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
 
             if (!response.IsSuccessful)

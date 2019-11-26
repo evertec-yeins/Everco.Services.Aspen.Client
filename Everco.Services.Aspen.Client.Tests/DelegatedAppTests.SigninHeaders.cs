@@ -36,7 +36,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -67,7 +67,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(UserIdentity.Master)
+                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 
@@ -90,7 +90,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 DelegatedApp.Initialize()
                     .RoutingTo(EnvironmentEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(UserIdentity.Master)
+                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -121,7 +121,7 @@ namespace Everco.Services.Aspen.Client.Tests
                     DelegatedApp.Initialize()
                         .RoutingTo(EnvironmentEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(UserIdentity.Master)
+                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 
@@ -215,7 +215,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NonceAlreadyProcessedWhenUserSigninRequestThrows()
         {
             ServiceLocator.Instance.RegisterNonceGenerator(new SingleUseNonceGenerator());
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
 
             // Se puede autenticar la aplicación usando el nonce la primera vez.
             Assert.That(client, Is.Not.Null);
@@ -551,7 +551,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IPayloadClaimsManager randomDeviceIdClaimBehavior = InvalidDeviceIdPayloadClaim.WithClaimBehavior(() => $"MyRandomDevice-{new Random().Next(999999, 9999999)}");
             ServiceLocator.Instance.RegisterPayloadClaimsManager(randomDeviceIdClaimBehavior);
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
@@ -603,7 +603,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingApiVersionHeaderWhenUserSigninRequestWorks()
         {
             ServiceLocator.Instance.RegisterHeadersManager(InvalidApiVersionHeader.AvoidingHeader());
-            IDelegatedApp client = GetDelegatedClient();
+            IDelegatedApp client = this.GetDelegatedClient();
             Assert.That(client, Is.Not.Null);
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
