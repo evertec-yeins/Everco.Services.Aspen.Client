@@ -222,34 +222,12 @@ Dictionary<string, List<Statement>> Statements
 		List<Statement> GetRandomStatements()
 		{
 			List<Statement> statements = Enumerable.Empty<Statement>().ToList();
-			Random random = new Random();
-			int randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
+			for (int index = 1; index <= 5; index++)
 			{
 				statements.Add(new Statement("80", "Monedero General"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("81", "Subsidio familiar"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("82", "Subsidio Educativo"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("83", "Bonos"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("84", "Viveres General"));
 			}
 

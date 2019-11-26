@@ -31,6 +31,22 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
             CollectionAssert.IsNotEmpty(accounts);
             Assert.That(accounts.Count, Is.EqualTo(1));
+
+            const string AccountIdPattern = @"^[\d]*$";
+            const string AccountNumberPattern = @".*\d{4}";
+            const string BackgroundColorPattern = @"^#(?:[0-9a-fA-F]{3}){1,2}$";
+            foreach (AccountExtendedInfo account in accounts)
+            {
+                Assert.That(account.Balance, Is.AssignableTo(typeof(decimal)));
+                Assert.That(account.Id, Is.Not.Null.And.Match(AccountIdPattern));
+                Assert.That(account.SourceAccountId, Is.Not.Null.And.Match(AccountIdPattern));
+                Assert.That(account.MaskedPan, Is.Not.Null.And.Match(AccountNumberPattern));
+                Assert.That(account.Name, Is.Not.Empty);
+                Assert.That(account.ShortName, Is.Not.Empty);
+                Assert.That(account.BackgroundColor, Is.Not.Null.And.Match(BackgroundColorPattern));
+                CollectionAssert.IsNotEmpty(account.Properties);
+            }
+
             IList<AccountProperty> properties = accounts.First().Properties.ToList();
             Assert.That(properties.Count, Is.EqualTo(4));
             Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranName"), Is.Not.Null);
@@ -52,15 +68,27 @@ namespace Everco.Services.Aspen.Client.Tests
             AccountInfo tupAccountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
             Assert.IsNotNull(tupAccountInfo);
             string accountId = tupAccountInfo.SourceAccountId;
-            Assert.DoesNotThrow(() => client.Inquiries.GetBalances(accountId));
+            IList<BalanceExtendedInfo> balances = client.Inquiries.GetBalances(accountId);
+            CollectionAssert.IsNotEmpty(balances);
+            Assert.That(balances.Count, Is.EqualTo(5));
+            const string AccountTypesPattern = "80|81|82|83|84";
+            const string AccountNumberPattern = @".*\d{4}";
+            foreach (BalanceExtendedInfo balance in balances)
+            {
+                Assert.That(balance.Balance, Is.AssignableTo(typeof(decimal)));
+                Assert.That(balance.Number, Is.Not.Null.And.Match(AccountNumberPattern));
+                Assert.That(balance.SourceAccountId, Is.Not.Empty);
+                Assert.That(balance.TypeId, Is.Not.Null.And.Match(AccountTypesPattern));
+                Assert.That(balance.TypeName, Is.Not.Empty);
+            }
         }
 
         /// <summary>
-        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida válida.
+        /// Obtener los saldos de una cuenta de un usuario que no existe produce una respuesta exitosa sin resultados.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
-        public void GetBalancesUnrecognizedAccountRequestWorks()
+        public void GetBalancesUnrecognizedAccountResponseIsEmpty()
         {
             IDelegatedApp client = this.GetDelegatedClient();
             string randomAccountId = new Random().Next(99, 9999).ToString();
@@ -79,34 +107,75 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = this.GetDelegatedClient();
             IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
             CollectionAssert.IsNotEmpty(accounts);
-            AccountInfo tupAccountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
-            Assert.IsNotNull(tupAccountInfo);
-            string accountId = tupAccountInfo.SourceAccountId;
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
             Assert.IsNotEmpty(accountId);
             IList<BalanceExtendedInfo> balances = client.Inquiries.GetBalances(accountId);
             CollectionAssert.IsNotEmpty(balances);
 
-            // Los últimos movimientos por toda las cuentas...
-            Assert.DoesNotThrow(() => client.Inquiries.GetStatements(accountId));
+            // Los movimientos más recientes realizados por todas las cuentas...
+            IList<MiniStatementInfo> statements = client.Inquiries.GetStatements(accountId);
+            CollectionAssert.IsNotEmpty(statements);
+            Assert.That(statements.Count, Is.EqualTo(5));
+            const string AccountTypesPattern = "80|81|82|83|84";
+            foreach (MiniStatementInfo statement in statements)
+            {
+                Assert.That(statement.AccountTypeId, Is.Not.Null.And.Match(AccountTypesPattern));
+                Assert.That(statement.Amount, Is.AssignableTo(typeof(decimal)));
+                Assert.That(statement.CardAcceptor, Is.Not.Null);
+                Assert.That(statement.TranName, Is.Not.Null);
+                Assert.That(statement.TranType, Is.Not.Null);
+            }
 
-            // Los movimientos de una cuenta específica...
+            // Los movimientos realizados por una cuenta específica...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
-            Assert.DoesNotThrow(() => client.Inquiries.GetStatements(accountId, accountTypeId));
+            IList<MiniStatementInfo> statementsByAccountType = client.Inquiries.GetStatements(accountId, accountTypeId);
+            CollectionAssert.IsNotEmpty(statementsByAccountType);
+            Assert.That(statements.Count, Is.EqualTo(5));
+            foreach (MiniStatementInfo statement in statementsByAccountType)
+            {
+                Assert.That(statement.AccountTypeId, Is.EqualTo(accountTypeId));
+                Assert.That(statement.Amount, Is.AssignableTo(typeof(decimal)));
+                Assert.That(statement.CardAcceptor, Is.Not.Null);
+                Assert.That(statement.TranName, Is.Not.Null);
+                Assert.That(statement.TranType, Is.Not.Null);
+            }
         }
 
         /// <summary>
-        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida válida.
+        /// Obtener los movimientos de una cuenta que no existe produce una una salida exitosa pero sin resultados.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
-        public void GetStatementsUnrecognizedAccountRequestWorks()
+        public void GetStatementsUnrecognizedAccountResponseIsEmpty()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            string randomAccountId = new Random().Next(99, 9999).ToString();
-            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(randomAccountId);
+            string unrecognizedAccountId = new Random().Next(999, 9999).ToString();
+            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(unrecognizedAccountId);
             Assert.DoesNotThrow(() => GetStatements());
             CollectionAssert.IsEmpty(GetStatements());
+        }
+
+        /// <summary>
+        /// Obtener los movimientos usando un tipo de cuenta que no existe produce una respuesta exitosa sin resultados.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetStatementsUnrecognizedAccountTypeResponseIsEmpty()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
+            Assert.IsNotEmpty(accountId);
+
+            string unrecognizedAccountTypeId = new Random().Next(999, 9999).ToString();
+            IList<MiniStatementInfo> statements = client.Inquiries.GetStatements(accountId, unrecognizedAccountTypeId);
+            CollectionAssert.IsEmpty(statements);
         }
     }
 }
