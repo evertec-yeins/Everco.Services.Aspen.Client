@@ -27,18 +27,25 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="AutonomousAppTests.cs">
-      <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    <Compile Update="AutonomousAppTests.*.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Update="appsettings.dmontalvo.json">
+    <Compile Update="DelegatedAppTests.*.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="appsettings.json">
+    </Content>
+    <Content Include="appsettings.dmontalvo.json">
+      <DependentUpon>appsettings.json</DependentUpon>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Assets\Dummies\RabbitMQ.Services.Bancor.linq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

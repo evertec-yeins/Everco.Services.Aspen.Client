@@ -47,7 +47,7 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         /// <param name="enrollmentAlias">El alias utilizado en el proceso de registro del usuario.</param>
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
         /// <returns>Lista de tipo <see cref="IBalanceInfo"/> con la información de saldos de las cuentas del usuario especificado.</returns>
-        IEnumerable<IBalanceInfo> GetBalancesByAlias(string channelId, string enrollmentAlias, string accountId);
+        IList<BalanceInfo> GetBalancesByAlias(string channelId, string enrollmentAlias, string accountId);
 
         /// <summary>
         /// Obtiene la información de los movimientos financieros de una cuenta asociada a un usuario.
@@ -73,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
         /// <param name="accountTypeId">El identificador del tipo de cuenta (bolsillo) que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
         /// <returns>Listado con la información de movimientos financieros de la cuenta especificada para el usuario actual.</returns>
-        IEnumerable<IMiniStatementInfo> GetStatementsByAlias(
+        IList<MiniStatementInfo> GetStatementsByAlias(
             string channelId,
             string enrollmentAlias,
             string accountId,

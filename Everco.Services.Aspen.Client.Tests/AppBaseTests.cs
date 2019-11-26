@@ -19,22 +19,6 @@ namespace Everco.Services.Aspen.Client.Tests
     public abstract class AppBaseTests
     {
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="AppBaseTests" />.
-        /// </summary>
-        protected AppBaseTests()
-        {
-        }
-
-        /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
-        /// </summary>
-        [SetUp]
-        public virtual void Setup()
-        {
-            ServiceLocator.Instance.Reset();
-        }
-
-        /// <summary>
         /// Obtiene un cliente para la aplicación autónoma de pruebas a partir de la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
@@ -55,5 +39,14 @@ namespace Everco.Services.Aspen.Client.Tests
                 .WithIdentity(DelegatedAppIdentity.Master)
                 .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
+
+        /// <summary>
+        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
+        /// </summary>
+        [SetUp]
+        public virtual void Setup()
+        {
+            ServiceLocator.Instance.Reset();
+        }
     }
 }

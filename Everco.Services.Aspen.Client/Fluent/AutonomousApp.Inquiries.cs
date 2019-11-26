@@ -85,7 +85,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Lista de tipo <see cref="IBalanceInfo" /> con la información de saldos de las cuentas del usuario especificado.
         /// </returns>
-        public IEnumerable<IBalanceInfo> GetBalancesByAlias(string channelId, string enrollmentAlias, string accountId)
+        public IList<BalanceInfo> GetBalancesByAlias(string channelId, string enrollmentAlias, string accountId)
         {
             EndpointParameters endpointParameters = new EndpointParameters()
                 .AddChannelId(channelId)
@@ -130,7 +130,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Listado con la información de movimientos financieros de la cuenta especificada para el usuario actual.
         /// </returns>
-        public IEnumerable<IMiniStatementInfo> GetStatementsByAlias(
+        public IList<MiniStatementInfo> GetStatementsByAlias(
             string channelId,
             string enrollmentAlias,
             string accountId,

@@ -29,14 +29,22 @@ namespace Everco.Services.Aspen.Client.Tests
         public AutonomousAppTests()
         {
             this.dummyServices = new DummyServices().StartBifrostService();
-            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>
         /// Finaliza una instancia de la clase <see cref="AutonomousAppTests" />.
         /// </summary>
         ~AutonomousAppTests() => this.dummyServices.Dispose();
+
+        /// <summary>
+        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar al conjunto de pruebas.
+        /// </summary>
+        [OneTimeSetUp]
+        public void Init()
+        {
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+        }
     }
 }

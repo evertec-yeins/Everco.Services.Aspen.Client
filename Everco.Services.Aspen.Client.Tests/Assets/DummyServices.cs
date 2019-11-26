@@ -37,15 +37,22 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// </summary>
         public void Dispose()
         {
-            Process[] processes = Process.GetProcessesByName("lprun");
-            foreach (Process process in processes)
+            try
             {
-                process.Kill(true);
-                process.Close();
-                process.Dispose();
-            }
+                Process[] processes = Process.GetProcessesByName("lprun");
+                foreach (Process process in processes)
+                {
+                    process.Kill(true);
+                    process.Close();
+                    process.Dispose();
+                }
 
-            Directory.GetFiles(this.DummyFilesPath, "*.flag", SearchOption.TopDirectoryOnly).ToList().ForEach(File.Delete);
+                Directory.GetFiles(this.DummyFilesPath, "*.flag", SearchOption.TopDirectoryOnly).ToList().ForEach(File.Delete);
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
         }
 
         /// <summary>
