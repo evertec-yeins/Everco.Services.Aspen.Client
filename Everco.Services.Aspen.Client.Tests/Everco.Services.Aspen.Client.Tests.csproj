@@ -19,6 +19,7 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj" />
     <ProjectReference Include="..\Everco.Services.Aspen.Client\Everco.Services.Aspen.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
