@@ -9,7 +9,6 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using Everco.Services.Aspen.Client.Fluent;
     using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using NUnit.Framework;
 
@@ -20,21 +19,7 @@ namespace Everco.Services.Aspen.Client.Tests
     public abstract class AppBaseTests
     {
         /// <summary>
-        /// Los procesos que fueron iniciados por cada servicio de prueba.
-        /// </summary>
-        private DummyServices dummyServices = null;
-
-        /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán una única vez, al finalizar el conjunto de pruebas implementadas.
-        /// </summary>
-        [OneTimeTearDown]
-        public virtual void Cleanup()
-        {
-            this.dummyServices?.Dispose();
-        }
-
-        /// <summary>
-        /// Obtiene un cliente para la aplicación autónoma de pruebas a partir de la solicitud de generación de un token de autenticación.
+        /// Obtiene un cliente para a partir de la aplicación autónoma de pruebas, omitiendo los valores almacenados en memoria.
         /// </summary>
         /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
         public virtual IAutonomousApp GetAutonomousClient() =>
@@ -45,7 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 .GetClient();
 
         /// <summary>
-        /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor almacenado en memoria.
+        /// Obtiene un cliente para a partir de la aplicación delegada de pruebas, omitiendo los valores almacenados en memoria. 
         /// </summary>
         /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
         public virtual IDelegatedApp GetDelegatedClient() =>
@@ -56,21 +41,36 @@ namespace Everco.Services.Aspen.Client.Tests
                 .GetClient();
 
         /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán al finalizar cada unidad de prueba.
         /// </summary>
-        [OneTimeSetUp]
-        public virtual void Init()
+        [TearDown]
+        public virtual void RunAfterTest()
         {
-            this.dummyServices = new DummyServices().StartBifrostService();
         }
 
         /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán antes de llamar a cada método de prueba.
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, al finalizar el conjunto de pruebas implementadas.
+        /// </summary>
+        [OneTimeTearDown]
+        public virtual void RunAfterTestFixture()
+        {
+        }
+
+        /// <summary>
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán antes de llamar a cada unidad de prueba.
         /// </summary>
         [SetUp]
-        public virtual void Setup()
+        public virtual void RunBeforeTest()
         {
             ServiceLocator.Instance.Reset();
+        }
+
+        /// <summary>
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// </summary>
+        [OneTimeSetUp]
+        public virtual void RunBeforeTestFixture()
+        {
         }
     }
 }

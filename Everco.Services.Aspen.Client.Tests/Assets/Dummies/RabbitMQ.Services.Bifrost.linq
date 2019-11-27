@@ -22,9 +22,9 @@ void Main()
 		ConnectionFactory factory = new ConnectionFactory()
 		{
 			HostName = "localhost",
-			UserName = "guest",
-			Password = "guest",
-			VirtualHost = "/"
+			UserName = "test",
+			Password = "test",
+			VirtualHost = "Bifrost"
 		};
 
 		debugMessage = $"[x] Using connection: 'host={factory.HostName};virtualhost={factory.VirtualHost};username={factory.UserName};password={factory.Password};exchange={this.Exchange}'";
@@ -34,8 +34,7 @@ void Main()
 		{
 			using (IModel channel = connection.CreateModel())
 			{
-				// Nota: use esta línea para crear el exchange si aún no existe. No se necesita declararlo por segunda vez.
-				//channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
+				channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
 				this.GetCardHolder(channel);
 				this.GetBalances(channel);
 				this.GetMiniStatements(channel);
@@ -45,7 +44,7 @@ void Main()
 				flagBluider.AppendLine(debugMessage);
 				
 				File.WriteAllText(flagPath, flagBluider.ToString());
-				Console.WriteLine("Press [enter] to exit.");
+				Console.WriteLine("[i] Press [enter] to exit.");
 				Console.ReadLine();
 			}
 		}
@@ -59,7 +58,7 @@ void Main()
 	}
 }
 
-string Exchange => "easy_net_q_rpc";
+string Exchange => "temporal_tests_rpc";
 
 List<CardHolder> CardHolders => new List<CardHolder>()
 {
@@ -248,16 +247,10 @@ void GetCardHolder(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CardHolderRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (CardHolderRequest request, CardHolderResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 		response.CardHolders = CardHolders.Where(ch => ch.DocType == request.DocType & ch.DocNumber == request.DocNumber).ToList();
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.CardHolders = null;
-			return;
-		}
 	});
 }
 
@@ -266,7 +259,7 @@ void GetBalances(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.BalanceRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (BalanceRequest request, BalanceResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -274,12 +267,6 @@ void GetBalances(IModel channel)
 		if (Accounts.TryGetValue(key, out List<Account> accounts))
 		{
 			response.Accounts = accounts;
-		}
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.Accounts = null;
-			return;
 		}
 	});
 }
@@ -289,7 +276,7 @@ void GetMiniStatements(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.MiniStatementsRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (MiniStatementsRequest request, MiniStatementsResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -297,12 +284,6 @@ void GetMiniStatements(IModel channel)
 		if (Statements.TryGetValue(key, out List<Statement> statements))
 		{
 			response.Statements = statements.Where(s => Regex.IsMatch(s.FromAccountTypeId, request.AccountTypeId)).ToList();
-		}
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.Statements = null;
-			return;
 		}
 	});
 }

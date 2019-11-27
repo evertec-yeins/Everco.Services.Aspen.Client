@@ -19,13 +19,14 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class AutonomousAppTests : AppBaseTests
     {
         /// <summary>
-        /// Proporciona un conjunto común de funciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
         /// </summary>
-        public override void Init()
+        public override void RunBeforeTestFixture()
         {
-            base.Init();
+            base.RunBeforeTestFixture();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
     }

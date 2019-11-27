@@ -11,9 +11,9 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
-
     using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Fluent;
+    using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
     using NUnit.Framework;
@@ -434,6 +434,61 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
             StringAssert.IsMatch("No se ha encontrado información de enrolamiento con los valores suministrados", exception.Message);
+        }
+
+        /// <summary>
+        /// Obtener las cuentas de los proveedores de datos conocidos.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetAccountsRecognizedDataProvidersRequestWorks()
+        {
+            // Se habilitan los proveedores actuales en la aplicación...
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            Assert.That(accounts.Count, Is.EqualTo(2));
+
+            const string AccountIdPattern = @"^[\d]*$";
+            const string AccountNumberPattern = @".*\d{4}";
+            foreach (AccountInfo account in accounts)
+            {
+                Assert.That(account.Balance, Is.AssignableTo(typeof(decimal)));
+                Assert.That(account.Id, Is.Not.Null.And.Match(AccountIdPattern));
+                Assert.That(account.SourceAccountId, Is.Not.Null.And.Match(AccountIdPattern));
+                Assert.That(account.MaskedPan, Is.Not.Null.And.Match(AccountNumberPattern));
+                Assert.That(account.Name, Is.Not.Empty);
+                CollectionAssert.IsNotEmpty(account.Properties);
+
+                IList<AccountProperty> accountProperties = account.Properties;
+                switch (account.Source)
+                {
+                    case Subsystem.Tup:
+                        Assert.That(accountProperties.Count, Is.EqualTo(4));
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranName"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranDate"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranCardAcceptor"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "CardStatusName"), Is.Not.Null);
+                        break;
+
+                    case Subsystem.Bancor:
+                        Assert.That(accountProperties.Count, Is.EqualTo(4));
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTran"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "NextPayment"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "FullPayment"), Is.Not.Null);
+                        Assert.That(accountProperties.SingleOrDefault(p => p.Key == "PartialPayment"), Is.Not.Null);
+                        break;
+                }
+            }
+
+            // Se reestablece la aplicación para usar el proveedor predeterminando para pruebas...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
     }
 }
