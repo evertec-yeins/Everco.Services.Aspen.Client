@@ -372,7 +372,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<BalanceInfo> balances = client.Inquiries.GetBalancesByAlias(channelId, enrollmentAlias, accountId);
             CollectionAssert.IsNotEmpty(balances);
 
-            // Los movimientos más recientes realizados por todas las cuentas...
+            // Los movimientos más recientes realizados por la cuenta...
             IList<MiniStatementInfo> statements = client.Inquiries.GetStatementsByAlias(channelId, enrollmentAlias, accountId);
             CollectionAssert.IsNotEmpty(statements);
             Assert.That(statements.Count, Is.EqualTo(5));
@@ -443,7 +443,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Inquiries")]
         public void GetAccountsRecognizedDataProvidersRequestWorks()
         {
-            // Se habilitan los proveedores actuales en la aplicación...
+            // Se habilitan los proveedores conocidos para la aplicación...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
@@ -487,8 +487,281 @@ namespace Everco.Services.Aspen.Client.Tests
                 }
             }
 
-            // Se reestablece la aplicación para usar el proveedor predeterminando para pruebas...
+            // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+        }
+
+        /// <summary>
+        /// Obtener las cuentas de un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetAccountsSafelyRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountSafeInfo> inquiryResults = client.Inquiries.GetAccountsSafely(docType, docNumber);
+            CollectionAssert.IsNotEmpty(inquiryResults);
+            Assert.That(inquiryResults.Count, Is.EqualTo(1));
+
+            const string AccountIdPattern = @"^[\d]*$";
+            const string AccountNumberPattern = @".*\d{4}";
+            foreach (AccountSafeInfo inquiryResult in inquiryResults)
+            {
+                CollectionAssert.IsNotEmpty(inquiryResult.Data);
+                Assert.IsNotEmpty(inquiryResult.Reason);
+                Assert.That(inquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
+                Assert.That(inquiryResult.Subsystem, Is.EqualTo(Subsystem.Tup));
+
+                foreach (AccountInfo account in inquiryResult.Data)
+                {
+                    Assert.That(account.Balance, Is.AssignableTo(typeof(decimal)));
+                    Assert.That(account.Id, Is.Not.Null.And.Match(AccountIdPattern));
+                    Assert.That(account.SourceAccountId, Is.Not.Null.And.Match(AccountIdPattern));
+                    Assert.That(account.MaskedPan, Is.Not.Null.And.Match(AccountNumberPattern));
+                    Assert.That(account.Name, Is.Not.Empty);
+                    CollectionAssert.IsNotEmpty(account.Properties);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obtener las cuentas de los proveedores de datos conocidos.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetAccountsSafelyUnavailableRecognizedDataProviderRequestWorks()
+        {
+            // Se habilitan los proveedores conocidos para la aplicación...
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+
+            // Se configura una conexión inválida a un proveedor de datos conocido para esperar que falle la consulta...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken");
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountSafeInfo> inquiryResults = client.Inquiries.GetAccountsSafely(docType, docNumber);
+            CollectionAssert.IsNotEmpty(inquiryResults);
+            Assert.That(inquiryResults.Count, Is.EqualTo(2));
+
+            // El proveedor de datos de TUP debe retornar un resultado por la consulta de cuentas...
+            AccountSafeInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
+            CollectionAssert.IsNotEmpty(tupInquiryResult.Data);
+            Assert.IsNotEmpty(tupInquiryResult.Reason);
+            Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
+
+            // El proveedor de datos de BANCOR debe indicar que no está disponible para procesar la consulta requerida...
+            AccountSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
+            CollectionAssert.IsEmpty(bancorInquiryResult.Data);
+            Assert.IsNotEmpty(bancorInquiryResult.Reason);
+            Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
+
+            // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+
+            // Se reestablece las conexión valida al proveedor de datos conocido...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
+        }
+
+        /// <summary>
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetBalancesSafelyRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
+
+            IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
+            CollectionAssert.IsNotEmpty(inquiryResults);
+            Assert.That(inquiryResults.Count, Is.EqualTo(1));
+
+            const string AccountTypesPattern = "80|81|82|83|84";
+            const string AccountNumberPattern = @".*\d{4}";
+            foreach (BalanceSafeInfo inquiryResult in inquiryResults)
+            {
+                CollectionAssert.IsNotEmpty(inquiryResult.Data);
+                Assert.IsNotEmpty(inquiryResult.Reason);
+                Assert.That(inquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
+                Assert.That(inquiryResult.Subsystem, Is.EqualTo(Subsystem.Tup));
+                Assert.That(inquiryResult.Data.Count, Is.EqualTo(5));
+
+                foreach (BalanceInfo balance in inquiryResult.Data)
+                {
+                    Assert.That(balance.Balance, Is.AssignableTo(typeof(decimal)));
+                    Assert.That(balance.Number, Is.Not.Null.And.Match(AccountNumberPattern));
+                    Assert.That(balance.SourceAccountId, Is.Not.Empty);
+                    Assert.That(balance.TypeId, Is.Not.Null.And.Match(AccountTypesPattern));
+                    Assert.That(balance.TypeName, Is.Not.Empty);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetBalancesSafelyUnavailableRecognizedDataProviderRequestWorks()
+        {
+            // Se habilitan los proveedores conocidos para la aplicación...
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
+
+            // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+
+            IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
+            CollectionAssert.IsNotEmpty(inquiryResults);
+            Assert.That(inquiryResults.Count, Is.EqualTo(2));
+
+            // El proveedor de datos de TUP debe indicar que no está disponible para procesar la consulta requerida...
+            BalanceSafeInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
+            CollectionAssert.IsEmpty(tupInquiryResult.Data);
+            Assert.IsNotEmpty(tupInquiryResult.Reason);
+            Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
+
+            // El proveedor de datos de BANCOR debe indicar que no implementa la característica de saldos...
+            BalanceSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
+            CollectionAssert.IsEmpty(bancorInquiryResult.Data);
+            Assert.IsNotEmpty(bancorInquiryResult.Reason);
+            Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.MissingFeature));
+
+            // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+
+            // Se reestablece las conexión valida al proveedor de datos de TUP...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+        }
+
+        /// <summary>
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetStatementsSafelyRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
+            Assert.IsNotEmpty(accountId);
+            IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
+            CollectionAssert.IsNotEmpty(balances);
+
+            void AssertStatementsSafeResults(IList<MiniStatementSafeInfo> statementInquiryResults)
+            {
+                CollectionAssert.IsNotEmpty(statementInquiryResults);
+                Assert.That(statementInquiryResults.Count, Is.EqualTo(1));
+                foreach (MiniStatementSafeInfo inquiryResult in statementInquiryResults)
+                {
+                    Assert.IsNotEmpty(inquiryResult.Reason);
+                    Assert.That(inquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
+                    Assert.That(inquiryResult.Subsystem, Is.EqualTo(Subsystem.Tup));
+                    IList<MiniStatementInfo> statements = inquiryResult.Data;
+                    CollectionAssert.IsNotEmpty(statements);
+                    Assert.That(statements.Count, Is.EqualTo(5));
+
+                    const string AccountTypesPattern = "80|81|82|83|84";
+                    foreach (MiniStatementInfo statement in statements)
+                    {
+                        Assert.That(statement.AccountTypeId, Is.Not.Null.And.Match(AccountTypesPattern));
+                        Assert.That(statement.Amount, Is.AssignableTo(typeof(decimal)));
+                        Assert.That(statement.CardAcceptor, Is.Not.Null);
+                        Assert.That(statement.TranName, Is.Not.Null);
+                        Assert.That(statement.TranType, Is.Not.Null);
+                    }
+                }
+            }
+
+            // Los movimientos más recientes realizados por la cuenta...
+            IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
+            AssertStatementsSafeResults(inquiryResults);
+
+            // Los movimientos más recientes realizados por la cuenta y el bolsillo específico...
+            string accountTypeId = balances.First().TypeId;
+            Assert.IsNotEmpty(accountTypeId);
+            inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
+            AssertStatementsSafeResults(inquiryResults);
+        }
+
+        /// <summary>
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida válida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Inquiries")]
+        public void GetStatementsSafelyUnavailableRecognizedDataProviderRequestWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
+            CollectionAssert.IsNotEmpty(accounts);
+            AccountInfo accountInfo = accounts.FirstOrDefault(account => account.Source == Subsystem.Tup);
+            Assert.IsNotNull(accountInfo);
+            string accountId = accountInfo.SourceAccountId;
+            Assert.IsNotEmpty(accountId);
+            IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
+            CollectionAssert.IsNotEmpty(balances);
+
+            void AssertStatementsSafeResults(IList<MiniStatementSafeInfo> statementInquiryResults)
+            {
+                CollectionAssert.IsNotEmpty(statementInquiryResults);
+                Assert.That(statementInquiryResults.Count, Is.EqualTo(1));
+                foreach (MiniStatementSafeInfo inquiryResult in statementInquiryResults)
+                {
+                    CollectionAssert.IsEmpty(inquiryResult.Data);
+                    Assert.IsNotEmpty(inquiryResult.Reason);
+                    Assert.That(inquiryResult.Subsystem, Is.EqualTo(Subsystem.Tup));
+                    Assert.That(inquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
+                }
+            }
+
+            // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+
+            // Los movimientos más recientes realizados por la cuenta...
+            IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
+            AssertStatementsSafeResults(inquiryResults);
+
+            // Los movimientos más recientes realizados por la cuenta y el bolsillo específico...
+            string accountTypeId = balances.First().TypeId;
+            Assert.IsNotEmpty(accountTypeId);
+            inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
+            AssertStatementsSafeResults(inquiryResults);
+
+            // Se reestablece las conexión valida al proveedor de datos de TUP...
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
         }
     }
 }

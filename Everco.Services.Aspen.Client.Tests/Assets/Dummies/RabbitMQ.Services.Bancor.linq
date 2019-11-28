@@ -30,7 +30,7 @@ void Main()
 		debugMessage = $"[x] Using connection: 'host={factory.HostName};virtualhost={factory.VirtualHost};username={factory.UserName};password={factory.Password};exchange={this.Exchange}'";
 		Console.WriteLine(debugMessage);
 		flagBluider.AppendLine(debugMessage);
-		using (IConnection connection = factory.CreateConnection("Bifrost Dummy RPC Server"))
+		using (IConnection connection = factory.CreateConnection("Bancor Dummy RPC Server"))
 		{
 			using (IModel channel = connection.CreateModel())
 			{
