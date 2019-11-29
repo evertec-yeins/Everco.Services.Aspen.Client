@@ -8,7 +8,7 @@
 // ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests.Identities
 {
-    using Auth;
+    using Identity;
 
     /// <summary>
     /// Implementa la información de la identidad de un usuario de pruebas para autenticar las solicitudes en el servicio Aspen.
@@ -37,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
             this.DocType = docType;
             this.DocNumber = docNumber;
             this.Password = password;
-            this.DeviceInfo = deviceInfo ?? new DeviceInfo();
+            this.Device = deviceInfo ?? DeviceInfo.Current;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
             this.DocType = "CC";
             this.DocNumber = "52080323";
             this.Password = "colombia";
-            this.DeviceInfo = new DeviceInfo();
+            this.Device = DeviceInfo.Current;
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// <summary>
         /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
         /// </summary>
-        public IDeviceInfo DeviceInfo { get; }
+        public IDeviceInfo Device { get; }
 
         /// <summary>
         /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.

@@ -8,7 +8,10 @@
 namespace Everco.Services.Aspen.Client.Auth
 {
     using System;
+    using Identity;
     using Internals;
+    using IUserIdentity = Identity.IUserIdentity;
+    using IDeviceInfo = Identity.IDeviceInfo;
 
     /// <summary>
     /// Representa la información que se utiliza para autenticar la solicitud en función de un usuario en el servicio Aspen.
@@ -30,16 +33,16 @@ namespace Everco.Services.Aspen.Client.Auth
             this.DocType = docType;
             this.DocNumber = docNumber;
             this.Password = password;
-            this.DeviceInfo = deviceInfo ?? new DeviceInfo();
+            this.Device = deviceInfo ?? DeviceInfo.Current;
             string defaultDeviceId = $@"{Environment.UserDomainName}\{Environment.UserName}";
-            string deviceId = this.DeviceInfo.DeviceId.DefaultIfNullOrEmpty(defaultDeviceId);
-            this.DeviceInfo.DeviceId = deviceId;
+            string deviceId = this.Device.DeviceId.DefaultIfNullOrEmpty(defaultDeviceId);
+            this.Device.DeviceId = deviceId;
         }
 
         /// <summary>
         /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
         /// </summary>
-        public IDeviceInfo DeviceInfo { get; }
+        public IDeviceInfo Device { get; }
 
         /// <summary>
         /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.

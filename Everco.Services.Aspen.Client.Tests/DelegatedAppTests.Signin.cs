@@ -10,13 +10,12 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using Assets;
-    using Everco.Services.Aspen.Client.Auth;
     using Fluent;
     using Identities;
     using Identity;
     using NUnit.Framework;
     using Providers;
+    using IUserIdentity = Identity.IUserIdentity;
 
     /// <summary>
     /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de delegada.

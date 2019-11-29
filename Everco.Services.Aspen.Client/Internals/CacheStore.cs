@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Internals
     using System;
     using System.Collections.Generic;
     using Auth;
+    using Identity;
 
     /// <summary>
     /// Permite almacenar el último token de autenticación generado.

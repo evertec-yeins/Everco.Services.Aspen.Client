@@ -7,7 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
-    using Auth;
+    using Identity;
     using Modules.Delegated;
 
     /// <summary>

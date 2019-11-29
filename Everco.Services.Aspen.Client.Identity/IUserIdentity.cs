@@ -1,11 +1,11 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="IUserIdentity.cs" company="Evertec Colombia">
+// <copyright file="IUserIdentity.cs" company="Processa">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
-// <author>dmontalvo</author>
-// <date>2019-09-23 10:00 AM</date>
+// <author>atorrest</author>
+// <date>2019-11-29 12:47 PM</date>
 // ----------------------------------------------------------------------
-namespace Everco.Services.Aspen.Client.Auth
+namespace Everco.Services.Aspen.Client.Identity
 {
     /// <summary>
     /// Define la información que se utiliza para autenticar la solicitud en función de un usuario en el servicio Aspen.
@@ -15,7 +15,7 @@ namespace Everco.Services.Aspen.Client.Auth
         /// <summary>
         /// Obtiene la información del dispositivo asociado al usuario que intenta autenticar la solicitud.
         /// </summary>
-        IDeviceInfo DeviceInfo { get; }
+        IDeviceInfo Device { get; }
 
         /// <summary>
         /// Obtiene el número de documento asociado con el usuario que intenta autenticar la solicitud.

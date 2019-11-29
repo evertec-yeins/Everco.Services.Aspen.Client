@@ -1,14 +1,15 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="DeviceInfo.cs" company="Evertec Colombia"> 
+// <copyright file="DeviceInfo.cs" company="Processa">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
-// <date>2019-01-04 06:45 PM</date>
+// <date>2019-11-29 01:02 PM</date>
 // ----------------------------------------------------------------------
-namespace Everco.Services.Aspen.Client.Auth
+namespace Everco.Services.Aspen.Client.Identity
 {
     using System;
     using System.Management;
+    using System.Runtime.InteropServices;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -30,8 +31,13 @@ namespace Everco.Services.Aspen.Client.Auth
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="DeviceInfo"/>.
         /// </summary>
-        public DeviceInfo()
+        private DeviceInfo()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                throw new PlatformNotSupportedException();
+            }
+
             try
             {
                 SelectQuery query = new SelectQuery(@"Select * from Win32_ComputerSystem");
@@ -122,8 +128,10 @@ namespace Everco.Services.Aspen.Client.Auth
                 return this.currentJson;
             }
 
-            this.currentJson = JsonConvert.SerializeObject(this, Formatting.None);
+            this.currentJson = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.None);
             return this.currentJson;
         }
+
+        public static IDeviceInfo Current => new DeviceInfo();
     }
 }

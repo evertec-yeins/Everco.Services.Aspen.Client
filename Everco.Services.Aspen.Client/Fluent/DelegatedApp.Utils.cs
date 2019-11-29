@@ -12,6 +12,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 
     using Entities;
     using Everco.Services.Aspen.Client.Auth;
+    using Identity;
     using Internals;
     using Modules.Delegated;
     using RestSharp;
@@ -87,7 +88,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 contentType: "application/x-www-form-urlencoded");
             request.AddParameter("ErrorReport", errorReport);
             request.AddParameter("Username", userName);
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();
+            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             IRestResponse response = this.RestClient.Execute(request);

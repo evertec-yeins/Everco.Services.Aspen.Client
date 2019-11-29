@@ -8,7 +8,6 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Net;
     using Assets;
     using Everco.Services.Aspen.Client.Auth;
@@ -17,6 +16,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Identity;
     using NUnit.Framework;
     using Providers;
+    using IUserIdentity = Identity.IUserIdentity;
 
     /// <summary>
     /// Implementa las pruebas unitarias de la firma requerida para acceder a las operaciones que requieren autenticación.
@@ -317,7 +317,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
-            TestContext.CurrentContext.DatabaseHelper().EnsureMismatchUserAuthToken(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber, userIdentityMaster.DeviceInfo.DeviceId);
+            TestContext.CurrentContext.DatabaseHelper().EnsureMismatchUserAuthToken(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber, userIdentityMaster.Device.DeviceId);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15846"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
