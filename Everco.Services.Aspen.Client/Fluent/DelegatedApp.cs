@@ -14,6 +14,8 @@ namespace Everco.Services.Aspen.Client.Fluent
     using Internals;
     using Newtonsoft.Json;
     using RestSharp;
+    using IDeviceInfo = Identity.IDeviceInfo;
+    using IUserIdentity = Identity.IUserIdentity;
 
     /// <summary>
     /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance delegada.
@@ -75,7 +77,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.
         /// </returns>
-        public ISession<IDelegatedApp> AuthenticateNoCache(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
+        public ISession<IDelegatedApp> AuthenticateNoCache(
+            string docType, 
+            string docNumber, 
+            string password, 
+            IDeviceInfo deviceInfo = null)
         {
             StaticUserIdentity userIdentity = new StaticUserIdentity(docType, docNumber, password, deviceInfo);
             return this.Authenticate(userIdentity, CachePolicy.BypassCache);

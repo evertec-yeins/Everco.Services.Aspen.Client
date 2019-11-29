@@ -13,13 +13,13 @@ namespace Everco.Services.Aspen.Client.Tests
     using NUnit.Framework;
 
     /// <summary>
-    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de delegada.
+    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicaciÃ³n con alcance de delegada.
     /// </summary>
     [TestFixture]
     public partial class DelegatedAppTests : AppBaseTests
     {
         /// <summary>
-        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// Proporciona un conjunto comÃºn de instrucciones que se ejecutarÃ¡n una Ãºnica vez, antes de llamar al conjunto de pruebas implementadas.
         /// </summary>
         public override void RunBeforeTestFixture()
         {

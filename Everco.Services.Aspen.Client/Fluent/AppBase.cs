@@ -5,6 +5,8 @@
 // <author>dmontalvo</author>
 // <date>2019-09-24 10:00 AM</date>
 // ----------------------------------------------------------------------
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable MemberCanBeProtected.Global
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
@@ -12,6 +14,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Linq;
     using System.Net;
     using Auth;
+    using Identity;
     using Internals;
     using JWT;
     using JWT.Algorithms;

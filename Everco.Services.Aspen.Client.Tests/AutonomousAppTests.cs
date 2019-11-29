@@ -7,19 +7,19 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
+    using Identity;
     using NUnit.Framework;
 
     /// <summary>
-    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de autónoma.
+    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicaciÃ³n con alcance de autÃ³noma.
     /// </summary>
     [TestFixture]
     public partial class AutonomousAppTests : AppBaseTests
     {
         /// <summary>
-        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// Proporciona un conjunto comÃºn de instrucciones que se ejecutarÃ¡n una Ãºnica vez, antes de llamar al conjunto de pruebas implementadas.
         /// </summary>
         public override void RunBeforeTestFixture()
         {

@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Providers
     using System;
     using System.Collections.Generic;
     using Auth;
+    using Identity;
     using Internals;
     using JWT;
     using RestSharp;
@@ -94,7 +95,7 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNullOrEmpty(token, nameof(token));
             Throw.IfNullOrEmpty(username, nameof(username));
 
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? new DeviceInfo();
+            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
@@ -144,7 +145,7 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNullOrEmpty(apiSecret, nameof(apiSecret));
             Throw.IfNull(userIdentity, nameof(userIdentity));
 
-            IDeviceInfo deviceInfo = userIdentity.DeviceInfo ?? CacheStore.GetDeviceInfo() ?? new DeviceInfo();
+            IDeviceInfo deviceInfo = userIdentity.Device ?? CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             CacheStore.SetDeviceInfo(deviceInfo);
 

@@ -10,9 +10,11 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using System;
     using System.Collections.Generic;
     using Auth;
+    using Identity;
     using JWT;
     using Providers;
     using RestSharp;
+    using DeviceInfo = Identity.DeviceInfo;
 
     /// <summary>
     /// Implementa un manejador que establece comportamientos de prueba para las cabeceras personalizadas esperadas por el servicio.
@@ -93,7 +95,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="username">La identificación del usuario autenticado.</param>
         public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
         {
-            IDeviceInfo deviceInfo = new DeviceInfo();
+            IDeviceInfo deviceInfo = DeviceInfo.Current;
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
@@ -128,7 +130,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
         public virtual void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)
         {
-            IDeviceInfo deviceInfo = userIdentity.DeviceInfo ?? new DeviceInfo();
+            IDeviceInfo deviceInfo = userIdentity.Device ?? DeviceInfo.Current;
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());

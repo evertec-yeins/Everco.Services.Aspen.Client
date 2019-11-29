@@ -14,6 +14,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Providers;
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Identities;
+    using Identity;
     using NUnit.Framework;
 
     /// <summary>
@@ -65,12 +66,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.DisableApp(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateEnabled(appIdentity.ApiKey, false);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20006"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
             StringAssert.IsMatch("ApiKey está desactivado. Póngase en contacto con el administrador", exception.Message);
-            SqlDataContext.EnableApp(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateEnabled(appIdentity.ApiKey, true);
         }
 
         /// <summary>
@@ -82,7 +83,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.RemoveAppAuthToken(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().RemoveAppAuthToken(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15847"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -101,7 +102,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(authToken, Is.Not.Null);
             Assert.That(authToken.Expired, Is.False);
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.EnsureExpireAppAuthToken(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureExpireAppAuthToken(appIdentity.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15848"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -117,12 +118,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateChangeSecret(appIdentity.ApiKey, true);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20009"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.UpgradeRequired));
             StringAssert.IsMatch("Necesita actualizar el secreto de la aplicación.", exception.Message);
-            SqlDataContext.EnsureAppNotRequiresChangeSecret(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateChangeSecret(appIdentity.ApiKey, false);
         }
 
         /// <summary>
@@ -171,7 +172,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAutonomousApp client = this.GetAutonomousClient();
             IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
-            SqlDataContext.EnsureMismatchAppAuthToken(appIdentityMaster.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureMismatchAppAuthToken(appIdentityMaster.ApiKey);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15846"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));

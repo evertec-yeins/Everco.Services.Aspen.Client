@@ -16,6 +16,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
+    using Identity;
     using NUnit.Framework;
 
     /// <summary>
@@ -25,7 +26,7 @@ namespace Everco.Services.Aspen.Client.Tests
     public partial class AutonomousAppTests
     {
         /// <summary>
-        /// Obtener las cuentas de un usuario produce una salida v·lida.
+        /// Obtener las cuentas de un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -74,7 +75,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obtener las cuentas por el alias de registro de un usuario produce una salida v·lida.
+        /// Obtener las cuentas por el alias de registro de un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -108,7 +109,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener las cuentas usando un alias de registro que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener las cuentas usando un alias de registro que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -120,11 +121,11 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetAccountsByAlias(channelId, unrecognizedEnrollmentAlias));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener las cuentas usando un canal que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener las cuentas usando un canal que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -136,11 +137,11 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetAccountsByAlias(unrecognizedChannelId, enrollmentAlias));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
-        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -186,7 +187,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obtener los saldos de una cuenta por el alias de registro de un usuario produce una salida v·lida.
+        /// Obtener los saldos de una cuenta por el alias de registro de un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -216,7 +217,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener los saldos de una cuenta usando un alias de registro que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener los saldos de una cuenta usando un alias de registro que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -229,11 +230,11 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetBalancesByAlias(channelId, unrecognizedEnrollmentAlias, accountId));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener los saldos de una cuenta usando un canal que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener los saldos de una cuenta usando un canal que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -246,11 +247,11 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetBalancesByAlias(unrecognizedChannelId, enrollmentAlias, accountId));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
-        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -269,7 +270,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(balances);
             
-            // Los movimientos m·s recientes realizados por todas las cuentas...
+            // Los movimientos m√°s recientes realizados por todas las cuentas...
             IList<MiniStatementInfo> statements = client.Inquiries.GetStatements(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(statements);
             Assert.That(statements.Count, Is.EqualTo(5));
@@ -283,7 +284,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 Assert.That(statement.TranType, Is.Not.Null);
             }
             
-            // Los movimientos realizados por una cuenta especÌfica...
+            // Los movimientos realizados por una cuenta espec√≠fica...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
             IList<MiniStatementInfo> statementsByAccountType = client.Inquiries.GetStatements(docType, docNumber, accountId, accountTypeId);
@@ -353,7 +354,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obtener los movimientos de una cuenta por el alias de registro de un usuario produce una salida v·lida.
+        /// Obtener los movimientos de una cuenta por el alias de registro de un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -372,7 +373,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<BalanceInfo> balances = client.Inquiries.GetBalancesByAlias(channelId, enrollmentAlias, accountId);
             CollectionAssert.IsNotEmpty(balances);
 
-            // Los movimientos m·s recientes realizados por la cuenta...
+            // Los movimientos m√°s recientes realizados por la cuenta...
             IList<MiniStatementInfo> statements = client.Inquiries.GetStatementsByAlias(channelId, enrollmentAlias, accountId);
             CollectionAssert.IsNotEmpty(statements);
             Assert.That(statements.Count, Is.EqualTo(5));
@@ -386,7 +387,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 Assert.That(statement.TranType, Is.Not.Null);
             }
 
-            // Los movimientos realizados por una cuenta especÌfica...
+            // Los movimientos realizados por una cuenta espec√≠fica...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
             IList<MiniStatementInfo> statementsByAccountType = client.Inquiries.GetStatementsByAlias(channelId, enrollmentAlias, accountId, accountTypeId);
@@ -403,7 +404,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener los movimientos de una cuenta usando un alias de registro que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener los movimientos de una cuenta usando un alias de registro que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -416,11 +417,11 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetStatementsByAlias(channelId, unrecognizedEnrollmentAlias, accountId));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
-        /// Se produce una excepciÛn cuando se intenta obtener los movimientos de una cuenta usando un canal que no existe.
+        /// Se produce una excepci√≥n cuando se intenta obtener los movimientos de una cuenta usando un canal que no existe.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -433,7 +434,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() => client.Inquiries.GetStatementsByAlias(unrecognizedChannelId, enrollmentAlias, accountId));
             Assert.That(exception.EventId, Is.EqualTo("15881"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            StringAssert.IsMatch("No se ha encontrado informaciÛn de enrolamiento con los valores suministrados", exception.Message);
+            StringAssert.IsMatch("No se ha encontrado informaci√≥n de enrolamiento con los valores suministrados", exception.Message);
         }
 
         /// <summary>
@@ -443,7 +444,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Inquiries")]
         public void GetAccountsRecognizedDataProvidersRequestWorks()
         {
-            // Se habilitan los proveedores conocidos para la aplicaciÛn...
+            // Se habilitan los proveedores conocidos para la aplicaci√≥n...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
@@ -487,12 +488,12 @@ namespace Everco.Services.Aspen.Client.Tests
                 }
             }
 
-            // Se reestablece la aplicaciÛn para usar el proveedor de datos predeterminando para pruebas...
+            // Se reestablece la aplicaci√≥n para usar el proveedor de datos predeterminando para pruebas...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>
-        /// Obtener las cuentas de un usuario produce una salida v·lida.
+        /// Obtener las cuentas de un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -534,11 +535,11 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Inquiries")]
         public void GetAccountsSafelyUnavailableRecognizedDataProviderRequestWorks()
         {
-            // Se habilitan los proveedores conocidos para la aplicaciÛn...
+            // Se habilitan los proveedores conocidos para la aplicaci√≥n...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
-            // Se configura una conexiÛn inv·lida a un proveedor de datos conocido para esperar que falle la consulta...
+            // Se configura una conexi√≥n inv√°lida a un proveedor de datos conocido para esperar que falle la consulta...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken");
 
             IAutonomousApp client = this.GetAutonomousClient();
@@ -555,21 +556,21 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotEmpty(tupInquiryResult.Reason);
             Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
 
-            // El proveedor de datos de BANCOR debe indicar que no est· disponible para procesar la consulta requerida...
+            // El proveedor de datos de BANCOR debe indicar que no est√° disponible para procesar la consulta requerida...
             AccountSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
             CollectionAssert.IsEmpty(bancorInquiryResult.Data);
             Assert.IsNotEmpty(bancorInquiryResult.Reason);
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
 
-            // Se reestablece la aplicaciÛn para usar el proveedor de datos predeterminando para pruebas...
+            // Se reestablece la aplicaci√≥n para usar el proveedor de datos predeterminando para pruebas...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
-            // Se reestablece las conexiÛn valida al proveedor de datos conocido...
+            // Se reestablece las conexi√≥n valida al proveedor de datos conocido...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
         }
 
         /// <summary>
-        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -611,13 +612,13 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los saldos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
         public void GetBalancesSafelyUnavailableRecognizedDataProviderRequestWorks()
         {
-            // Se habilitan los proveedores conocidos para la aplicaciÛn...
+            // Se habilitan los proveedores conocidos para la aplicaci√≥n...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
@@ -631,34 +632,34 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotNull(accountInfo);
             string accountId = accountInfo.SourceAccountId;
 
-            // Se configura una conexiÛn inv·lida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
+            // Se configura una conexi√≥n inv√°lida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
             IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(inquiryResults);
             Assert.That(inquiryResults.Count, Is.EqualTo(2));
 
-            // El proveedor de datos de TUP debe indicar que no est· disponible para procesar la consulta requerida...
+            // El proveedor de datos de TUP debe indicar que no est√° disponible para procesar la consulta requerida...
             BalanceSafeInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
             CollectionAssert.IsEmpty(tupInquiryResult.Data);
             Assert.IsNotEmpty(tupInquiryResult.Reason);
             Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
 
-            // El proveedor de datos de BANCOR debe indicar que no implementa la caracterÌstica de saldos...
+            // El proveedor de datos de BANCOR debe indicar que no implementa la caracter√≠stica de saldos...
             BalanceSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
             CollectionAssert.IsEmpty(bancorInquiryResult.Data);
             Assert.IsNotEmpty(bancorInquiryResult.Reason);
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.MissingFeature));
 
-            // Se reestablece la aplicaciÛn para usar el proveedor de datos predeterminando para pruebas...
+            // Se reestablece la aplicaci√≥n para usar el proveedor de datos predeterminando para pruebas...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
-            // Se reestablece las conexiÛn valida al proveedor de datos de TUP...
+            // Se reestablece las conexi√≥n valida al proveedor de datos de TUP...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
         }
 
         /// <summary>
-        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -702,11 +703,11 @@ namespace Everco.Services.Aspen.Client.Tests
                 }
             }
 
-            // Los movimientos m·s recientes realizados por la cuenta...
+            // Los movimientos m√°s recientes realizados por la cuenta...
             IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
             AssertStatementsSafeResults(inquiryResults);
 
-            // Los movimientos m·s recientes realizados por la cuenta y el bolsillo especÌfico...
+            // Los movimientos m√°s recientes realizados por la cuenta y el bolsillo espec√≠fico...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
             inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
@@ -714,7 +715,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
-        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v·lida.
+        /// Obtener los movimientos de una cuenta asociada a un usuario produce una salida v√°lida.
         /// </summary>
         [Test]
         [Category("Modules.Inquiries")]
@@ -746,21 +747,21 @@ namespace Everco.Services.Aspen.Client.Tests
                 }
             }
 
-            // Se configura una conexiÛn inv·lida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
+            // Se configura una conexi√≥n inv√°lida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
-            // Los movimientos m·s recientes realizados por la cuenta...
+            // Los movimientos m√°s recientes realizados por la cuenta...
             IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
             AssertStatementsSafeResults(inquiryResults);
 
-            // Los movimientos m·s recientes realizados por la cuenta y el bolsillo especÌfico...
+            // Los movimientos m√°s recientes realizados por la cuenta y el bolsillo espec√≠fico...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
             inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
             AssertStatementsSafeResults(inquiryResults);
 
-            // Se reestablece las conexiÛn valida al proveedor de datos de TUP...
+            // Se reestablece las conexi√≥n valida al proveedor de datos de TUP...
             SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
         }
     }

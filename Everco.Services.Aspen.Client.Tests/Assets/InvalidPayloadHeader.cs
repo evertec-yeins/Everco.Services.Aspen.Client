@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using System;
     using Auth;
     using Everco.Services.Aspen.Client.Providers;
+    using Identity;
     using JWT;
     using RestSharp;
 

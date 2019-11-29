@@ -1,11 +1,11 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="IDeviceInfo.cs" company="Evertec Colombia">
+// <copyright file="IDeviceInfo.cs" company="Processa">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
-// <author>dmontalvo</author>
-// <date>2019-09-24 10:00 AM</date>
+// <author>atorrest</author>
+// <date>2019-11-29 12:48 PM</date>
 // ----------------------------------------------------------------------
-namespace Everco.Services.Aspen.Client.Auth
+namespace Everco.Services.Aspen.Client.Identity
 {
     /// <summary>
     /// Define la información asociada con el dispositivo de un usuario que envía la petición al servicio Aspen.
