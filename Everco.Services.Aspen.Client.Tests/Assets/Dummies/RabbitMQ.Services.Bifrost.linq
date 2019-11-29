@@ -62,60 +62,16 @@ string Exchange => "temporal_tests_rpc";
 
 List<CardHolder> CardHolders => new List<CardHolder>()
 {
-	new CardHolder()
-	{
-		PersonId = 120134,
-		DocType = "CC",
-		DocNumber = "52080323"
-	},
-	new CardHolder()
-	{
-		PersonId = 1244133,
-		DocType = "CC",
-		DocNumber = "79483129"
-	},
-	new CardHolder()
-	{
-		PersonId = 1376155,
-		DocType = "NIT",
-		DocNumber = "75717277"
-	},
-	new CardHolder()
-	{
-		PersonId = 1080,
-		DocType = "CE",
-		DocNumber = "203467"	
-	},
-	new CardHolder()
-	{
-		PersonId = 844842,
-		DocType = "TI",
-		DocNumber = "94030704708"
-	},
-	new CardHolder()
-	{
-		PersonId = 339319,
-		DocType = "CC",
-		DocNumber = "52150900"
-	},
-	new CardHolder()
-	{
-		PersonId = 1222995,
-		DocType = "CC",
-		DocNumber = "3262308"
-	},
-	new CardHolder()
-	{
-		PersonId = 94837,
-		DocType = "CC",
-		DocNumber = "52582664"
-	},
-	new CardHolder()
-	{
-		PersonId = 94837,
-		DocType = "CC",
-		DocNumber = "52582664"
-	}
+	new CardHolder(1, "CC", "52080323"),
+	new CardHolder(2, "CC", "79483129"),
+	new CardHolder(3, "NIT", "75717277"),
+	new CardHolder(4, "CE", "203467"),
+	new CardHolder(5, "TI", "94030704708"),
+	new CardHolder(6, "CC", "52150900"),
+	new CardHolder(7, "CC", "3262308"),
+	new CardHolder(8, "CC", "52582664"),
+	new CardHolder(9, "CC", "52582664"),
+	new CardHolder(12, "CC", "35512889")
 };
 
 Dictionary<string, List<Account>> Accounts => new Dictionary<string, List<Account>>()
@@ -372,6 +328,13 @@ class CardHolder
 		this.RegionName = "Bogotá";
 		this.CustomerGroup = "01";
 		this.Creation = DateTime.Now.AddYears(-(new Random().Next(3, 20)));
+	}
+
+	public CardHolder(long personId, string docType, string docNumber) : this()
+	{
+		this.PersonId = personId;
+		this.DocType = docType;
+		this.DocNumber = docNumber;
 	}
 	
 	public string Address { get; set; }

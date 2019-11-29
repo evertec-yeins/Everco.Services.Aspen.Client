@@ -15,19 +15,24 @@ namespace Everco.Services.Aspen.Client.Fluent
     public interface IAutonomousApp : IRouting<IAutonomousApp>, IAppIdentity<IAutonomousApp>, ISession<IAutonomousApp>
     {
         /// <summary>
+        /// Obtiene un objeto que permite acceder a operaciones de consulta de productos financieros.
+        /// </summary>
+        IInquiriesModule Inquiries { get; }
+
+        /// <summary>
+        /// Obtiene un objeto que permite acceder a las operaciones de administración varias.
+        /// </summary>
+        IManagementModule Management { get; }
+
+        /// <summary>
         /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización del sistema Aspen.
         /// </summary>
         ISettingsModule Settings { get; }
 
         /// <summary>
-        /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización del sistema Aspen.
+        /// Obtiene un objeto que permite acceder a operaciones para utilidades varias.
         /// </summary>
         IUtilsModule Utils { get; }
-
-        /// <summary>
-        /// Obtiene un objeto que permite acceder a la información relacionada con las consultas del sistema Aspen.
-        /// </summary>
-        IInquiriesModule Inquiries { get; }
 
         /// <summary>
         /// Envía al servicio una solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
