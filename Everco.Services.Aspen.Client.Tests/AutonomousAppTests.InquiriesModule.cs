@@ -446,7 +446,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             // Se habilitan los proveedores conocidos para la aplicación...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
             IAutonomousApp client = this.GetAutonomousClient();
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
@@ -489,7 +489,7 @@ namespace Everco.Services.Aspen.Client.Tests
             }
 
             // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
         /// <summary>
@@ -537,10 +537,10 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             // Se habilitan los proveedores conocidos para la aplicación...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
             // Se configura una conexión inválida a un proveedor de datos conocido para esperar que falle la consulta...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken");
 
             IAutonomousApp client = this.GetAutonomousClient();
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
@@ -563,10 +563,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
 
             // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
             // Se reestablece las conexión valida al proveedor de datos conocido...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
         }
 
         /// <summary>
@@ -620,7 +620,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             // Se habilitan los proveedores conocidos para la aplicación...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
             IAutonomousApp client = this.GetAutonomousClient();
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
@@ -633,7 +633,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string accountId = accountInfo.SourceAccountId;
 
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
             IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(inquiryResults);
@@ -652,10 +652,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.MissingFeature));
 
             // Se reestablece la aplicación para usar el proveedor de datos predeterminando para pruebas...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
 
             // Se reestablece las conexión valida al proveedor de datos de TUP...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
         }
 
         /// <summary>
@@ -749,7 +749,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
             // Los movimientos más recientes realizados por la cuenta...
             IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
@@ -762,7 +762,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AssertStatementsSafeResults(inquiryResults);
 
             // Se reestablece las conexión valida al proveedor de datos de TUP...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
         }
     }
 }

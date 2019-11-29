@@ -15,6 +15,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
     using Fluent;
+    using Identity;
     using NUnit.Framework;
 
     /// <summary>
@@ -190,7 +191,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             // Se habilitan los proveedores actuales en la aplicación...
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
             IDelegatedApp client = this.GetDelegatedClient();
             IList<AccountExtendedInfo> accounts = client.Inquiries.GetAccounts();
@@ -233,7 +234,7 @@ namespace Everco.Services.Aspen.Client.Tests
             }
 
             // Se reestablece la aplicación para usar el proveedor predeterminando para pruebas...
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
     }
 }
