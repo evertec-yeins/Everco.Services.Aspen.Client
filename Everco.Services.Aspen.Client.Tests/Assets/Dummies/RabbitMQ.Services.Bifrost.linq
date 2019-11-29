@@ -22,9 +22,9 @@ void Main()
 		ConnectionFactory factory = new ConnectionFactory()
 		{
 			HostName = "localhost",
-			UserName = "guest",
-			Password = "guest",
-			VirtualHost = "/"
+			UserName = "test",
+			Password = "test",
+			VirtualHost = "Bifrost"
 		};
 
 		debugMessage = $"[x] Using connection: 'host={factory.HostName};virtualhost={factory.VirtualHost};username={factory.UserName};password={factory.Password};exchange={this.Exchange}'";
@@ -34,8 +34,7 @@ void Main()
 		{
 			using (IModel channel = connection.CreateModel())
 			{
-				// Nota: use esta línea para crear el exchange si aún no existe. No se necesita declararlo por segunda vez.
-				//channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
+				channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
 				this.GetCardHolder(channel);
 				this.GetBalances(channel);
 				this.GetMiniStatements(channel);
@@ -45,7 +44,7 @@ void Main()
 				flagBluider.AppendLine(debugMessage);
 				
 				File.WriteAllText(flagPath, flagBluider.ToString());
-				Console.WriteLine("Press [enter] to exit.");
+				Console.WriteLine("[i] Press [enter] to exit.");
 				Console.ReadLine();
 			}
 		}
@@ -59,64 +58,20 @@ void Main()
 	}
 }
 
-string Exchange => "easy_net_q_rpc";
+string Exchange => "temporal_tests_rpc";
 
 List<CardHolder> CardHolders => new List<CardHolder>()
 {
-	new CardHolder()
-	{
-		PersonId = 120134,
-		DocType = "CC",
-		DocNumber = "52080323"
-	},
-	new CardHolder()
-	{
-		PersonId = 1244133,
-		DocType = "CC",
-		DocNumber = "79483129"
-	},
-	new CardHolder()
-	{
-		PersonId = 1376155,
-		DocType = "NIT",
-		DocNumber = "75717277"
-	},
-	new CardHolder()
-	{
-		PersonId = 1080,
-		DocType = "CE",
-		DocNumber = "203467"	
-	},
-	new CardHolder()
-	{
-		PersonId = 844842,
-		DocType = "TI",
-		DocNumber = "94030704708"
-	},
-	new CardHolder()
-	{
-		PersonId = 339319,
-		DocType = "CC",
-		DocNumber = "52150900"
-	},
-	new CardHolder()
-	{
-		PersonId = 1222995,
-		DocType = "CC",
-		DocNumber = "3262308"
-	},
-	new CardHolder()
-	{
-		PersonId = 94837,
-		DocType = "CC",
-		DocNumber = "52582664"
-	},
-	new CardHolder()
-	{
-		PersonId = 94837,
-		DocType = "CC",
-		DocNumber = "52582664"
-	}
+	new CardHolder(1, "CC", "52080323"),
+	new CardHolder(2, "CC", "79483129"),
+	new CardHolder(3, "NIT", "75717277"),
+	new CardHolder(4, "CE", "203467"),
+	new CardHolder(5, "TI", "94030704708"),
+	new CardHolder(6, "CC", "52150900"),
+	new CardHolder(7, "CC", "3262308"),
+	new CardHolder(8, "CC", "52582664"),
+	new CardHolder(9, "CC", "52582664"),
+	new CardHolder(12, "CC", "35512889")
 };
 
 Dictionary<string, List<Account>> Accounts => new Dictionary<string, List<Account>>()
@@ -222,34 +177,12 @@ Dictionary<string, List<Statement>> Statements
 		List<Statement> GetRandomStatements()
 		{
 			List<Statement> statements = Enumerable.Empty<Statement>().ToList();
-			Random random = new Random();
-			int randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
+			for (int index = 1; index <= 5; index++)
 			{
 				statements.Add(new Statement("80", "Monedero General"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("81", "Subsidio familiar"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("82", "Subsidio Educativo"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("83", "Bonos"));
-			}
-
-			randomIndex = random.Next(1, 5);
-			for (int index = 1; index <= randomIndex; index++)
-			{
 				statements.Add(new Statement("84", "Viveres General"));
 			}
 
@@ -270,16 +203,10 @@ void GetCardHolder(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CardHolderRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (CardHolderRequest request, CardHolderResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 		response.CardHolders = CardHolders.Where(ch => ch.DocType == request.DocType & ch.DocNumber == request.DocNumber).ToList();
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.CardHolders = null;
-			return;
-		}
 	});
 }
 
@@ -288,7 +215,7 @@ void GetBalances(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.BalanceRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (BalanceRequest request, BalanceResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -296,12 +223,6 @@ void GetBalances(IModel channel)
 		if (Accounts.TryGetValue(key, out List<Account> accounts))
 		{
 			response.Accounts = accounts;
-		}
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.Accounts = null;
-			return;
 		}
 	});
 }
@@ -311,7 +232,7 @@ void GetMiniStatements(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.MiniStatementsRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (MiniStatementsRequest request, MiniStatementsResponse response) =>
 	{
-		Console.WriteLine($"[.] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -319,12 +240,6 @@ void GetMiniStatements(IModel channel)
 		if (Statements.TryGetValue(key, out List<Statement> statements))
 		{
 			response.Statements = statements.Where(s => Regex.IsMatch(s.FromAccountTypeId, request.AccountTypeId)).ToList();
-		}
-
-		if (request.DocNumber.StartsWith("0"))
-		{
-			response.Statements = null;
-			return;
 		}
 	});
 }
@@ -413,6 +328,13 @@ class CardHolder
 		this.RegionName = "Bogotá";
 		this.CustomerGroup = "01";
 		this.Creation = DateTime.Now.AddYears(-(new Random().Next(3, 20)));
+	}
+
+	public CardHolder(long personId, string docType, string docNumber) : this()
+	{
+		this.PersonId = personId;
+		this.DocType = docType;
+		this.DocNumber = docNumber;
 	}
 	
 	public string Address { get; set; }

@@ -1,15 +1,17 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="DummyServices.cs" company="Evertec Colombia">
+// <copyright file="ServicesHelper.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>
 // <date>2019-11-20 12:04 PM</date>
 // -----------------------------------------------------------------------
+// ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests.Assets
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -17,15 +19,32 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     /// <summary>
     /// Implementa funcionalidades para administrar servicios ficticios creados a partir de queries de LINQPad.
     /// </summary>
-    public class DummyServices : IDisposable
+    [SuppressMessage("Style", "IDE0063:Use simple 'using' statement", Justification = "Keep calm and ignore")]
+    public class ServicesHelper : IDisposable
     {
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="DummyServices" />.
+        /// Para uso interno.
         /// </summary>
-        public DummyServices()
+        private static ServicesHelper instance = null;
+
+        /// <summary>
+        /// Los procesos que fueron iniciados por cada servicio ficticio.
+        /// </summary>
+        private Dictionary<string, Process> processesStarted = null;
+
+        /// <summary>
+        /// Impide que se cree una instancia predeterminada de la clase <see cref="ServicesHelper" />.
+        /// </summary>
+        private ServicesHelper()
         {
             this.DummyFilesPath = Path.Join(Directory.GetCurrentDirectory(), @"Assets\Dummies");
+            this.processesStarted = new Dictionary<string, Process>();
         }
+
+        /// <summary>
+        /// The instance.
+        /// </summary>
+        public static ServicesHelper Instance => instance ?? (instance = new ServicesHelper());
 
         /// <summary>
         /// Obtiene la ruta de los archivos ficticios.
@@ -37,22 +56,33 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// </summary>
         public void Dispose()
         {
-            Process[] processes = Process.GetProcessesByName("lprun");
-            foreach (Process process in processes)
+            try
             {
-                process.Kill(true);
-                process.Close();
-                process.Dispose();
-            }
+                IEnumerable<Process> killProcesses = Process.GetProcessesByName("lprun");
+                foreach (Process process in killProcesses)
+                {
+                    process.Kill(true);
+                    process.Close();
+                    process.Dispose();
+                }
 
-            Directory.GetFiles(this.DummyFilesPath, "*.flag", SearchOption.TopDirectoryOnly).ToList().ForEach(File.Delete);
+                Directory.GetFiles(this.DummyFilesPath, "*.flag", SearchOption.TopDirectoryOnly).ToList().ForEach(File.Delete);
+                this.processesStarted?.Clear();
+                this.processesStarted = null;
+                instance = null;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($@"[ERROR] Unhandled exception on killing dummy processes: {exception.Message}");
+                Console.WriteLine(exception);
+            }
         }
 
         /// <summary>
-        /// Inicia todos los servicios de prueba disponibles.
+        /// Inicializa todos los servicios ficticios disponibles.
         /// </summary>
-        /// <returns>La instancia actual de <see cref="DummyServices"/>.</returns>
-        public DummyServices StartAllServices()
+        /// <returns>La instancia actual de <see cref="ServicesHelper"/>.</returns>
+        public ServicesHelper StartAllServices()
         {
             foreach (FileInfo dummyFileInfo in this.GetDummyFiles())
             {
@@ -63,10 +93,21 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         }
 
         /// <summary>
-        /// Inicia el microservicio de Bifrost.
+        /// Inicializa el microservicio de Bancor.
         /// </summary>
-        /// <returns>La instancia actual de <see cref="DummyServices"/>.</returns>
-        public DummyServices StartBifrostService()
+        /// <returns>La instancia actual de <see cref="ServicesHelper"/>.</returns>
+        public ServicesHelper StartBancorService()
+        {
+            FileInfo dummyFileInfo = this.GetDummyFileInfo("RabbitMQ.Services.Bancor.linq");
+            this.StartProcess(dummyFileInfo);
+            return this;
+        }
+
+        /// <summary>
+        /// Inicializa el microservicio de Bifrost.
+        /// </summary>
+        /// <returns>La instancia actual de <see cref="ServicesHelper"/>.</returns>
+        public ServicesHelper StartBifrostService()
         {
             FileInfo dummyFileInfo = this.GetDummyFileInfo("RabbitMQ.Services.Bifrost.linq");
             this.StartProcess(dummyFileInfo);
@@ -97,12 +138,18 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         private void StartProcess(FileInfo dummyFileInfo)
         {
             string key = dummyFileInfo.Name;
+            if (this.processesStarted.ContainsKey(key))
+            {
+                return;
+            }
+
             ProcessStartInfo startInfo = new ProcessStartInfo("lprun.exe")
                                              {
                                                  WindowStyle = ProcessWindowStyle.Minimized,
-                                                 Arguments = dummyFileInfo.FullName
+                                                 Arguments = dummyFileInfo.FullName,
+                                                 CreateNoWindow = true
                                              };
-            Process.Start(startInfo);
+            this.processesStarted.Add(key, Process.Start(startInfo));
 
             // Aquí se pretende dar una espera, hasta comprobar que el servicio realmente inició.
             DateTime waitTime = DateTime.Now.AddSeconds(10);

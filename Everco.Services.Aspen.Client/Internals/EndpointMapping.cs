@@ -139,5 +139,47 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         [EndPointMappingInfo("/inquires/accounts/channel/@[ChannelId]/alias/@[EnrollmentAlias]/id/@[AccountId]/type/@[AccountTypeId]/statements", Method.GET)]
         StatementsByAlias,
+
+        /// <summary>
+        /// Operación para obtener las cuentas para transferencia de saldos vinculadas a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts/docType/@[OwnerDocType]/docNumber/@[OwnerDocNumber]", Method.GET)]
+        TransferAccountsByUserIdentity,
+
+        /// <summary>
+        /// Operación para vincular una cuenta para transferencia de saldos a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts/docType/@[OwnerDocType]/docNumber/@[OwnerDocNumber]", Method.POST)]
+        LinkTransferAccountByUserIdentity,
+
+        /// <summary>
+        /// Operación para desvincular una cuenta registrada a un usuario por el alias de la cuenta.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts/docType/@[OwnerDocType]/docNumber/@[OwnerDocNumber]/alias/@[Alias]", Method.DELETE)]
+        UnlinkTransferAccountByUserIdentityAndAlias,
+
+        /// <summary>
+        /// Operación para desvincular una cuenta registrada a un usuario por la identificación del titular de la cuenta.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts/docTypeOwner/@[OwnerDocType]/docNumberOwner/@[OwnerDocNumber]/docTypeLink/@[CardHolderDocType]/docNumberLink/@[CardHolderDocNumber]", Method.DELETE)]
+        UnlinkTransferAccountByUserIdentityAndCardHolder,
+
+        /// <summary>
+        /// Operación para obtener las cuentas para transferencia de saldos vinculadas al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts", Method.GET)]
+        TransferAccountsFromCurrentUser,
+
+        /// <summary>
+        /// Operación para vincular una cuenta para transferencia de saldos al usuario actual autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts", Method.POST)]
+        LinkTransferAccountFromCurrentUser,
+
+        /// <summary>
+        /// Operación para desvincular una cuenta registrada al usuario actual autenticado por el alias de la cuenta.
+        /// </summary>
+        [EndPointMappingInfo("/transfers/accounts/@[Alias]", Method.DELETE)]
+        UnlinkTransferAccountFromCurrentUserByAlias
     }
 }

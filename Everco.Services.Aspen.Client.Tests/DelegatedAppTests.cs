@@ -7,35 +7,27 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
+    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
-    using Identity;
     using NUnit.Framework;
 
     /// <summary>
-    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicaci�n con alcance de delegada.
+    /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de delegada.
     /// </summary>
+    [TestFixture]
     public partial class DelegatedAppTests : AppBaseTests
     {
         /// <summary>
-        /// Los procesos que fueron iniciados por cada servicio de prueba.
+        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
         /// </summary>
-        private readonly DummyServices dummyServices = null;
-
-        /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="AutonomousAppTests" />.
-        /// </summary>
-        public DelegatedAppTests()
+        public override void RunBeforeTestFixture()
         {
-            this.dummyServices = new DummyServices().StartBifrostService();
+            base.RunBeforeTestFixture();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
+            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
-
-        /// <summary>TestContext.CurrentContext.DatabaseHelper()
-        /// Finaliza una instancia de la clase <see cref="AutonomousAppTests" />.
-        /// </summary>
-        ~DelegatedAppTests() => this.dummyServices.Dispose();
     }
 }
