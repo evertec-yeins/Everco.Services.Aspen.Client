@@ -14,7 +14,6 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Entities;
     using Fluent;
-    using Identities;
     using NUnit.Framework;
     using Providers;
 

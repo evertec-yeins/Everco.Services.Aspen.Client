@@ -11,7 +11,6 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Collections.Generic;
     using System.Net;
     using Assets;
-    using Everco.Services.Aspen.Client.Auth;
     using Fluent;
     using Identities;
     using NUnit.Framework;

@@ -9,7 +9,6 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Net;
-    using System.Text;
     using Fluent;
     using Identities;
     using Identity;
