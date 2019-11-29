@@ -28,36 +28,43 @@ namespace Everco.Services.Aspen.Client.Identity
                                 string apiKeyName = "ASPEN:APIKEY", 
                                 string apiSecretName = "ASPEN:APISECRET")
         {
-            if (string.IsNullOrWhiteSpace(subKeyPath))
+            try
             {
-                throw new ArgumentNullException(nameof(subKeyPath));
-            }
+                if (string.IsNullOrWhiteSpace(subKeyPath))
+                {
+                    throw new ArgumentNullException(nameof(subKeyPath));
+                }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                throw new PlatformNotSupportedException();
-            }
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    throw new PlatformNotSupportedException();
+                }
 
 #pragma warning disable SA0102
 
-            RegistryKey rootKey = root switch
-            {
-                RegistryRoot.LocalMachine => Registry.LocalMachine,
-                RegistryRoot.CurrentUser => Registry.CurrentUser,
-                _ => Registry.ClassesRoot
-            };
+                RegistryKey rootKey = root switch
+                {
+                    RegistryRoot.LocalMachine => Registry.LocalMachine,
+                    RegistryRoot.CurrentUser => Registry.CurrentUser,
+                    _ => Registry.ClassesRoot
+                };
 
 #pragma warning restore SA0102
 
-            using RegistryKey key = rootKey.OpenSubKey(subKeyPath);
+                using RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath);
             
-            if (key == null)
-            {
-                return;
-            }
+                if (registryKey == null)
+                {
+                    return;
+                }
 
-            this.ApiKey = key.GetValue(apiKeyName)?.ToString();
-            this.ApiSecret = key.GetValue(apiSecretName)?.ToString();
+                this.ApiKey = registryKey.GetValue(apiKeyName)?.ToString()?.TryDecrypt();
+                this.ApiSecret = registryKey.GetValue(apiSecretName)?.ToString()?.TryDecrypt();
+            }
+            catch (Exception exception)
+            {
+                throw new IdentityException(exception);
+            }
         }
 
         /// <summary>

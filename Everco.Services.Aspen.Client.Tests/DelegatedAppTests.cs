@@ -10,6 +10,8 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
+    using Identity;
+    using NUnit.Framework;
 
     /// <summary>
     /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de delegada.
@@ -28,11 +30,11 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             this.dummyServices = new DummyServices().StartBifrostService();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
-            SqlDataContext.SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Local");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
 
-        /// <summary>
+        /// <summary>TestContext.CurrentContext.DatabaseHelper()
         /// Finaliza una instancia de la clase <see cref="AutonomousAppTests" />.
         /// </summary>
         ~DelegatedAppTests() => this.dummyServices.Dispose();

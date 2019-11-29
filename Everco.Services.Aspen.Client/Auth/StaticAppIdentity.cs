@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Auth
 {
+    using Identity;
     using Internals;
 
     /// <summary>

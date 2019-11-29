@@ -35,8 +35,8 @@ namespace Everco.Services.Aspen.Client.Identity
                 throw new ArgumentNullException(nameof(apiSecretName));
             }
 
-            this.ApiKey = ConfigurationManager.AppSettings[apiKeyName];
-            this.ApiSecret = ConfigurationManager.AppSettings[apiSecretName];
+            this.ApiKey = ConfigurationManager.AppSettings[apiKeyName].TryDecrypt();
+            this.ApiSecret = ConfigurationManager.AppSettings[apiSecretName].TryDecrypt();
         }
 
         /// <summary>

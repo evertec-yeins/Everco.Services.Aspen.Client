@@ -12,7 +12,7 @@ namespace Everco.Services.Aspen.Client.Identity
     /// <summary>
     /// Obtiene la información que se utiliza para autenticar la solicitud en el servicio Aspen a partir de los valores proporcionados en el constructor de la clase.
     /// </summary>
-    [Obsolete("No es recomendable utilizar esta clase. En su lugar utilice cualquier clase de las que implementa la interfaz IAppIdentity")]
+    [Obsolete("No es recomendable utilizar esta clase. En su lugar utilice cualquier clase que implemente la interfaz IAppIdentity")]
     public class HardCodeIdentity : IAppIdentity
     {
         /// <summary>
@@ -22,8 +22,8 @@ namespace Everco.Services.Aspen.Client.Identity
         /// <param name="apiSecret">Valor que se establece como ApiSecret.</param>
         public HardCodeIdentity(string apiKey, string apiSecret)
         {
-            this.ApiKey = apiKey;
-            this.ApiSecret = apiSecret;
+            this.ApiKey = apiKey?.TryDecrypt();
+            this.ApiSecret = apiSecret?.TryDecrypt();
         }
 
         /// <summary>

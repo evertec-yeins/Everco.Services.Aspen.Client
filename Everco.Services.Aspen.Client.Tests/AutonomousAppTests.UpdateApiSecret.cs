@@ -9,11 +9,10 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Net;
-    using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Fluent;
     using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Client.Tests.Assets;
     using Identities;
+    using Identity;
     using NUnit.Framework;
     using PasswordGenerator;
 
@@ -41,7 +40,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 .WithIdentity(apiKey, currentApiSecret)
                 .UpdateApiSecret(newApiSecret));
 
-            SqlDataContext.RestoreApiSecret(apiKey, currentApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, currentApiSecret);
         }
 
         /// <summary>
@@ -62,9 +61,9 @@ namespace Everco.Services.Aspen.Client.Tests
                 .UpdateApiSecret(newApiSecret));
 
             // El tipo de formato del secreto debe ser 'SecretFormat.Encrypted' (1)
-            Assert.IsTrue(SqlDataContext.AppSecretFormatIsEncrypted(apiKey));
+            Assert.IsTrue(TestContext.CurrentContext.DatabaseHelper().AppSecretFormatIsEncrypted(apiKey));
 
-            SqlDataContext.RestoreApiSecret(apiKey, currentApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, currentApiSecret);
         }
 
         /// <summary>
@@ -94,7 +93,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(client.AuthToken, Is.Not.Null);
             Assert.That(client.AuthToken.Token, Is.Not.Null);
 
-            SqlDataContext.RestoreApiSecret(apiKey, currentApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, currentApiSecret);
         }
 
         /// <summary>
@@ -127,7 +126,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             StringAssert.IsMatch("El contenido de la cabecera personalizada 'X-PRO-Auth-Payload' no es válido. Invalid signature. ¿Está utilizando las credenciales proporcionadas?", exception.Message);
 
-            SqlDataContext.RestoreApiSecret(apiKey, currentApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, currentApiSecret);
         }
 
         /// <summary>
@@ -145,7 +144,7 @@ namespace Everco.Services.Aspen.Client.Tests
             // Ya que el secreto actual de la aplicación de pruebas sólo tiene letras,
             // para saltar las validaciones del nuevo secreto se establece en la aplicación,
             // un secreto aleatorio y a así validar que el nuevo secreto sea igual al actual.
-            SqlDataContext.RestoreApiSecret(apiKey, randomApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, randomApiSecret);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
@@ -160,7 +159,7 @@ namespace Everco.Services.Aspen.Client.Tests
             StringAssert.IsMatch("El nuevo secreto no debe ser igual al actual.", exception.Message);
 
             // Se reestablece el secreto predeterminado.
-            SqlDataContext.RestoreApiSecret(apiKey, currentApiSecret);
+            TestContext.CurrentContext.DatabaseHelper().UpdateApiSecret(apiKey, currentApiSecret);
         }
 
         /// <summary>

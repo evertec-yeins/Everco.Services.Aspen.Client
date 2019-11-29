@@ -8,22 +8,22 @@
 // ReSharper disable ConvertToNullCoalescingCompoundAssignment
 namespace Everco.Services.Aspen.Client.Tests.Identities
 {
-    using Auth;
+    using Everco.Services.Aspen.Client.Identity;
 
     /// <summary>
     /// Representa la información que se utiliza para autenticar la solicitud en el servicio Aspen.
     /// </summary>
-    internal class DelegatedAppIdentity : IAppIdentity
+    internal class DelegatedAppIdentity 
     {
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static IAppIdentity assistantIdentity = null;
+        private static IAppIdentity assistantIdentity;
 
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static IAppIdentity masterIdentity = null;
+        private static IAppIdentity masterIdentity;
 
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="DelegatedAppIdentity" />.
@@ -37,26 +37,19 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         /// <summary>
-        /// Impide que se cree una instancia predeterminada de la clase <see cref="DelegatedAppIdentity" />.
-        /// </summary>
-        private DelegatedAppIdentity()
-        {
-            this.ApiKey = "29b35be3-3159-4800-807e-cde138439378";
-            this.ApiSecret = "colombia";
-        }
-
-        /// <summary>
         /// Obtiene la identidad de una aplicación delegada para fines de comparación.
         /// </summary>
         public static IAppIdentity Helper =>
-            assistantIdentity ?? (assistantIdentity = new DelegatedAppIdentity(
-                                      "54d2f61d-ff72-4968-b363-870e6ac22525",
-                                      "colombia"));
+            assistantIdentity ?? (assistantIdentity = new EnvironmentIdentity(
+                                      "ASPEN:DELEGATEDAPP2:APIKEY",
+                                      "ASPEN:DELEGATEDAPP2:APISECRET"));
 
         /// <summary>
         /// Obtiene la identidad de una aplicación delegada para la autenticación de las pruebas automatizadas.
         /// </summary>
-        public static IAppIdentity Master => masterIdentity ?? (masterIdentity = new DelegatedAppIdentity());
+        public static IAppIdentity Master => masterIdentity ?? (masterIdentity = new EnvironmentIdentity(
+                                                 "ASPEN:DELEGATEDAPP1:APIKEY",
+                                                 "ASPEN:DELEGATEDAPP1:APISECRET"));
 
         /// <summary>
         /// Obtiene el ApiKey que identifica a la aplicación que intenta autenticar la solicitud.

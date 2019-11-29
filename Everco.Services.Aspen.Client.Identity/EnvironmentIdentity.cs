@@ -34,8 +34,8 @@ namespace Everco.Services.Aspen.Client.Identity
                 throw new ArgumentNullException(nameof(apiSecretEnvName));
             }
 
-            this.ApiKey = Environment.GetEnvironmentVariable(apiKeyEnvName);
-            this.ApiSecret = Environment.GetEnvironmentVariable(apiSecretEnvName);
+            this.ApiKey = Environment.GetEnvironmentVariable(apiKeyEnvName).TryDecrypt();
+            this.ApiSecret = Environment.GetEnvironmentVariable(apiSecretEnvName).TryDecrypt();
         }
         
         /// <summary>

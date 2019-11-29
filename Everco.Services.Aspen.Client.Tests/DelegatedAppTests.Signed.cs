@@ -14,6 +14,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Auth;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Fluent;
+    using Identity;
     using NUnit.Framework;
     using Providers;
 
@@ -100,12 +101,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.DisableApp(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateEnabled(appIdentity.ApiKey, false);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20006"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
             StringAssert.IsMatch("ApiKey está desactivado. Póngase en contacto con el administrador", exception.Message);
-            SqlDataContext.EnableApp(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateEnabled(appIdentity.ApiKey, true);
         }
 
         /// <summary>
@@ -120,11 +121,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(authToken, Is.Not.Null);
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
-            SqlDataContext.RemoveUserAuthToken(
-                userIdentity.DocType,
-                userIdentity.DocNumber,
-                authToken.DeviceId,
-                appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().RemoveUserAuthToken(appIdentity.ApiKey, userIdentity.DocType, userIdentity.DocNumber, authToken.DeviceId);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15847"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -145,11 +142,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(authToken.Expired, Is.False);
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
-            SqlDataContext.EnsureExpireUserAuthToken(
-                userIdentity.DocType,
-                userIdentity.DocNumber,
-                authToken.DeviceId,
-                appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureExpireUserAuthToken(appIdentity.ApiKey, userIdentity.DocType, userIdentity.DocNumber, authToken.DeviceId);
 
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15848"));
@@ -166,12 +159,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            SqlDataContext.EnsureAppRequiresChangeSecret(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateChangeSecret(appIdentity.ApiKey, true);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("20009"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.UpgradeRequired));
             StringAssert.IsMatch("Necesita actualizar el secreto de la aplicación.", exception.Message);
-            SqlDataContext.EnsureAppNotRequiresChangeSecret(appIdentity.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().UpdateChangeSecret(appIdentity.ApiKey, false);
         }
 
         /// <summary>
@@ -223,10 +216,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity commonUserIdentity = RecognizedUserIdentity.Master;
             
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
-            SqlDataContext.EnsureUserAndProfileInfo(
-                commonUserIdentity.DocType,
-                commonUserIdentity.DocNumber,
-                appIdentityMaster.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
@@ -239,10 +229,7 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
-            SqlDataContext.EnsureUserAndProfileInfo(
-                commonUserIdentity.DocType,
-                commonUserIdentity.DocNumber,
-                appIdentityHelper.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
@@ -271,10 +258,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
-            SqlDataContext.EnsureUserAndProfileInfo(
-                userIdentityMaster.DocType,
-                userIdentityMaster.DocNumber,
-                appIdentityMaster.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber);
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
@@ -287,10 +271,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
             IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
-            SqlDataContext.EnsureUserAndProfileInfo(
-                userIdentityHelper.DocType,
-                userIdentityHelper.DocNumber,
-                appIdentityHelper.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, userIdentityHelper.DocType, userIdentityHelper.DocNumber);
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
@@ -336,11 +317,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IDelegatedApp client = this.GetDelegatedClient();
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
-            SqlDataContext.EnsureMismatchUserAuthToken(
-                userIdentityMaster.DocType,
-                userIdentityMaster.DocNumber,
-                userIdentityMaster.DeviceInfo.DeviceId,
-                appIdentityMaster.ApiKey);
+            TestContext.CurrentContext.DatabaseHelper().EnsureMismatchUserAuthToken(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber, userIdentityMaster.DeviceInfo.DeviceId);
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetDocTypes());
             Assert.That(exception.EventId, Is.EqualTo("15846"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
