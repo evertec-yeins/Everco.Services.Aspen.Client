@@ -38,7 +38,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Obtiene un cliente para la aplicación autónoma de pruebas a partir de la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
-        public virtual IAutonomousApp GetAutonomousClient() =>
+        protected virtual IAutonomousApp GetAutonomousClient() =>
             AutonomousApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(AutonomousAppIdentity.Master)
@@ -49,7 +49,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Envía al servicio la solicitud de generación de un token de autenticación omitiendo cualquier valor almacenado en memoria.
         /// </summary>
         /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
-        public virtual IDelegatedApp GetDelegatedClient() =>
+        protected virtual IDelegatedApp GetDelegatedClient() =>
             DelegatedApp.Initialize()
                 .RoutingTo(EnvironmentEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
