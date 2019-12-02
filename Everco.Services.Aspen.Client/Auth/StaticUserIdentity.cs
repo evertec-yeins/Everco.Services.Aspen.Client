@@ -10,8 +10,8 @@ namespace Everco.Services.Aspen.Client.Auth
     using System;
     using Identity;
     using Internals;
-    using IUserIdentity = Identity.IUserIdentity;
     using IDeviceInfo = Identity.IDeviceInfo;
+    using IUserIdentity = Identity.IUserIdentity;
 
     /// <summary>
     /// Representa la información que se utiliza para autenticar la solicitud en función de un usuario en el servicio Aspen.

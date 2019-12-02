@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="ConsoleLoggingProvider.cs" company="Processa"> 
+// <copyright file="ConsoleLoggingProvider.cs" company="Evertec Colombia"> 
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>dmontalvo</author>

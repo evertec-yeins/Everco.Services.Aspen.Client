@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="DeviceInfo.cs" company="Processa">
+// <copyright file="DeviceInfo.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -63,6 +63,11 @@ namespace Everco.Services.Aspen.Client.Identity
             this.Idiom = "Desktop";
             this.DeviceType = "Physical";
         }
+
+        /// <summary>
+        /// Obtiene una instancia con la información predeterminada de un dispositivo.
+        /// </summary>
+        public static IDeviceInfo Current => new DeviceInfo();
 
         /// <summary>
         /// Obtiene o establece el identificador del dispositivo.
@@ -131,7 +136,5 @@ namespace Everco.Services.Aspen.Client.Identity
             this.currentJson = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.None);
             return this.currentJson;
         }
-
-        public static IDeviceInfo Current => new DeviceInfo();
     }
 }
