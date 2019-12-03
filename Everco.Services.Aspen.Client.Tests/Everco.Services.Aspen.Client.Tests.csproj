@@ -30,16 +30,14 @@
     <Compile Update="AutonomousAppTests.*.cs">
       <DependentUpon>AutonomousAppTests.cs</DependentUpon>
     </Compile>
-    <Compile Update="AutonomousAppTests - Copy.Utils.cs">
-      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    <Compile Update="DelegatedAppTests.*.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
     </Compile>
     <Compile Update="Data\IDatabaseHelper.cs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="DelegatedAppTests.*.cs">
+    <Compile Update="DelegatedAppTests - Copy.InquiriesModule.cs">
       <DependentUpon>DelegatedAppTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>

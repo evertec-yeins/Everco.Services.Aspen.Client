@@ -23,6 +23,18 @@ namespace Everco.Services.Aspen.Client.Internals
         }
 
         /// <summary>
+        /// Agrega a la colección el parámetro que representa el nombre o alias que identifica a una cuenta.
+        /// </summary>
+        /// <param name="accountAlias">El nombre o alias que identifica a una cuenta.</param>
+        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
+        internal EndpointParameters AddAccountAlias(string accountAlias)
+        {
+            Throw.IfNullOrEmpty(accountAlias, nameof(accountAlias));
+            this.Add("@[Alias]", accountAlias);
+            return this;
+        }
+
+        /// <summary>
         /// Agrega el parámetro que representa el identificador de una cuenta.
         /// </summary>
         /// <param name="accountId">El valor del identificador de la cuenta.</param>
@@ -43,6 +55,30 @@ namespace Everco.Services.Aspen.Client.Internals
         {
             Throw.IfNullOrEmpty(accountTypeId, nameof(accountTypeId));
             this.Add("@[AccountTypeId]", accountTypeId);
+            return this;
+        }
+
+        /// <summary>
+        /// Agrega a la colección el parámetro que representa el número de documento del titular de una cuenta.
+        /// </summary>
+        /// <param name="cardHolderDocNumber">El valor del número de documento del titular.</param>
+        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
+        internal EndpointParameters AddCardHolderDocNumber(string cardHolderDocNumber)
+        {
+            Throw.IfNullOrEmpty(cardHolderDocNumber, nameof(cardHolderDocNumber));
+            this.Add("@[CardHolderDocNumber]", cardHolderDocNumber);
+            return this;
+        }
+
+        /// <summary>
+        /// Agrega a la colección el parámetro que representa el tipo de documento del titular de una cuenta.
+        /// </summary>
+        /// <param name="cardHolderDocType">El valor del tipo de documento del titular.</param>
+        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
+        internal EndpointParameters AddCardHolderDocType(string cardHolderDocType)
+        {
+            Throw.IfNullOrEmpty(cardHolderDocType, nameof(cardHolderDocType));
+            this.Add("@[CardHolderDocType]", cardHolderDocType);
             return this;
         }
 
@@ -95,18 +131,6 @@ namespace Everco.Services.Aspen.Client.Internals
         }
 
         /// <summary>
-        /// Agrega a la colección el parámetro que representa el tipo de documento de un usuario.
-        /// </summary>
-        /// <param name="ownerDocType">El valor del tipo de documento del usuario.</param>
-        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
-        internal EndpointParameters AddOwnerDocType(string ownerDocType)
-        {
-            Throw.IfNullOrEmpty(ownerDocType, nameof(ownerDocType));
-            this.Add("@[OwnerDocType]", ownerDocType);
-            return this;
-        }
-
-        /// <summary>
         /// Agrega a la colección el parámetro que representa el número de documento de un usuario.
         /// </summary>
         /// <param name="ownerDocNumber">El valor del número de documento del usuario.</param>
@@ -115,6 +139,18 @@ namespace Everco.Services.Aspen.Client.Internals
         {
             Throw.IfNullOrEmpty(ownerDocNumber, nameof(ownerDocNumber));
             this.Add("@[OwnerDocNumber]", ownerDocNumber);
+            return this;
+        }
+
+        /// <summary>
+        /// Agrega a la colección el parámetro que representa el tipo de documento de un usuario.
+        /// </summary>
+        /// <param name="ownerDocType">El valor del tipo de documento del usuario.</param>
+        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
+        internal EndpointParameters AddOwnerDocType(string ownerDocType)
+        {
+            Throw.IfNullOrEmpty(ownerDocType, nameof(ownerDocType));
+            this.Add("@[OwnerDocType]", ownerDocType);
             return this;
         }
     }

@@ -16,6 +16,16 @@ namespace Everco.Services.Aspen.Client.Fluent
     public interface IDelegatedApp : IRouting<IDelegatedApp>, IAppIdentity<IDelegatedApp>, ISession<IDelegatedApp>
     {
         /// <summary>
+        /// Obtiene un objeto que permite acceder a la información relacionada con las consultas del sistema Aspen.
+        /// </summary>
+        IInquiriesModule Inquiries { get; }
+
+        /// <summary>
+        /// Obtiene un objeto que permite acceder a las operaciones de administración varias.
+        /// </summary>
+        IManagementModule Management { get; }
+
+        /// <summary>
         /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización del sistema Aspen.
         /// </summary>
         ISettingsModule Settings { get; }
@@ -24,11 +34,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización del sistema Aspen.
         /// </summary>
         IUtilsModule Utils { get; }
-
-        /// <summary>
-        /// Obtiene un objeto que permite acceder a la información relacionada con las consultas del sistema Aspen.
-        /// </summary>
-        IInquiriesModule Inquiries { get; }
 
         /// <summary>
         /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación firmada con las credenciales de un usuario.
@@ -41,6 +46,13 @@ namespace Everco.Services.Aspen.Client.Fluent
         ISession<IDelegatedApp> Authenticate(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null);
 
         /// <summary>
+        /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación firmada con las credenciales de un usuario.
+        /// </summary>
+        /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
+        /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
+        ISession<IDelegatedApp> Authenticate(IUserIdentity userIdentity);
+
+        /// <summary>
         /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
         /// </summary>
         /// <param name="docType">El tipo de documento del usuario que firma la solicitud de autenticación.</param>
@@ -49,13 +61,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="deviceInfo">La información del dispositivo desde donde se intenta autenticar el usuario.</param>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
         ISession<IDelegatedApp> AuthenticateNoCache(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null);
-
-        /// <summary>
-        /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación firmada con las credenciales de un usuario.
-        /// </summary>
-        /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
-        /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>
-        ISession<IDelegatedApp> Authenticate(IUserIdentity userIdentity);
 
         /// <summary>
         /// Envía al servicio de Aspen, una solicitud de generación de un token de autenticación omitiendo cualquier valor en la cache.
