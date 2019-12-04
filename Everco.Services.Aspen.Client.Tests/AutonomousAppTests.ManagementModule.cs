@@ -12,7 +12,6 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Linq;
     using System.Net;
     using System.Text.RegularExpressions;
-
     using Everco.Services.Aspen.Client.Fluent;
     using Everco.Services.Aspen.Client.Identity;
     using Everco.Services.Aspen.Client.Tests.Identities;
@@ -58,7 +57,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         [Test]
         [Category("Modules.Management.TransferAccounts")]
-        public void GetUnlinkedTransferAccountsWorks()
+        public void GetTransferAccountsNoContentWorks()
         {
             this.DeleteTransferAccountsFromRecognizedUser();
             IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
@@ -107,7 +106,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         [Test]
         [Category("Modules.Management.TransferAccounts")]
-        public void LinkRecognizedTransferAccountInfoWorks()
+        public void LinkTransferAccountWorks()
         {
             this.DeleteTransferAccountsFromRecognizedUser();
             IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
@@ -133,6 +132,63 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotEmpty(transferAccountInfo.CardHolderName);
             const string MaskedPanPattern = @".*\d{4}";
             Assert.That(transferAccountInfo.MaskedPan, Is.Not.Null.And.Match(MaskedPanPattern));
+        }
+
+        /// <summary>
+        /// Vincular la información de un titular de cuenta no reconocido.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountUnrecognizedCardHolderThrows()
+        {
+            IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
+            string recognizedDocType = recognizedUserIdentity.DocType;
+            string recognizedDocNumber = recognizedUserIdentity.DocNumber;
+            
+            string recognizedCardHolderDocType = "CC";
+            string unrecognizedCardHolderDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
+            LinkTransferAccountInfo unrecognizedTransferAccountInfo = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType,
+                unrecognizedCardHolderDocNumber,
+                "MyAccountAlias");
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(
+                recognizedDocType,
+                recognizedDocNumber,
+                unrecognizedTransferAccountInfo));
+            Assert.That(exception.EventId, Is.EqualTo("15867"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotAcceptable));
+            StringAssert.IsMatch("No se encuentra información de la cuenta con los datos suministrados", exception.Message);
+        }
+
+        /// <summary>
+        /// Vincular la cuenta de un tarjetahabiente desconocida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountUnrecognizedAccountNumberThrows()
+        {
+            this.DeleteTransferAccountsFromRecognizedUser();
+            IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
+            string recognizedDocType = recognizedUserIdentity.DocType;
+            string recognizedDocNumber = recognizedUserIdentity.DocNumber;
+
+            string recognizedCardHolderDocType = "CC";
+            string recognizedCardHolderDocNumber = "79483129";
+            string recognizedAlias = "MyTransferAccount";
+            string unrecognizedAccountNumber = new Random().Next(1000000000, int.MaxValue).ToString("0000000000000000");
+            LinkTransferAccountInfo unrecognizedTransferAccountInfo = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType,
+                recognizedCardHolderDocNumber,
+                recognizedAlias,
+                unrecognizedAccountNumber);
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(recognizedDocType, recognizedDocNumber, unrecognizedTransferAccountInfo));
+            Assert.That(exception.EventId, Is.EqualTo("15857"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Conflict));
+            StringAssert.IsMatch("Cuenta no pertenece a tarjetahabiente", exception.Message);
         }
 
         /// <summary>
@@ -278,6 +334,170 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotEmpty(transferAccountInfo.CardHolderName);
             const string MaskedPanPattern = @".*\d{4}";
             Assert.That(transferAccountInfo.MaskedPan, Is.Not.Null.And.Match(MaskedPanPattern));
+        }
+
+        /// <summary>
+        /// Vincular la información de una cuenta usando un alias usado por otra cuenta.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountAlreadyExistAliasThrows()
+        {
+            this.DeleteTransferAccountsFromRecognizedUser();
+            IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
+            string recognizedDocType = recognizedUserIdentity.DocType;
+            string recognizedDocNumber = recognizedUserIdentity.DocNumber;
+
+            string recognizedCardHolderDocType1 = "CC";
+            string recognizedCardHolderDocNumber1 = "79483129";
+            string alreadyExistAlias = "MyTransferAccount";
+            LinkTransferAccountInfo linkTransferAccountInfo1 = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType1,
+                recognizedCardHolderDocNumber1,
+                alreadyExistAlias);
+            IAutonomousApp client = this.GetAutonomousClient();
+            Assert.DoesNotThrow(() => client.Management.LinkTransferAccount(recognizedDocType, recognizedDocNumber, linkTransferAccountInfo1));
+            IList<TransferAccountInfo> transferAccounts = client.Management.GetTransferAccounts(recognizedDocType, recognizedDocNumber);
+            CollectionAssert.IsNotEmpty(transferAccounts);
+            TransferAccountInfo transferAccountInfo = transferAccounts.FirstOrDefault(info => info.Alias == alreadyExistAlias);
+            Assert.NotNull(transferAccountInfo);
+
+            string recognizedCardHolderDocType2 = "CC";
+            string recognizedCardHolderDocNumber2 = "35512889";
+            LinkTransferAccountInfo linkTransferAccountInfo2 = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType2,
+                recognizedCardHolderDocNumber2,
+                alreadyExistAlias);
+            AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(
+                recognizedDocType,
+                recognizedDocNumber,
+                linkTransferAccountInfo2));
+            Assert.That(exception.EventId, Is.EqualTo("15853"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Conflict));
+            StringAssert.IsMatch($"Ya existe una cuenta registrada con el nombre '{alreadyExistAlias}'", exception.Message);
+        }
+
+        /// <summary>
+        /// Vincular la información de una tarjetahabiente que ya existe.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountAlreadyExistCardHolderThrows()
+        {
+            this.DeleteTransferAccountsFromRecognizedUser();
+            IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
+            string recognizedDocType = recognizedUserIdentity.DocType;
+            string recognizedDocNumber = recognizedUserIdentity.DocNumber;
+
+            string recognizedCardHolderDocType = "CC";
+            string recognizedCardHolderDocNumber = "79483129";
+            string randomAlias1 = $"MyRandomAlias-{new Random().Next(9999, 99999)}";
+            LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType,
+                recognizedCardHolderDocNumber,
+                randomAlias1);
+            IAutonomousApp client = this.GetAutonomousClient();
+            Assert.DoesNotThrow(() => client.Management.LinkTransferAccount(recognizedDocType, recognizedDocNumber, linkTransferAccountInfo));
+            IList<TransferAccountInfo> transferAccounts = client.Management.GetTransferAccounts(recognizedDocType, recognizedDocNumber);
+            CollectionAssert.IsNotEmpty(transferAccounts);
+            TransferAccountInfo transferAccountInfo = transferAccounts.FirstOrDefault(info => info.CardHolderDocNumber == recognizedCardHolderDocNumber);
+            Assert.NotNull(transferAccountInfo);
+
+            string randomAlias2 = $"MyRandomAlias-{new Random().Next(9999, 99999)}";
+            linkTransferAccountInfo.Alias = randomAlias2;
+            AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(recognizedDocType, recognizedDocNumber, linkTransferAccountInfo));
+            Assert.That(exception.EventId, Is.EqualTo("15863"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Conflict));
+            StringAssert.IsMatch("Cuenta ya está registrada con otro alias", exception.Message);
+        }
+
+        /// <summary>
+        /// Vincular una cuenta a un usuario con un tipo de documento desconocido.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountEmptyOwnerDocTypeThrows()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            string emptyDocType = "     ";
+            string recognizedDocNumber = RecognizedUserIdentity.Master.DocNumber;
+            string recognizedCardHolderDocType = "CC";
+            string recognizedCardHolderDocNumber = "79483129";
+            LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                recognizedCardHolderDocType,
+                recognizedCardHolderDocNumber,
+                "MyAlias");
+            AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(
+                emptyDocType,
+                recognizedDocNumber,
+                linkTransferAccountInfo));
+            Assert.That(exception.EventId, Is.EqualTo("15867"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotAcceptable));
+            StringAssert.IsMatch("'UserDocType' no puede ser nulo ni vacío", exception.Message);
+        }
+
+        /// <summary>
+        /// Vincular una cuenta a un usuario con un tipo de documento desconocido.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountUnrecognizedOwnerDocTypeThrows()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            string recognizedDocNumber = RecognizedUserIdentity.Master.DocNumber;
+            string recognizedCardHolderDocType = "CC";
+            string recognizedCardHolderDocNumber = "79483129";
+            string[] unrecognizedDocTypes = { "01", "10", "xx", "Xx", "xX", "a1", "A1" };
+
+            foreach (string unrecognizedDocType in unrecognizedDocTypes)
+            {
+                LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                    recognizedCardHolderDocType,
+                    recognizedCardHolderDocNumber,
+                    "MyAlias");
+                AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(
+                    unrecognizedDocType,
+                    recognizedDocNumber,
+                    linkTransferAccountInfo));
+                Assert.That(exception.EventId, Is.EqualTo("15867"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotAcceptable));
+                StringAssert.IsMatch($"Tipo de documento en la URL no es reconocido. '{unrecognizedDocType}' no es reconocido como tipo de documento", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Vincular la información de una tarjetahabiente usando un alias inválido.
+        /// </summary>
+        [Test]
+        [Category("Modules.Management.TransferAccounts")]
+        public void LinkTransferAccountInvalidFormatAliasThrows()
+        {
+            this.DeleteTransferAccountsFromRecognizedUser();
+            IUserIdentity recognizedUserIdentity = RecognizedUserIdentity.Master;
+            string recognizedDocType = recognizedUserIdentity.DocType;
+            string recognizedDocNumber = recognizedUserIdentity.DocNumber;
+
+            IAutonomousApp client = this.GetAutonomousClient();
+            string recognizedCardHolderDocType = "CC";
+            string recognizedCardHolderDocNumber = "79483129";
+
+            string[] invalidFormatAlias =
+                {
+                    "Lórem ípsum dolor sit ámet", // NO accents.
+                    "<gXjyhrYqannHUA$LLV&7guTHm.F&1X5JB$Uobx3@!rPn9&x;4BzE>", // NO special characters.
+                    $"{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}-{Guid.NewGuid()}" // Exceeded maximum length (150)
+                };
+            foreach (string invalidAlias in invalidFormatAlias)
+            {
+                LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                    recognizedCardHolderDocType,
+                    recognizedCardHolderDocNumber,
+                    invalidAlias);
+                AspenException exception = Assert.Throws<AspenException>(() => client.Management.LinkTransferAccount(recognizedDocType, recognizedDocNumber, linkTransferAccountInfo));
+                Assert.That(exception.EventId, Is.EqualTo("15867"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotAcceptable));
+                StringAssert.IsMatch(Regex.Escape("'Alias' incluye caracteres inválidos o excede la longitud máxima (150). Por favor utilice letras (sin acentos), números y guiones"), exception.Message);
+            }
         }
 
         /// <summary>

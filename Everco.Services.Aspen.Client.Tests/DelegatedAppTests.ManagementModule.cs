@@ -47,7 +47,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// </summary>
         [Test]
         [Category("Modules.Management.TransferAccounts")]
-        public void GetUnlinkedTransferAccountsWorks()
+        public void GetTransferAccountsNoContentWorks()
         {
             this.DeleteTransferAccountsFromRecognizedUser();
             IDelegatedApp client = this.GetDelegatedClient();
