@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
+    using System;
     using System.Collections.Generic;
     using Everco.Services.Aspen.Entities;
     using Fluent;
@@ -61,18 +62,25 @@ namespace Everco.Services.Aspen.Client.Tests
         private void LinkTransferAccountsToRecognizedUser()
         {
             IDelegatedApp client = this.GetDelegatedClient();
-            List<(string, string)> recognizedCardHolders = new List<(string, string)>
+            List<(string, string, string)> recognizedCardHolders = new List<(string, string, string)>
                                                                {
-                                                                   ("CC", "79483129"),
-                                                                   ("CC", "52150900"),
-                                                                   ("CC", "3262308"),
-                                                                   ("CC", "52582664"),
-                                                                   ("CC", "35512889")
+                                                                   ("CC", "79483129", "6039590286132628"),
+                                                                   ("CC", "52150900", "6039594610201554"),
+                                                                   ("CC", "3262308", "6039590635149836"),
+                                                                   ("CC", "52582664", "6039594246705697"),
+                                                                   ("CC", "35512889", "6039599272117600")
                                                                };
 
-            foreach ((string cardHolderDocType, string cardHolderDocNumber) in recognizedCardHolders)
+            const string RecognizedPinNumber = "141414";
+            foreach ((string cardHolderDocType, string cardHolderDocNumber, string accountNumber) in recognizedCardHolders)
             {
-                LinkTransferAccountPinSignedInfo linkTransferAccountInfo = new LinkTransferAccountPinSignedInfo(cardHolderDocType, cardHolderDocNumber, "141414");
+                string randomAlias = new Random().Next(9999, 99999).ToString();
+                LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                    cardHolderDocType,
+                    cardHolderDocNumber,
+                    randomAlias,
+                    accountNumber,
+                    RecognizedPinNumber);
                 client.Management.LinkTransferAccount(linkTransferAccountInfo);
             }
         }

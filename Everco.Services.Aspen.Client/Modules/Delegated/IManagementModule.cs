@@ -26,8 +26,23 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
         /// <summary>
         /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
         /// </summary>
+        /// <param name="cardHolderDocType">El tipo de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="cardHolderDocNumber">El número de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="alias">El nombre con el que se desea identificar la cuenta a registrar.</param>
+        /// <param name="accountNumber">El número de cuenta que se desea registrar o <c>null</c> para que el sistema busque el número de cuenta asociado con el tarjetahabiente.</param>
+        /// <param name="pinNumber">El pin transaccional del usuario autenticado.</param>
+        void LinkTransferAccount(
+            string cardHolderDocType,
+            string cardHolderDocNumber,
+            string alias,
+            string accountNumber,
+            string pinNumber);
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
+        /// </summary>
         /// <param name="accountInfo">La información de la cuenta a vincular.</param>
-        void LinkTransferAccount(ILinkTransferAccountPinSignedInfo accountInfo);
+        void LinkTransferAccount(ILinkTransferAccountInfo accountInfo);
 
         /// <summary>
         /// Desvincula la información de una cuenta de las cuentas inscritas para transferencia de saldos del usuario actual.

@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Entities;
@@ -34,9 +35,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<TransferAccountInfo> GetTransferAccounts(string docType, string docNumber)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddOwnerDocType(docType)
-                .AddOwnerDocNumber(docNumber);
+            EndpointParameters endpointParameters = new EndpointParameters
+                                                        {
+                                                            { "@[OwnerDocType]", docType },
+                                                            { "@[OwnerDocNumber]", docNumber }
+                                                        };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TransferAccountsByUserIdentity, endpointParameters);
             return this.Execute<List<TransferAccountInfo>>(request) ?? Enumerable.Empty<TransferAccountInfo>().ToList();
         }
@@ -56,6 +59,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// El nombre o alias con el que se desea identificar a la cuenta que se está vinculando.
         /// Cuando es <see langword="null" />, el sistema auto-establece un alias a partir de la combinación de <paramref name="cardHolderDocType" /> y <paramref name="cardHolderDocNumber" />.
         /// </param>
+        /// <exception cref="ArgumentException">Se produce cuando alguno de parámetros: <paramref name="docType"/>, <paramref name="docNumber"/>, <paramref name="cardHolderDocType"/> o <paramref name="cardHolderDocNumber"/> es nulo o vacío.</exception>
         public void LinkTransferAccount(
             string docType,
             string docNumber,
@@ -64,6 +68,14 @@ namespace Everco.Services.Aspen.Client.Fluent
             string accountNumber = null,
             string alias = null)
         {
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(docType, nameof(docType));
+                Throw.IfNullOrEmpty(docNumber, nameof(docNumber));
+                Throw.IfNullOrEmpty(cardHolderDocType, nameof(cardHolderDocType));
+                Throw.IfNullOrEmpty(cardHolderDocNumber, nameof(cardHolderDocNumber));
+            }
+
             LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
                 cardHolderDocType,
                 cardHolderDocNumber,
@@ -78,11 +90,22 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="docType">El tipo de documento del cliente al cual se vinculará la cuenta.</param>
         /// <param name="docNumber">El número de documento del cliente al cual se vinculará la cuenta.</param>
         /// <param name="accountInfo">La información de la cuenta a vincular.</param>
+        /// <exception cref="ArgumentException">Se produce cuando <paramref name="docType"/> o <paramref name="docNumber"/> es nulo o vacío.</exception>
+        /// <exception cref="ArgumentNullException">Se produce cuando <paramref name="accountInfo"/> es nulo.</exception>
         public void LinkTransferAccount(string docType, string docNumber, ILinkTransferAccountInfo accountInfo)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddOwnerDocType(docType)
-                .AddOwnerDocNumber(docNumber);
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(docType, nameof(docType));
+                Throw.IfNullOrEmpty(docNumber, nameof(docNumber));
+                Throw.IfNull(accountInfo, nameof(accountInfo));
+            }
+
+            EndpointParameters endpointParameters = new EndpointParameters
+                                                        {
+                                                            { "@[OwnerDocType]", docType },
+                                                            { "@[OwnerDocNumber]", docNumber }
+                                                        };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.LinkTransferAccountByUserIdentity, endpointParameters);
             request.AddJsonBody(accountInfo);
             this.Execute(request);
@@ -96,10 +119,19 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="alias">El nombre o alias con el que se vinculó la cuenta.</param>
         public void UnlinkTransferAccount(string docType, string docNumber, string alias)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddOwnerDocType(docType)
-                .AddOwnerDocNumber(docNumber)
-                .AddAccountAlias(alias);
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(docType, nameof(docType));
+                Throw.IfNullOrEmpty(docNumber, nameof(docNumber));
+                Throw.IfNullOrEmpty(alias, nameof(alias));
+            }
+
+            EndpointParameters endpointParameters = new EndpointParameters
+                                                        {
+                                                            { "@[OwnerDocType]", docType },
+                                                            { "@[OwnerDocNumber]", docNumber },
+                                                            { "@[Alias]", alias }
+                                                        };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.UnlinkTransferAccountByUserIdentityAndAlias, endpointParameters);
             this.Execute(request);
         }
@@ -117,11 +149,21 @@ namespace Everco.Services.Aspen.Client.Fluent
             string cardHolderDocType,
             string cardHolderDocNumber)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddOwnerDocType(docType)
-                .AddOwnerDocNumber(docNumber)
-                .AddCardHolderDocType(cardHolderDocType)
-                .AddCardHolderDocNumber(cardHolderDocNumber);
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(docType, nameof(docType));
+                Throw.IfNullOrEmpty(docNumber, nameof(docNumber));
+                Throw.IfNullOrEmpty(cardHolderDocType, nameof(cardHolderDocType));
+                Throw.IfNullOrEmpty(cardHolderDocNumber, nameof(cardHolderDocNumber));
+            }
+
+            EndpointParameters endpointParameters = new EndpointParameters
+                                                        {
+                                                            { "@[OwnerDocType]", docType },
+                                                            { "@[OwnerDocNumber]", docNumber },
+                                                            { "@[CardHolderDocType]", cardHolderDocType },
+                                                            { "@[CardHolderDocNumber]", cardHolderDocNumber }
+                                                        };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.UnlinkTransferAccountByUserIdentityAndCardHolder, endpointParameters);
             this.Execute(request);
         }

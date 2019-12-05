@@ -39,9 +39,49 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <summary>
         /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
         /// </summary>
-        /// <param name="accountInfo">La información de la cuenta a vincular.</param>
-        public void LinkTransferAccount(ILinkTransferAccountPinSignedInfo accountInfo)
+        /// <param name="cardHolderDocType">El tipo de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="cardHolderDocNumber">El número de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="alias">El nombre con el que se desea identificar la cuenta a registrar.</param>
+        /// <param name="accountNumber">El número de cuenta que se desea registrar o <c>null</c> para que el sistema busque el número de cuenta asociado con el tarjetahabiente.</param>
+        /// <param name="pinNumber">El pin transaccional del usuario autenticado.</param>
+        public void LinkTransferAccount(
+            string cardHolderDocType,
+            string cardHolderDocNumber,
+            string alias,
+            string accountNumber,
+            string pinNumber)
         {
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(cardHolderDocType, nameof(cardHolderDocType));
+                Throw.IfNullOrEmpty(cardHolderDocNumber, nameof(cardHolderDocNumber));
+                Throw.IfNullOrEmpty(alias, nameof(alias));
+                Throw.IfNullOrEmpty(accountNumber, nameof(accountNumber));
+                Throw.IfNullOrEmpty(pinNumber, nameof(pinNumber));
+            }
+
+            LinkTransferAccountInfo linkTransferAccountInfo = new LinkTransferAccountInfo(
+                cardHolderDocType,
+                cardHolderDocNumber,
+                alias,
+                accountNumber,
+                pinNumber);
+            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.LinkTransferAccountFromCurrentUser);
+            request.AddJsonBody(linkTransferAccountInfo);
+            this.Execute(request);
+        }
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
+        /// </summary>
+        /// <param name="accountInfo">La información de la cuenta a vincular.</param>
+        public void LinkTransferAccount(ILinkTransferAccountInfo accountInfo)
+        {
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNull(accountInfo, nameof(accountInfo));
+            }
+
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.LinkTransferAccountFromCurrentUser);
             request.AddJsonBody(accountInfo);
             this.Execute(request);
@@ -53,8 +93,15 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="alias">El nombre o alias con el que se vinculó la cuenta.</param>
         public void UnlinkTransferAccount(string alias)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddAccountAlias(alias);
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(alias, nameof(alias));
+            }
+
+            EndpointParameters endpointParameters = new EndpointParameters
+                                                        {
+                                                            { "@[Alias]", alias }
+                                                        };
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.UnlinkTransferAccountFromCurrentUserByAlias, endpointParameters);
             this.Execute(request);
         }
