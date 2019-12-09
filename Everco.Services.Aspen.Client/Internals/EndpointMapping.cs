@@ -27,12 +27,6 @@ namespace Everco.Services.Aspen.Client.Internals
         ApiSecret,
 
         /// <summary>
-        /// Operación para cifrar una cadena de texto usando el algoritmo de cifrado del servicio.
-        /// </summary>
-        [EndPointMappingInfo("/utils/crypto", Method.POST)]
-        Encrypt,
-
-        /// <summary>
         /// Operación para obtener la lista de tipos de documento predeterminados soportados por el servicio.
         /// </summary>
         [EndPointMappingInfo("/utils/document-types", Method.GET)]
