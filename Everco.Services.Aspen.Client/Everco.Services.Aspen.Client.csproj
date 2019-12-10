@@ -41,6 +41,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+      <Compile Update="Fluent\AutonomousApp.*.cs">
+        <DependentUpon>Fluent\AutonomousApp.cs</DependentUpon>
+      </Compile>
+    <Compile Update="Fluent\DelegatedApp.*.cs">
+      <DependentUpon>Fluent\DelegatedApp.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Properties\Resources.resx">

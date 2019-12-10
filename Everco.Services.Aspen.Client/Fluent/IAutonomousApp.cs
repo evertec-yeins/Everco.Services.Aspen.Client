@@ -15,10 +15,14 @@ namespace Everco.Services.Aspen.Client.Fluent
     public interface IAutonomousApp : IRouting<IAutonomousApp>, IAppIdentity<IAutonomousApp>, ISession<IAutonomousApp>
     {
         /// <summary>
+        /// /// Obtiene un objeto que permite acceder los endpoints dinámicos del servicio.
+        /// </summary>
+        IDynamicsModule Dynamics { get; }
+
+        /// <summary>
         /// Obtiene un objeto que permite acceder a operaciones de consulta de productos financieros.
         /// </summary>
         IInquiriesModule Inquiries { get; }
-
         /// <summary>
         /// Obtiene un objeto que permite acceder a las operaciones de administración varias.
         /// </summary>

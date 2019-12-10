@@ -10,10 +10,8 @@
 namespace Everco.Services.Aspen.Client
 {
     using System;
-    using System.Collections.Generic;
     using System.Net;
     using System.Text.RegularExpressions;
-    using Newtonsoft.Json;
     using RestSharp;
 
     /// <summary>
