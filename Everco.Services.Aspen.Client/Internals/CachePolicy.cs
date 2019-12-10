@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="CachePolicy.cs" company="Processa">
+// <copyright file="CachePolicy.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>

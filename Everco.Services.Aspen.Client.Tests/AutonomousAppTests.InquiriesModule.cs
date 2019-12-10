@@ -321,9 +321,11 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Inquiries")]
         public void GetStatementsUnrecognizedAccountResponseIsEmpty()
         {
-            IDelegatedApp client = this.GetDelegatedClient();
+            IAutonomousApp client = this.GetAutonomousClient();
+            string fixedDocType = "CC";
+            string unrecognizedDocNumber = new Random().Next(1000000000, int.MaxValue).ToString();
             string unrecognizedAccountId = new Random().Next(999, 9999).ToString();
-            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(unrecognizedAccountId);
+            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(fixedDocType, unrecognizedDocNumber, unrecognizedAccountId);
             Assert.DoesNotThrow(() => GetStatements());
             CollectionAssert.IsEmpty(GetStatements());
         }

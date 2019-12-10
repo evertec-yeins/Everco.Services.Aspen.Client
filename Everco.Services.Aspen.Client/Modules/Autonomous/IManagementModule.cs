@@ -20,7 +20,6 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         /// </summary>
         /// <param name="docType">El tipo de documento del usuario para el que se obtienen las cuentas.</param>
         /// <param name="docNumber">El número de documento del usuario para el que se obtienen las cuentas.</param>
-        /// <returns>Listado de cuentas inscritas.</returns>
         /// <returns>
         /// Lista de instancias de <see cref="ITransferAccountInfo" /> con la información de las cuentas vinculadas al usuario especificado.
         /// </returns>

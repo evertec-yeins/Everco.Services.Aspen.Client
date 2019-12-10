@@ -11,9 +11,9 @@ namespace Everco.Services.Aspen.Client
     using System.Net;
     using Internals;
     using JWT;
-    using JWT.Serializers;
     using Providers;
     using SimpleInjector;
+    using JsonNetSerializer = JWT.Serializers.JsonNetSerializer;
 
     /// <summary>
     /// Expone las operaciones que permiten encapsular y sobrescribir las dependencias del cliente.

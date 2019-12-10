@@ -88,10 +88,10 @@ namespace Everco.Services.Aspen.Client.Tests.Data
             string appKey, 
             string docType, 
             string docNumber, 
-            string pinNumber = null, 
-            string firstName = null, 
+            string pinNumber = null,
+            string firstName = null,
             string lastName = null,
-            string secret = null, 
+            string secret = null,
             string email = null);
 
         /// <summary>

@@ -157,8 +157,11 @@ namespace Everco.Services.Aspen.Client.Tests
                                                              { "Secret", password },
                                                              { "SecretFormat", "InvalidTypeName" }
                                                          };
-            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentity.ApiKey,
-                tempUserIdentity.DocType, tempUserIdentity.DocNumber, userProfile);
+            TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(
+                appIdentity.ApiKey,
+                tempUserIdentity.DocType,
+                tempUserIdentity.DocNumber,
+                userProfile);
 
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {

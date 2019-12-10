@@ -10,8 +10,6 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Everco.Services.Aspen.Client.Auth;
-    using Everco.Services.Aspen.Client.Tests.Assets;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
     using Fluent;

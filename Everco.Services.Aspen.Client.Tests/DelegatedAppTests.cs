@@ -7,28 +7,26 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Auth;
-    using Everco.Services.Aspen.Client.Tests.Assets;
+    using Everco.Services.Aspen.Client.Fluent;
+    using Everco.Services.Aspen.Client.Providers;
     using Everco.Services.Aspen.Client.Tests.Identities;
-    using Identity;
     using NUnit.Framework;
 
     /// <summary>
     /// Implementa las pruebas unitarias para acceder a las operaciones de una aplicación con alcance de delegada.
     /// </summary>
     [TestFixture]
-    public partial class DelegatedAppTests : AppBaseTests
+    public partial class DelegatedAppTests
     {
         /// <summary>
-        /// Proporciona un conjunto común de instrucciones que se ejecutarán una única vez, antes de llamar al conjunto de pruebas implementadas.
+        /// Obtiene un cliente para a partir de la aplicación delegada de pruebas, omitiendo los valores almacenados en memoria. 
         /// </summary>
-        public override void RunBeforeTestFixture()
-        {
-            base.RunBeforeTestFixture();
-            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
-        }
+        /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
+        public IDelegatedApp GetDelegatedClient() =>
+            DelegatedApp.Initialize()
+                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .WithIdentity(DelegatedAppIdentity.Master)
+                .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                .GetClient();
     }
 }
