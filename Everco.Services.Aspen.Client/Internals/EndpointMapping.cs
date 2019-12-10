@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="EndpointMapping.cs" company="Processa">
+// <copyright file="EndpointMapping.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -25,12 +25,6 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         [EndPointMappingInfo("/auth/secret", Method.POST)]
         ApiSecret,
-
-        /// <summary>
-        /// Operación para cifrar una cadena de texto usando el algoritmo de cifrado del servicio.
-        /// </summary>
-        [EndPointMappingInfo("/utils/crypto", Method.POST)]
-        Encrypt,
 
         /// <summary>
         /// Operación para obtener la lista de tipos de documento predeterminados soportados por el servicio.

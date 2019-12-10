@@ -16,6 +16,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
     public class IdentityTests
     {
         [Test]
+        [Category("AppIdentities")]
         public void RegistryIdentityWorks()
         {
             RegistryIdentity identity = new RegistryIdentity(
@@ -32,6 +33,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         [Test]
+        [Category("AppIdentities")]
         public void SecureIdentityWorks()
         {
             // Primer paso (Guardar en un archivo, una única vez)
@@ -48,6 +50,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         [Test]
+        [Category("AppIdentities")]
         public void SecureIdentityWithEntropyWorks()
         {
             // Primer paso (Guardar en un archivo, una única vez, utilizando un valor para la entropia)
@@ -69,9 +72,10 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         }
 
         [Test]
+        [Category("AppIdentities")]
         public void EnvironmentIdentityWorks()
         {
-            var identity = new EnvironmentIdentity(
+            EnvironmentIdentity identity = new EnvironmentIdentity(
                 "ASPEN:AUTONOMOUSAPP2:APIKEY",
                 "ASPEN:AUTONOMOUSAPP2:APISECRET");
 

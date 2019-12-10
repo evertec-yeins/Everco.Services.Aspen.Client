@@ -4,7 +4,6 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="AutonomousAppTests.SigninHeaders.cs~RF1cb673d.TMP" />
     <None Remove="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>
@@ -27,16 +26,20 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="AnonymousTests.*.cs">
+      <DependentUpon>AnonymousTests.cs</DependentUpon>
+    </Compile>
     <Compile Update="AutonomousAppTests.*.cs">
       <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Update="DelegatedAppTests.*.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
     </Compile>
     <Compile Update="Data\IDatabaseHelper.cs">
       <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="DelegatedAppTests.*.cs">
+    <Compile Update="DelegatedAppTests - Copy.InquiriesModule.cs">
       <DependentUpon>DelegatedAppTests.cs</DependentUpon>
     </Compile>
   </ItemGroup>

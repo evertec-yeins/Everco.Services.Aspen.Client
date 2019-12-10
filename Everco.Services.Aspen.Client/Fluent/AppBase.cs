@@ -207,6 +207,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             this.validator = new JwtValidator(ServiceLocator.Instance.JwtJsonSerializer, this.datetimeProvider);
             this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder);
             this.RestClient.Timeout = (int)this.timeout.TotalMilliseconds;
+            this.RestClient.UseSerializer(JsonNetSerializer.Default);
 
             IWebProxy webProxy = ServiceLocator.Instance.WebProxy;
             if (webProxy.GetType() != typeof(NullWebProxy))

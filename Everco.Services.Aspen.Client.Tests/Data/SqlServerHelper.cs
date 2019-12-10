@@ -265,29 +265,29 @@ UPDATE [dbo].[AuthTokenUser]
 			string appKey,
 			string docType,
 			string docNumber,
-			string pinNumber = "141414",
-			string firstName = "Pepe",
-			string lastName = "Cortisona",
-			string secret = "colombia",
-			string email = "pepe@cortisona.com")
+			string pinNumber = null,
+			string firstName = null,
+			string lastName = null,
+			string secret = null,
+			string email = null)
 		{
 			this.EnsureUserInfo(docType, docNumber);
 			int userId = this.GetUserId(docType, docNumber);
 			int appId = this.GetAppId(appKey);
 			var pinNumberInfo = new
 			{
-				PinNumber = pinNumber,
+				PinNumber = pinNumber ?? "141414",
 				PinFormat = "Clear",
 				DeviceId = $@"{Environment.UserDomainName}\{Environment.UserName}",
 				LastUpdateAt = DateTime.Now
 			};
 			Dictionary<string, string> profileProperties = new Dictionary<string, string>()
 															  {
-																  { "LastName", lastName },
-																  { "FirstName", firstName },
-																  { "Secret", secret },
+                                                                  { "FirstName", firstName ?? "Pepe" },
+                                                                  { "LastName", lastName ?? "Cortisona" },
+																  { "Secret", secret ?? "colombia" },
 																  { "SecretFormat", "Clear" },
-																  { "Email", email },
+																  { "Email", email ?? "pepe@cortisona.com" },
 																  { "PinMetadata", JsonConvert.SerializeObject(pinNumberInfo, Formatting.None) }
 															  };
 			this.AddUserProfileProperties(userId, appId, profileProperties);

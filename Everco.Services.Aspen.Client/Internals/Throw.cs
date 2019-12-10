@@ -1,6 +1,6 @@
 ﻿// -----------------------------------------------------------------------
 // <copyright file="Throw.cs" company="Evertec Colombia"> 
-// Copyright (c) 2018 Todos los derechos reservados.
+// Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
 // <date>2019-01-03 04:44 PM</date>

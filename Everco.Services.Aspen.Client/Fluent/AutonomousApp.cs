@@ -239,5 +239,52 @@ namespace Everco.Services.Aspen.Client.Fluent
                 ? default
                 : JsonConvert.DeserializeObject<TResponse>(response.Content);
         }
+
+        /// <summary>
+        /// Envía la solicitud al servicio Aspen.
+        /// </summary>
+        /// <param name="request">Información de la solicitud.</param>
+        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
+        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
+        private void Execute(IRestRequest request, string apiVersion = null)
+        {
+            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
+            ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, this.AuthToken.Token);
+            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
+            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
+            Dictionary<string, object> body = this.GetBody(request.Parameters);
+            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
+            try
+            {
+                payload = this.JwtDecoder.Decode(payload);
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
+            }
+            catch (Exception)
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
+            }
+
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+            IRestResponse response = this.RestClient.Execute(request);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
+            string responseContent = responseContentType.Contains("text/html")
+                                         ? "[TEXT/HTML]"
+                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
+
+            if (!response.IsSuccessful)
+            {
+                throw new AspenException(response);
+            }
+        }
     }
 }

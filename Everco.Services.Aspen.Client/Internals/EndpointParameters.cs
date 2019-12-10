@@ -7,7 +7,6 @@
 // -----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Internals
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
@@ -18,7 +17,7 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="EndpointParameters" />
         /// </summary>
-        internal EndpointParameters() : base(new Dictionary<string, object>())
+        public EndpointParameters() : base(new Dictionary<string, object>())
         {
         }
 
@@ -91,30 +90,6 @@ namespace Everco.Services.Aspen.Client.Internals
         {
             Throw.IfNullOrEmpty(enrollmentAlias, nameof(enrollmentAlias));
             this.Add("@[EnrollmentAlias]", enrollmentAlias);
-            return this;
-        }
-
-        /// <summary>
-        /// Agrega a la colección el parámetro que representa el tipo de documento de un usuario.
-        /// </summary>
-        /// <param name="ownerDocType">El valor del tipo de documento del usuario.</param>
-        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
-        internal EndpointParameters AddOwnerDocType(string ownerDocType)
-        {
-            Throw.IfNullOrEmpty(ownerDocType, nameof(ownerDocType));
-            this.Add("@[OwnerDocType]", ownerDocType);
-            return this;
-        }
-
-        /// <summary>
-        /// Agrega a la colección el parámetro que representa el número de documento de un usuario.
-        /// </summary>
-        /// <param name="ownerDocNumber">El valor del número de documento del usuario.</param>
-        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
-        internal EndpointParameters AddOwnerDocNumber(string ownerDocNumber)
-        {
-            Throw.IfNullOrEmpty(ownerDocNumber, nameof(ownerDocNumber));
-            this.Add("@[OwnerDocNumber]", ownerDocNumber);
             return this;
         }
     }

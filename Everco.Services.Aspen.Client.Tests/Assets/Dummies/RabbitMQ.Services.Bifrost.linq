@@ -62,116 +62,69 @@ string Exchange => "temporal_tests_rpc";
 
 List<CardHolder> CardHolders => new List<CardHolder>()
 {
-	new CardHolder(1, "CC", "52080323"),
-	new CardHolder(2, "CC", "79483129"),
-	new CardHolder(3, "NIT", "75717277"),
+	new CardHolder(1, "CC", "79483129"),
+	new CardHolder(2, "CC", "52080323"),
+	new CardHolder(3, "NJ", "75717277"),
 	new CardHolder(4, "CE", "203467"),
 	new CardHolder(5, "TI", "94030704708"),
-	new CardHolder(6, "CC", "52150900"),
-	new CardHolder(7, "CC", "3262308"),
-	new CardHolder(8, "CC", "52582664"),
+	new CardHolder(6, "PS", "10888002"),
+	new CardHolder(7, "CC", "52150900"),
+	new CardHolder(8, "CC", "3262308"),
 	new CardHolder(9, "CC", "52582664"),
-	new CardHolder(12, "CC", "35512889")
+	new CardHolder(10, "CC", "35512889"),
+	new CardHolder(11, "CC", "52099375"),
+	new CardHolder(12, "CC", "1000047909")
 };
 
-Dictionary<string, List<Account>> Accounts => new Dictionary<string, List<Account>>()
+Dictionary<string, List<Account>> accounts = null;
+Dictionary<string, List<Account>> Accounts
 {
-	{ 
-		"CC-52080323",
-		new List<Account>()
+	get
+	{
+		if (this.accounts != null && this.accounts.Any())
 		{
-			new Account()
-			{
-				CustomerId = 904,
-				CustomerTypeId = 1,
-				CustomerTypeName = "AFILIADO",
-				CustomerStatusId = 1,
-				CustomerStatusName = "CLIENTE TIENE TARJETA",
-				CardId = 84,
-				CardStatusId = null,
-				CardStatusName = "OK",
-				CardEnabled = true,
-				Pan = "6039597499604889",
-				AccountTypeId = "80",
-				AccountTypeName = "Monedero General",
-				AccountNumber = "603959749960488980"
-			},
-			new Account()
-			{
-				CustomerId = 904,
-				CustomerTypeId = 1,
-				CustomerTypeName = "AFILIADO",
-				CustomerStatusId = 1,
-				CustomerStatusName = "CLIENTE TIENE TARJETA",
-				CardId = 84,
-				CardStatusId = null,
-				CardStatusName = "OK",
-				CardEnabled = true,
-				Pan = "6039597499604889",
-				AccountTypeId = "81",
-				AccountTypeName = "Subsidio familiar",
-				AccountNumber = "603959749960488981"
-			},
-			new Account()
-			{
-				CustomerId = 904,
-				CustomerTypeId = 1,
-				CustomerTypeName = "AFILIADO",
-				CustomerStatusId = 1,
-				CustomerStatusName = "CLIENTE TIENE TARJETA",
-				CardId = 84,
-				CardStatusId = null,
-				CardStatusName = "OK",
-				CardEnabled = true,
-				Pan = "6039597499604889",
-				AccountTypeId = "82",
-				AccountTypeName = "Subsidio Educativo",
-				AccountNumber = "603959749960488982"
-			},
-			new Account()
-			{
-				CustomerId = 904,
-				CustomerTypeId = 1,
-				CustomerTypeName = "AFILIADO",
-				CustomerStatusId = 1,
-				CustomerStatusName = "CLIENTE TIENE TARJETA",
-				CardId = 84,
-				CardStatusId = null,
-				CardStatusName = "OK",
-				CardEnabled = true,
-				Pan = "6039597499604889",
-				AccountTypeId = "83",
-				AccountTypeName = "Bonos",
-				AccountNumber = "603959749960488983"
-			},
-			new Account()
-			{
-				CustomerId = 904,
-				CustomerTypeId = 1,
-				CustomerTypeName = "AFILIADO",
-				CustomerStatusId = 1,
-				CustomerStatusName = "CLIENTE TIENE TARJETA",
-				CardId = 84,
-				CardStatusId = null,
-				CardStatusName = "OK",
-				CardEnabled = true,
-				Pan = "6039597499604889",
-				AccountTypeId = "84",
-				AccountTypeName = "Viveres General",
-				AccountNumber = "603959749960488984"
-			}
+			return this.accounts;
 		}
+
+		List<Account> GetRandomAccounts(long cardId, string accountNumber)
+		{
+			List<Account> accounts = Enumerable.Empty<Account>().ToList();
+			accounts.Add(new Account(cardId, "80", "Monedero General", accountNumber));
+			accounts.Add(new Account(cardId, "81", "Subsidio familiar", accountNumber));
+			accounts.Add(new Account(cardId, "82", "Subsidio Educativo", accountNumber));
+			accounts.Add(new Account(cardId, "83", "Bonos", accountNumber));
+			accounts.Add(new Account(cardId, "84", "Viveres General", accountNumber));
+			return accounts.OrderBy(x => x.AccountTypeId).ToList();
+		}
+
+		this.accounts = new Dictionary<string, List<Account>>()
+		{
+			{ "CC-79483129", GetRandomAccounts(203945, "6039590286132628") },
+			{ "CC-52080323", GetRandomAccounts(84, "6039597499604889") },
+			{ "NJ-75717277", GetRandomAccounts(1465021, "6039591139502645") },
+			{ "CE-203467", GetRandomAccounts(830632, "6039599197746541") },
+			{ "TI-94030704708", GetRandomAccounts(343175, "6039590361618343") },
+			{ "PS-10888002", GetRandomAccounts(1478394, "6039590830592384") },
+			{ "CC-52150900", GetRandomAccounts(640067, "6039594610201554") },
+			{ "CC-3262308", GetRandomAccounts(1234113, "6039590635149836") },
+			{ "CC-52582664", GetRandomAccounts(138665, "6039594246705697") },
+			{ "CC-35512889", GetRandomAccounts(617984, "6039599272117600") },
+			{ "CC-52099375", GetRandomAccounts(131202, "6039593514025838") },
+			{ "CC-1000047909", GetRandomAccounts(696026, "6039593151183452") }
+		};
+
+		return this.accounts;
 	}
-};
+}
 
 Dictionary<string, List<Statement>> statements = null;
 Dictionary<string, List<Statement>> Statements
 {
 	get
 	{
-		if (statements != null)
+		if (this.statements != null && this.statements.Any())
 		{
-			return statements;
+			return this.statements;
 		}
 		
 		List<Statement> GetRandomStatements()
@@ -189,12 +142,23 @@ Dictionary<string, List<Statement>> Statements
 			return statements.OrderBy(x => x.TransactionDate).ToList();
 		}
 		
-		statements = new Dictionary<string, List<Statement>>()
+		this.statements = new Dictionary<string, List<Statement>>()
 		{
-			{ "CC-52080323", GetRandomStatements() }
+			{ "CC-79483129", GetRandomStatements() },
+			{ "CC-52080323", GetRandomStatements() },
+			{ "NJ-75717277", GetRandomStatements() },
+			{ "CE-203467", GetRandomStatements() },
+			{ "TI-94030704708", GetRandomStatements() },
+			{ "PS-10888002", GetRandomStatements() },
+			{ "CC-52150900", GetRandomStatements() },
+			{ "CC-3262308", GetRandomStatements() },
+			{ "CC-52582664", GetRandomStatements() },
+			{ "CC-35512889", GetRandomStatements() },
+			{ "CC-52099375", GetRandomStatements() },
+			{ "CC-1000047909", GetRandomStatements() },
 		};
-		
-		return statements;
+
+		return this.statements;
 	}
 }
 
@@ -203,7 +167,7 @@ void GetCardHolder(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CardHolderRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (CardHolderRequest request, CardHolderResponse response) =>
 	{
-		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request [{request.DocType}-{request.DocNumber}] Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 		response.CardHolders = CardHolders.Where(ch => ch.DocType == request.DocType & ch.DocNumber == request.DocNumber).ToList();
@@ -215,7 +179,7 @@ void GetBalances(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.BalanceRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (BalanceRequest request, BalanceResponse response) =>
 	{
-		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Balances Request [{request.DocType}-{request.DocNumber}] Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -232,7 +196,7 @@ void GetMiniStatements(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.MiniStatementsRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (MiniStatementsRequest request, MiniStatementsResponse response) =>
 	{
-		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Card Holder Request Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Statements Request [{request.DocType}-{request.DocNumber}] Received...");
 		request.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 		response.CorrelationalId = request.CorrelationalId;
 
@@ -380,7 +344,33 @@ class Account
 {
 	public Account()
 	{
+		this.CustomerId = new Random().Next(999, 99999);
+		this.CustomerTypeId = 1;
+		this.CustomerTypeName = "AFILIADO";
+		this.CustomerStatusId = 1;
+		this.CustomerStatusName = "CLIENTE TIENE TARJETA";
+		this.CardId = new Random().Next(999, 99999);
+		this.CardStatusId = null;
+		this.CardStatusName = "OK";
+		this.CardEnabled = true;
+		this.Pan = new Random().Next(99999999, 999999999).ToString("0000000000000000");
+		this.AccountTypeId = "80";
+		this.AccountTypeName = "Monedero General";
+		this.AccountNumber = $"{this.Pan}{this.AccountTypeId}";
 		this.AccountBalance = 2000000;
+	}
+	
+	public Account(
+		long cardId,
+		string accountTypeId,
+		string accountTypeName,
+		string accountNumber) : this()
+	{
+		this.CardId = cardId;
+		this.Pan = accountNumber;
+		this.AccountTypeId = accountTypeId;
+		this.AccountTypeName = accountTypeName;
+		this.AccountNumber = $"{this.Pan}{this.AccountTypeId}";
 	}
 	
 	public long CustomerId { get; set; }
