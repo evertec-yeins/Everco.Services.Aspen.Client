@@ -12,6 +12,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Net;
     using Auth;
     using Internals;
+    using Modules.Autonomous;
     using Newtonsoft.Json;
     using RestSharp;
 
@@ -35,6 +36,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             return new AutonomousApp();
         }
+
+        /// <summary>
+        /// Obtiene un objeto que permite acceder a los endpoints dinámicos del servicio.
+        /// </summary>
+        public IDynamicsModule Dynamics => this;
 
         /// <summary>
         /// Envía al servicio la solicitud de generación de un token de autenticación.
@@ -135,6 +141,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"========== {request.Resource} Start ==========");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
@@ -164,6 +171,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                                          : response.Content.DefaultIfNullOrEmpty("NONSET");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"========== {request.Resource} End ==========");
 
             if (!response.IsSuccessful)
             {
@@ -188,9 +196,11 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, this.AuthToken.Token);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"========== {request.Resource} Start ==========");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
+#if DEBUG
             Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
             Dictionary<string, object> body = this.GetBody(request.Parameters);
             string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
@@ -206,6 +216,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
@@ -217,6 +228,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                                          : response.Content.DefaultIfNullOrEmpty("NONSET");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"========== {request.Resource} End ==========");
 
             if (!response.IsSuccessful)
             {

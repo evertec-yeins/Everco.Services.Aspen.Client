@@ -25,7 +25,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static ServicesHelper instance = null;
+        private static ServicesHelper instance;
 
         /// <summary>
         /// Los procesos que fueron iniciados por cada servicio ficticio.

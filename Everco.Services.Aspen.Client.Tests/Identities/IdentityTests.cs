@@ -12,7 +12,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
     using Identity;
     using NUnit.Framework;
 
-    [TestFixture()]
+    [TestFixture]
     public class IdentityTests
     {
         [Test]
