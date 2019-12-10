@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="AutonomousAppDynamics.cs" company="Processa">
+// <copyright file="AutonomousApp.Dynamics.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -19,6 +19,11 @@ namespace Everco.Services.Aspen.Client.Fluent
     /// </summary>
     public partial class AutonomousApp : IDynamicsModule
     {
+        /// <summary>
+        /// Obtiene un objeto que permite acceder a los endpoints dinámicos del servicio.
+        /// </summary>
+        public IDynamicsModule Dynamics => this;
+
         /// <summary>
         /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
         /// </summary>

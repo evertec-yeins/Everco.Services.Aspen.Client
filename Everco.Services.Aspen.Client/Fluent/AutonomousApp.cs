@@ -38,11 +38,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Obtiene un objeto que permite acceder a los endpoints dinámicos del servicio.
-        /// </summary>
-        public IDynamicsModule Dynamics => this;
-
-        /// <summary>
         /// Envía al servicio la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.</returns>

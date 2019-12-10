@@ -503,13 +503,13 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
             string docType = userIdentity.DocType;
             string docNumber = userIdentity.DocNumber;
-            IList<AccountSafeInfo> inquiryResults = client.Inquiries.GetAccountsSafely(docType, docNumber);
+            IList<AccountResultInfo> inquiryResults = client.InquiriesV11.GetAccounts(docType, docNumber);
             CollectionAssert.IsNotEmpty(inquiryResults);
             Assert.That(inquiryResults.Count, Is.EqualTo(1));
 
             const string AccountIdPattern = @"^[\d]*$";
             const string AccountNumberPattern = @".*\d{4}";
-            foreach (AccountSafeInfo inquiryResult in inquiryResults)
+            foreach (AccountResultInfo inquiryResult in inquiryResults)
             {
                 CollectionAssert.IsNotEmpty(inquiryResult.Data);
                 Assert.IsNotEmpty(inquiryResult.Reason);
@@ -546,18 +546,18 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
             string docType = userIdentity.DocType;
             string docNumber = userIdentity.DocNumber;
-            IList<AccountSafeInfo> inquiryResults = client.Inquiries.GetAccountsSafely(docType, docNumber);
+            IList<AccountResultInfo> inquiryResults = client.InquiriesV11.GetAccounts(docType, docNumber);
             CollectionAssert.IsNotEmpty(inquiryResults);
             Assert.That(inquiryResults.Count, Is.EqualTo(2));
 
             // El proveedor de datos de TUP debe retornar un resultado por la consulta de cuentas...
-            AccountSafeInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
+            AccountResultInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
             CollectionAssert.IsNotEmpty(tupInquiryResult.Data);
             Assert.IsNotEmpty(tupInquiryResult.Reason);
             Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
 
             // El proveedor de datos de BANCOR debe indicar que no está disponible para procesar la consulta requerida...
-            AccountSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
+            AccountResultInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
             CollectionAssert.IsEmpty(bancorInquiryResult.Data);
             Assert.IsNotEmpty(bancorInquiryResult.Reason);
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
@@ -586,13 +586,13 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.IsNotNull(accountInfo);
             string accountId = accountInfo.SourceAccountId;
 
-            IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
+            IList<BalanceResultInfo> inquiryResults = client.InquiriesV11.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(inquiryResults);
             Assert.That(inquiryResults.Count, Is.EqualTo(1));
 
             const string AccountTypesPattern = "80|81|82|83|84";
             const string AccountNumberPattern = @".*\d{4}";
-            foreach (BalanceSafeInfo inquiryResult in inquiryResults)
+            foreach (BalanceResultInfo inquiryResult in inquiryResults)
             {
                 CollectionAssert.IsNotEmpty(inquiryResult.Data);
                 Assert.IsNotEmpty(inquiryResult.Reason);
@@ -635,18 +635,18 @@ namespace Everco.Services.Aspen.Client.Tests
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
-            IList<BalanceSafeInfo> inquiryResults = client.Inquiries.GetBalancesSafely(docType, docNumber, accountId);
+            IList<BalanceResultInfo> inquiryResults = client.InquiriesV11.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(inquiryResults);
             Assert.That(inquiryResults.Count, Is.EqualTo(2));
 
             // El proveedor de datos de TUP debe indicar que no está disponible para procesar la consulta requerida...
-            BalanceSafeInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
+            BalanceResultInfo tupInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Tup);
             CollectionAssert.IsEmpty(tupInquiryResult.Data);
             Assert.IsNotEmpty(tupInquiryResult.Reason);
             Assert.That(tupInquiryResult.Status, Is.EqualTo(SubsystemStatus.Unavailable));
 
             // El proveedor de datos de BANCOR debe indicar que no implementa la característica de saldos...
-            BalanceSafeInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
+            BalanceResultInfo bancorInquiryResult = inquiryResults.First(info => info.Subsystem == Subsystem.Bancor);
             CollectionAssert.IsEmpty(bancorInquiryResult.Data);
             Assert.IsNotEmpty(bancorInquiryResult.Reason);
             Assert.That(bancorInquiryResult.Status, Is.EqualTo(SubsystemStatus.MissingFeature));
@@ -678,11 +678,11 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(balances);
 
-            void AssertStatementsSafeResults(IList<MiniStatementSafeInfo> statementInquiryResults)
+            void AssertStatementsSafeResults(IList<MiniStatementResultInfo> statementInquiryResults)
             {
                 CollectionAssert.IsNotEmpty(statementInquiryResults);
                 Assert.That(statementInquiryResults.Count, Is.EqualTo(1));
-                foreach (MiniStatementSafeInfo inquiryResult in statementInquiryResults)
+                foreach (MiniStatementResultInfo inquiryResult in statementInquiryResults)
                 {
                     Assert.IsNotEmpty(inquiryResult.Reason);
                     Assert.That(inquiryResult.Status, Is.EqualTo(SubsystemStatus.Available));
@@ -704,13 +704,13 @@ namespace Everco.Services.Aspen.Client.Tests
             }
 
             // Los movimientos más recientes realizados por la cuenta...
-            IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
+            IList<MiniStatementResultInfo> inquiryResults = client.InquiriesV11.GetStatements(docType, docNumber, accountId);
             AssertStatementsSafeResults(inquiryResults);
 
             // Los movimientos más recientes realizados por la cuenta y el bolsillo específico...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
-            inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
+            inquiryResults = client.InquiriesV11.GetStatements(docType, docNumber, accountId, accountTypeId);
             AssertStatementsSafeResults(inquiryResults);
         }
 
@@ -734,11 +734,11 @@ namespace Everco.Services.Aspen.Client.Tests
             IList<BalanceInfo> balances = client.Inquiries.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(balances);
 
-            void AssertStatementsSafeResults(IList<MiniStatementSafeInfo> statementInquiryResults)
+            void AssertStatementsSafeResults(IList<MiniStatementResultInfo> statementInquiryResults)
             {
                 CollectionAssert.IsNotEmpty(statementInquiryResults);
                 Assert.That(statementInquiryResults.Count, Is.EqualTo(1));
-                foreach (MiniStatementSafeInfo inquiryResult in statementInquiryResults)
+                foreach (MiniStatementResultInfo inquiryResult in statementInquiryResults)
                 {
                     CollectionAssert.IsEmpty(inquiryResult.Data);
                     Assert.IsNotEmpty(inquiryResult.Reason);
@@ -752,13 +752,13 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
 
             // Los movimientos más recientes realizados por la cuenta...
-            IList<MiniStatementSafeInfo> inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId);
+            IList<MiniStatementResultInfo> inquiryResults = client.InquiriesV11.GetStatements(docType, docNumber, accountId);
             AssertStatementsSafeResults(inquiryResults);
 
             // Los movimientos más recientes realizados por la cuenta y el bolsillo específico...
             string accountTypeId = balances.First().TypeId;
             Assert.IsNotEmpty(accountTypeId);
-            inquiryResults = client.Inquiries.GetStatementsSafely(docType, docNumber, accountId, accountTypeId);
+            inquiryResults = client.InquiriesV11.GetStatements(docType, docNumber, accountId, accountTypeId);
             AssertStatementsSafeResults(inquiryResults);
 
             // Se reestablece las conexión valida al proveedor de datos de TUP...

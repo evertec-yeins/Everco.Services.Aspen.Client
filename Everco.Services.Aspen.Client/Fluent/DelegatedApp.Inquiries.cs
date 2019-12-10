@@ -39,13 +39,13 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// Obtiene la información del resultado que encapsula el resumen de las cuentas asociadas al usuario actual procesada de forma segura.
         /// </summary>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar las cuentas del usuario actual procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar las cuentas del usuario actual procesado de forma segura.
         /// </returns>
-        public IList<AccountExtendedSafeInfo> GetAccountsSafely()
+        public IList<AccountExtendedResultInfo> GetAccountsSafely()
         {
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.AccountsFromCurrentUser);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<AccountExtendedSafeInfo>>(request);
+            return this.Execute<List<AccountExtendedResultInfo>>(request);
         }
 
         /// <summary>
@@ -67,14 +67,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar los saldos de una cuenta procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar los saldos de una cuenta procesado de forma segura.
         /// </returns>
-        public IList<BalanceExtendedSafeInfo> GetBalancesSafely(string accountId)
+        public IList<BalanceExtendedResultInfo> GetBalancesSafely(string accountId)
         {
             EndpointParameters endpointParameters = new EndpointParameters().AddAccountId(accountId);
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.BalancesFromCurrentUser, endpointParameters);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<BalanceExtendedSafeInfo>>(request);
+            return this.Execute<List<BalanceExtendedResultInfo>>(request);
         }
 
         /// <summary>
@@ -100,16 +100,16 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los movimientos financieros.</param>
         /// <param name="accountTypeId">El identificador del tipo de cuenta que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IMiniStatementInfo}" /> con la información del resultado de consultar los movimientos de una cuenta procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IMiniStatementInfo}" /> con la información del resultado de consultar los movimientos de una cuenta procesado de forma segura.
         /// </returns>
-        public IList<MiniStatementSafeInfo> GetStatementsSafely(string accountId, string accountTypeId = null)
+        public IList<MiniStatementResultInfo> GetStatementsSafely(string accountId, string accountTypeId = null)
         {
             EndpointParameters endpointParameters = new EndpointParameters()
                 .AddAccountId(accountId)
                 .AddAccountTypeId(string.IsNullOrWhiteSpace(accountTypeId) ? "*" : accountTypeId);
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.StatementsFromCurrentUser, endpointParameters);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<MiniStatementSafeInfo>>(request);
+            return this.Execute<List<MiniStatementResultInfo>>(request);
         }
     }
 }

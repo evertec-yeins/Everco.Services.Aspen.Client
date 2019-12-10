@@ -294,7 +294,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().UpdateEnabled(appIdentity.ApiKey, false);
-            AspenException exception = Assert.Throws<AspenException>(() => GetDelegatedClient());
+            AspenException exception = Assert.Throws<AspenException>(() => this.GetDelegatedClient());
             Assert.That(exception.EventId, Is.EqualTo("20006"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
             StringAssert.IsMatch("ApiKey está desactivado. Póngase en contacto con el administrador", exception.Message);

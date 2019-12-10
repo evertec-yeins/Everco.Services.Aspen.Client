@@ -7,7 +7,9 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
-    using Modules.Autonomous;
+    using Everco.Services.Aspen.Client.Modules.Autonomous;
+    using V10 = Modules.Autonomous.V10;
+    using V11 = Modules.Autonomous.V11;
 
     /// <summary>
     /// Define el comportamiento de una aplicación con alcance de autónoma.
@@ -15,14 +17,20 @@ namespace Everco.Services.Aspen.Client.Fluent
     public interface IAutonomousApp : IRouting<IAutonomousApp>, IAppIdentity<IAutonomousApp>, ISession<IAutonomousApp>
     {
         /// <summary>
-        /// /// Obtiene un objeto que permite acceder los endpoints dinámicos del servicio.
+        /// Obtiene un objeto que permite acceder a los endpoints dinámicos del servicio.
         /// </summary>
         IDynamicsModule Dynamics { get; }
 
         /// <summary>
         /// Obtiene un objeto que permite acceder a operaciones de consulta de productos financieros.
         /// </summary>
-        IInquiriesModule Inquiries { get; }
+        V10.IInquiriesModule Inquiries { get; }
+
+        /// <summary>
+        /// Obtiene un objeto que permite acceder a operaciones de consulta de productos financieros.
+        /// </summary>
+        V11.IInquiriesModule InquiriesV11 { get; }
+
         /// <summary>
         /// Obtiene un objeto que permite acceder a las operaciones de administración varias.
         /// </summary>

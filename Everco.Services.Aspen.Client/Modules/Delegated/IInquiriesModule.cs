@@ -27,9 +27,9 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
         /// Obtiene la información del resultado que encapsula el resumen de las cuentas asociadas al usuario actual procesada de forma segura.
         /// </summary>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IAccountExtendedInfo}"/> con la información del resultado de consultar las cuentas del usuario actual procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}"/> con la información del resultado de consultar las cuentas del usuario actual procesado de forma segura.
         /// </returns>
-        IList<AccountExtendedSafeInfo> GetAccountsSafely();
+        IList<AccountExtendedResultInfo> GetAccountsSafely();
 
         /// <summary>
         /// Obtiene la información de saldos de una cuenta asociada al usuario actual.
@@ -45,9 +45,9 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
         /// </summary>
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IAccountExtendedInfo}"/> con la información del resultado de consultar los saldos de una cuenta procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}"/> con la información del resultado de consultar los saldos de una cuenta procesado de forma segura.
         /// </returns>
-        IList<BalanceExtendedSafeInfo> GetBalancesSafely(string accountId);
+        IList<BalanceExtendedResultInfo> GetBalancesSafely(string accountId);
 
         /// <summary>
         /// Obtiene la información de los movimientos financieros de una cuenta asociada al usuario actual.
@@ -65,8 +65,8 @@ namespace Everco.Services.Aspen.Client.Modules.Delegated
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los movimientos financieros.</param>
         /// <param name="accountTypeId">El identificador del tipo de cuenta que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquirySafeInfo{IMiniStatementInfo}"/> con la información del resultado de consultar los movimientos de una cuenta procesado de forma segura.
+        /// Lista de instancias de <see cref="IInquiryResultInfo{IMiniStatementInfo}"/> con la información del resultado de consultar los movimientos de una cuenta procesado de forma segura.
         /// </returns>
-        IList<MiniStatementSafeInfo> GetStatementsSafely(string accountId, string accountTypeId = null);
+        IList<MiniStatementResultInfo> GetStatementsSafely(string accountId, string accountTypeId = null);
     }
 }

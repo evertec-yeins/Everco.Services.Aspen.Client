@@ -86,7 +86,7 @@ namespace Everco.Services.Aspen.Client
             Method method = attribute.Method;
             KeyValuePair<string, Method> endpointMappingInfo = new KeyValuePair<string, Method>(resource, method);
             AppDomain.CurrentDomain.SetData(keyName, endpointMappingInfo);
-            return (Uri.EscapeDataString(resource), method);
+            return (resource, method);
         }
 
         /// <summary>
