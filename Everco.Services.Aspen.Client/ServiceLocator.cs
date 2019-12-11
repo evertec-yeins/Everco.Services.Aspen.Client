@@ -9,6 +9,7 @@
 namespace Everco.Services.Aspen.Client
 {
     using System.Net;
+    using Identity;
     using Internals;
     using JWT;
     using Providers;
@@ -53,13 +54,13 @@ namespace Everco.Services.Aspen.Client
             this.container.RegisterInstance<IJsonSerializer>(new JsonNetSerializer());
             this.container.RegisterInstance<IWebProxy>(new NullWebProxy());
             this.container.RegisterInstance<ILoggingProvider>(new NullLoggingProvider());
+            this.container.RegisterInstance<IEndpointProvider>(new EnvironmentEndpoint());
+            this.container.RegisterInstance<IAppIdentity>(new EnvironmentIdentity());
 
             if (environmentRuntime.IsDevelopment)
             {
                 this.container.RegisterInstance<ILoggingProvider>(new ConsoleLoggingProvider());
             }
-
-            this.container.Verify();
         }
 
         /// <summary>
@@ -67,6 +68,16 @@ namespace Everco.Services.Aspen.Client
         /// </summary>
         /// <value>Referencia de la instancia actual.</value>
         public static IServiceLocator Instance => instance ?? (instance = new ServiceLocator());
+
+        /// <summary>
+        /// Obtiene la instancia del componente predeterminado que se utiliza para obtener la Url del servicio Aspen.
+        /// </summary>
+        public IEndpointProvider DefaultEndpoint => this.container?.GetInstance<IEndpointProvider>();
+
+        /// <summary>
+        /// Obtiene la instancia del componente predeterminado que se utiliza para obtener las credenciales de conexión con el servicio Aspen.
+        /// </summary>
+        public IAppIdentity DefaultIdentity => this.container?.GetInstance<IAppIdentity>();
 
         /// <summary>
         /// Obtiene la instancia del servicio que se utiliza para generar valores Epoch.
@@ -117,6 +128,26 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del servidor proxy que se debe utilizar para las conexiones con el servicio.
         /// </summary>
         public IWebProxy WebProxy => this.container?.GetInstance<IWebProxy>();
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
+        public void SetDefaultEndpoint(IEndpointProvider endpointProvider)
+        {
+            Throw.IfNull(endpointProvider, nameof(endpointProvider));
+            this.RegisterInstance(endpointProvider: endpointProvider);
+        }
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
+        public void SetDefaultIdentity(IAppIdentity appIdentity)
+        {
+            Throw.IfNull(appIdentity, nameof(appIdentity));
+            this.RegisterInstance(appIdentity: appIdentity);
+        }
 
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator" /> para la generación de valores Epoch.
@@ -222,15 +253,17 @@ namespace Everco.Services.Aspen.Client
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="ServiceLocator" />
         /// </summary>
-        /// <param name="nonceGenerator">Instancia de <see cref="INonceGenerator"/> que se utiliza para inicializar el proveedor de valores nonce o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="epochGenerator">Instancia de <see cref="IEpochGenerator"/> que se utiliza para inicializar el proveedor de valores epoch o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="headersManager">Instancia de <see cref="IHeadersManager"/> que se utiliza para inicializar el proveedor de cabeceras para las solicitudes al servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="requestHeaderNames">Instancia de <see cref="IHeaderElement"/> que se utiliza para inicializar el proveedor de los nombres de cabeceras personalizadas o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="payloadClaimNames">Instancia de <see cref="IPayloadClaimElement"/> que se utiliza para inicializar el proveedor de los nombres para las reclamaciones usadas en la carga útil del servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="payloadClaimsManager">Instancia de <see cref="IPayloadClaimsManager"/> que se utiliza para inicializar el proveedor de reclamaciones de la carga útil o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="jwtJsonSerializer">Instancia de <see cref="IJsonSerializer"/> que se utiliza para inicializar el proveedor de serialización y deserialización de JWT o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="webProxy">Instancia de <see cref="IWebProxy"/> que se utiliza para inicializar el proveedor del servidor proxy o <c>null</c> para utilizar la instancia predeterminada.</param>
-        /// <param name="loggingProvider">Instancia de <see cref="ILoggingProvider"/> que se utiliza para inicializar el proveedor de escritura de trazas de seguimiento o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="nonceGenerator">Instancia de <see cref="INonceGenerator" /> que se utiliza para inicializar el proveedor de valores nonce o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="epochGenerator">Instancia de <see cref="IEpochGenerator" /> que se utiliza para inicializar el proveedor de valores epoch o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="headersManager">Instancia de <see cref="IHeadersManager" /> que se utiliza para inicializar el proveedor de cabeceras para las solicitudes al servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="requestHeaderNames">Instancia de <see cref="IHeaderElement" /> que se utiliza para inicializar el proveedor de los nombres de cabeceras personalizadas o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="payloadClaimNames">Instancia de <see cref="IPayloadClaimElement" /> que se utiliza para inicializar el proveedor de los nombres para las reclamaciones usadas en la carga útil del servicio o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="payloadClaimsManager">Instancia de <see cref="IPayloadClaimsManager" /> que se utiliza para inicializar el proveedor de reclamaciones de la carga útil o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="jwtJsonSerializer">Instancia de <see cref="IJsonSerializer" /> que se utiliza para inicializar el proveedor de serialización y deserialización de JWT o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="webProxy">Instancia de <see cref="IWebProxy" /> que se utiliza para inicializar el proveedor del servidor proxy o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="loggingProvider">Instancia de <see cref="ILoggingProvider" /> que se utiliza para inicializar el proveedor de escritura de trazas de seguimiento o <c>null</c> para utilizar la instancia predeterminada.</param>
+        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/> para la obtención de valores de configuración.</param>
+        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/> para la obtención de valores de configuración.</param>
         private void RegisterInstance(
             INonceGenerator nonceGenerator = null,
             IEpochGenerator epochGenerator = null,
@@ -240,7 +273,9 @@ namespace Everco.Services.Aspen.Client
             IPayloadClaimsManager payloadClaimsManager = null,
             IJsonSerializer jwtJsonSerializer = null,
             IWebProxy webProxy = null,
-            ILoggingProvider loggingProvider = null)
+            ILoggingProvider loggingProvider = null,
+            IEndpointProvider endpointProvider = null,
+            IAppIdentity appIdentity = null)
         {
             lock (padlock)
             {
@@ -253,6 +288,8 @@ namespace Everco.Services.Aspen.Client
                 IJsonSerializer instanceOfJwtJsonSerializer = jwtJsonSerializer ?? this.JwtJsonSerializer ?? new JsonNetSerializer();
                 IWebProxy instanceOfWebProxy = webProxy ?? this.WebProxy ?? new NullWebProxy();
                 ILoggingProvider instanceOfLoggingProvider = loggingProvider ?? this.LoggingProvider ?? new NullLoggingProvider();
+                IEndpointProvider instanceOfEndpointProvider = endpointProvider ?? new EnvironmentEndpoint();
+                IAppIdentity instanceOfAppIdentity = appIdentity ?? new EnvironmentIdentity();
 
                 if (this.container != null)
                 {
@@ -271,7 +308,8 @@ namespace Everco.Services.Aspen.Client
                 this.container.RegisterInstance(instanceOfJwtJsonSerializer);
                 this.container.RegisterInstance(instanceOfWebProxy);
                 this.container.RegisterInstance(instanceOfLoggingProvider);
-                this.container.Verify();
+                this.container.RegisterInstance(instanceOfEndpointProvider);
+                this.container.RegisterInstance(instanceOfAppIdentity);
             }
         }
     }

@@ -5,7 +5,7 @@
 // <author>dmontalvo</author>
 // <date>2019-09-23 10:00 AM</date>
 // ----------------------------------------------------------------------
-namespace Everco.Services.Aspen.Client.Providers
+namespace Everco.Services.Aspen.Client.Identity
 {
     using System;
 

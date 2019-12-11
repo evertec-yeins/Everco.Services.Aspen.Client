@@ -13,6 +13,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Providers;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
+    using Identity;
     using Newtonsoft.Json;
     using NUnit.Framework;
 
@@ -30,7 +31,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void GetDefaultDocTypesWorks()
         {
             IAnonymous client = Anonymous.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
             IList<DocTypeInfo> defaultDocTypes = client.Utils.GetDefaultDocTypes();
             CollectionAssert.IsNotEmpty(defaultDocTypes);
@@ -51,7 +52,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void SaveAppCrashWorks()
         {
             IAnonymous client = Anonymous.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
             string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
             Dictionary<string, object> errorReportInfo = new Dictionary<string, object>

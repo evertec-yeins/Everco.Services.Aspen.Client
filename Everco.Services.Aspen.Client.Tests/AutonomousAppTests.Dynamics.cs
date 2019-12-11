@@ -12,6 +12,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Net;
     using Fluent;
     using Identities;
+    using Identity;
     using NUnit.Framework;
     using Providers;
 
@@ -22,7 +23,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void XYZ()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(EnvironmentEndpointProvider.Default)
+                                                 .RoutingTo(TestingEndpointProvider.Default)
                                                  .WithIdentity(AutonomousAppIdentity.Master)
                                                  .AuthenticateNoCache()
                                                  .GetClient();
@@ -36,7 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void RecognizedEndpoint()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(EnvironmentEndpointProvider.Default)
+                                                 .RoutingTo(TestingEndpointProvider.Default)
                                                  .WithIdentity(AutonomousAppIdentity.Master)
                                                  .AuthenticateNoCache()
                                                  .GetClient();
@@ -49,7 +50,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void RecognizedEndpointWorks()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(EnvironmentEndpointProvider.Default)
+                                                 .RoutingTo(TestingEndpointProvider.Default)
                                                  .WithIdentity(AutonomousAppIdentity.Master)
                                                  .AuthenticateNoCache()
                                                  .GetClient();

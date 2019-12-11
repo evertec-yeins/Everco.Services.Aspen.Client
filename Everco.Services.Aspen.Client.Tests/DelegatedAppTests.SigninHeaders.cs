@@ -13,6 +13,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Assets;
     using Fluent;
     using Identities;
+    using Identity;
     using NUnit.Framework;
     using Providers;
 
@@ -33,7 +34,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
@@ -64,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
                         .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
@@ -87,7 +88,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
@@ -118,7 +119,7 @@ namespace Everco.Services.Aspen.Client.Tests
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
                         .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();

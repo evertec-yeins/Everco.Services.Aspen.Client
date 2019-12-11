@@ -7,8 +7,6 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Providers
 {
-    using System;
-    using Auth;
     using Identity;
     using JWT;
     using RestSharp;

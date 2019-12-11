@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client
 {
     using System.Net;
+    using Identity;
     using JWT;
     using Providers;
 
@@ -16,6 +17,16 @@ namespace Everco.Services.Aspen.Client
     /// </summary>
     public interface IServiceLocator
     {
+        /// <summary>
+        /// Obtiene la instancia del componente predeterminado que se utiliza para obtener la Url del servicio Aspen.
+        /// </summary>
+        IEndpointProvider DefaultEndpoint { get; }
+
+        /// <summary>
+        /// Obtiene la instancia del componente predeterminado que se utiliza para obtener las credenciales de conexión con el servicio Aspen.
+        /// </summary>
+        IAppIdentity DefaultIdentity { get;  }
+
         /// <summary>
         /// Obtiene la instancia del generador de valores epoch (número de segundos que han transcurrido desde 1970-01-01T00:00:00Z)
         /// </summary>
@@ -65,6 +76,18 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del proxy para la conexión con el servicio de Aspen.
         /// </summary>
         IWebProxy WebProxy { get; }
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
+        void SetDefaultEndpoint(IEndpointProvider endpointProvider);
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
+        void SetDefaultIdentity(IAppIdentity appIdentity);
 
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator"/> para la generación de valores Epoch.

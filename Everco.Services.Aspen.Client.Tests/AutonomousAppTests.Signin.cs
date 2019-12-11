@@ -46,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(randomApiKey, apiKeySecret)
                         .AuthenticateNoCache()
                         .GetClient();
@@ -69,7 +69,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(recognizedApiKey, invalidApiSecret)
                         .AuthenticateNoCache()
                         .GetClient();
@@ -91,7 +91,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     AutonomousApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(delegatedAppIdentity)
                         .AuthenticateNoCache()
                         .GetClient();

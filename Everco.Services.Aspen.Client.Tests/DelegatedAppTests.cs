@@ -8,7 +8,6 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Providers;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using NUnit.Framework;
 
@@ -24,7 +23,7 @@ namespace Everco.Services.Aspen.Client.Tests
         /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
         public IDelegatedApp GetDelegatedClient() =>
             DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
                 .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();

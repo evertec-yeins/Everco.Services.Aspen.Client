@@ -11,7 +11,7 @@ namespace Everco.Services.Aspen.Client.Identity
     using System.Configuration;
 
     /// <summary>
-    /// Obtiene  la información que se utiliza para autenticar la solicitud en el servicio Aspen de la sección appSewttings de un archivo de configuración XML.
+    /// Obtiene  la información que se utiliza para autenticar la solicitud en el servicio Aspen de la sección appSettings de un archivo de configuración XML.
     /// </summary>
     public class AppConfigIdentity : IAppIdentity
     {
@@ -37,6 +37,16 @@ namespace Everco.Services.Aspen.Client.Identity
 
             this.ApiKey = ConfigurationManager.AppSettings[apiKeyName].TryDecrypt();
             this.ApiSecret = ConfigurationManager.AppSettings[apiSecretName].TryDecrypt();
+
+            if (string.IsNullOrWhiteSpace(this.ApiKey))
+            {
+                throw new IdentityException($"Value for ApiKey not found in AppSettings:{apiKeyName}.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.ApiSecret))
+            {
+                throw new IdentityException($"Value for ApiSecret not found in AppSettings:{apiSecretName}.");
+            }
         }
 
         /// <summary>

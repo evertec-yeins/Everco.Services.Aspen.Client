@@ -178,7 +178,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
                 .AuthenticateNoCache(userIdentityMaster)
                 .GetClient();
@@ -189,7 +189,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
                 .AuthenticateNoCache(userIdentityHelper)
                 .GetClient();
@@ -219,7 +219,7 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
                 .AuthenticateNoCache(commonUserIdentity)
                 .GetClient();
@@ -232,7 +232,7 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
                 .AuthenticateNoCache(commonUserIdentity)
                 .GetClient();
@@ -260,7 +260,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber);
             IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
                 .AuthenticateNoCache(userIdentityMaster)
                 .GetClient();
@@ -273,7 +273,7 @@ namespace Everco.Services.Aspen.Client.Tests
             IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, userIdentityHelper.DocType, userIdentityHelper.DocNumber);
             IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
                 .AuthenticateNoCache(userIdentityHelper)
                 .GetClient();
