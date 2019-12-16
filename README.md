@@ -8,5 +8,5 @@ var client = AutonomousApp.Initialize()
 	.Authenticate()
 	.GetClient();
 
-client.Settings.GetDocTypes();
+var docTypes = client.Settings.GetDocTypes();
 ```
