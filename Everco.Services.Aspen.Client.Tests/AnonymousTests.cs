@@ -8,8 +8,10 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
-    using System.Diagnostics;
-    using Identity;
+    using System.Collections.Generic;
+    using Everco.Services.Aspen.Client.Fluent;
+    using Everco.Services.Aspen.Client.Tests.Identities;
+    using Everco.Services.Aspen.Entities;
     using Newtonsoft.Json;
     using NUnit.Framework;
 
@@ -17,23 +19,50 @@ namespace Everco.Services.Aspen.Client.Tests
     /// Implementa las pruebas unitarias para acceder a las operaciones anónimas del servicio.
     /// </summary>
     [TestFixture]
-    public partial class AnonymousTests
+    public class AnonymousTests
     {
-
+        /// <summary>
+        /// Obtener los tipos de documento predetermiandos funciona.
+        /// </summary>
         [Test]
-        public void ABC()
+        [Category("Anonymous")]
+        public void GetDefaultDocTypesWorks()
         {
-            ServiceLocator.Instance.SetDefaultEndpoint(new RegistryEndpoint());
-            //ServiceLocator.Instance.SetDefaultIdentity(new RegistryIdentity());
-            Console.WriteLine(JsonConvert.SerializeObject(ServiceLocator.Instance.DefaultEndpoint, Formatting.Indented));
-            //Console.WriteLine(JsonConvert.SerializeObject(ServiceLocator.Instance.DefaultIdentity, Formatting.Indented));
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+            IList<DocTypeInfo> defaultDocTypes = client.GetDefaultDocTypes();
+            CollectionAssert.IsNotEmpty(defaultDocTypes);
+            Assert.That(defaultDocTypes.Count, Is.EqualTo(5));
+            foreach (DocTypeInfo docTypeInfo in defaultDocTypes)
+            {
+                Assert.IsNotNull(docTypeInfo);
+                Assert.That(docTypeInfo.Name, Is.Not.Null);
+                Assert.That(docTypeInfo.ShortName, Is.Not.Null);
+            }
+        }
 
-            //IAutonomousApp client = AutonomousApp.Initialize()
-            //                                     .WithDefaults()
-            //                                     .Authenticate()
-            //                                     .GetClient();
+        /// <summary>
+        /// Guardar la información del crash (errores o bloqueos de sistema) generado por una aplicación conocida .
+        /// </summary>
+        [Test]
+        [Category("Anonymous")]
+        public void SaveAppCrashWorks()
+        {
+            IAnonymous client = Anonymous.Initialize().RoutingTo(TestingEndpointProvider.Default).GetClient();
+            string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
+            Dictionary<string, object> errorReportInfo = new Dictionary<string, object>
+                                                             {
+                                                                 { "Id", Guid.NewGuid().ToString() },
+                                                                 { "AppStartTime", DateTime.Now },
+                                                                 { "AppErrorTime", DateTime.Now }
+                                                             };
 
-            //Assert.IsNotNull(client);
+            string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.Indented);
+            Assert.DoesNotThrow(() => client.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
+
+            errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
+            Assert.DoesNotThrow(() => client.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
         }
     }
 }
