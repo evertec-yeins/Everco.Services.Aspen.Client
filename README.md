@@ -1,5 +1,5 @@
 # Everco.Services.Aspen.Client
-Versión alpha del cliente del servicio Aspen
+Versión beta del cliente del servicio Aspen
 
 ```c#
 var client = AutonomousApp.Initialize()
