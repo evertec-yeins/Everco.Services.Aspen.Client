@@ -2,19 +2,11 @@
 Versión alpha del cliente del servicio Aspen
 
 ```c#
-IAutonomousApp autonomousClient = AutonomousApp.Initialize()
+var client = AutonomousApp.Initialize()
 	.RoutingTo("https://localhost/api")
 	.WithIdentity("MyApyKey", "MyApiSecret")
 	.Authenticate()
 	.GetClient();
 
-autonomousClient.Settings.GetDocTypes().Dump("Autonomous Document Types");
-
-IDelegatedApp delegatedClient = DelegatedApp.Initialize()
-	.RoutingTo("https://localhost/api")
-	.WithIdentity("MyApiKey", "MyApiSecret")
-	.Authenticate("UserDocType", "UserDocNumber", "UserPassword")
-	.GetClient();
-		
-delegatedClient.Settings.GetDocTypes().Dump("Delegated Document Types");
+client.Settings.GetDocTypes();
 ```
