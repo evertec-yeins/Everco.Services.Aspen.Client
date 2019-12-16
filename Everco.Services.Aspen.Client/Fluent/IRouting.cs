@@ -8,7 +8,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
-    using Providers;
+    using Identity;
 
     /// <summary>
     /// Define las operaciones que permiten establecer la URL del servicio ASPEN y tiempo de espera para las respuestas.
@@ -38,5 +38,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="timeout">El tiempo de espera para las respuesta de las solicitudes al servicio o <c>null</c> para establecer el valor predeterminado (15 segundos)</param>
         /// <returns>Instancia de <see cref="IAppIdentity{TFluent}"/> que permite establecer los datos de conexión con el servicio.</returns>
         IAppIdentity<TFluent> RoutingTo(Uri url, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Establece la URL y la identidad para las solicitudes al servicio Aspen a partir de los valores predeterminados.
+        /// </summary>
+        /// <returns>Instancia de <see cref="IAppIdentity{TFluent}"/> que permite establecer los datos de conexión con el servicio.</returns>
+        TFluent WithDefaults();
     }
 }

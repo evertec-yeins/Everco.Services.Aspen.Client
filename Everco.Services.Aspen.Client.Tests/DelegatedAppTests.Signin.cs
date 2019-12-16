@@ -52,7 +52,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(invalidCredentialIdentity)
                     .GetClient();
@@ -78,7 +78,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(unrecognizedUserIdentity)
                     .GetClient();
@@ -101,7 +101,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
                     .AuthenticateNoCache(userIdentity)
                     .GetClient();
@@ -128,7 +128,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
                         .AuthenticateNoCache(tempUserIdentity)
                         .GetClient();
@@ -166,7 +166,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(appIdentity)
                         .AuthenticateNoCache(tempUserIdentity)
                         .GetClient();
@@ -197,7 +197,7 @@ namespace Everco.Services.Aspen.Client.Tests
             
             void Authenticate() =>
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(appIdentity)
                     .AuthenticateNoCache(userIdentity)
                     .GetClient();
@@ -228,7 +228,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     DelegatedApp.Initialize()
-                        .RoutingTo(EnvironmentEndpointProvider.Default)
+                        .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .AuthenticateNoCache(RecognizedUserIdentity.Master)
                         .GetClient();
@@ -251,7 +251,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
                     .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();
@@ -274,7 +274,7 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 DelegatedApp.Initialize()
-                    .RoutingTo(EnvironmentEndpointProvider.Default)
+                    .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(recognizedApiKey, randomApiSecret)
                     .AuthenticateNoCache(RecognizedUserIdentity.Master)
                     .GetClient();

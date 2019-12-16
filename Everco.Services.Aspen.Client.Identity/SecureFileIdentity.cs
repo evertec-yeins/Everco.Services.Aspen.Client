@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="SecureIdentity.cs" company="Evertec Colombia">
+// <copyright file="SecureFileIdentity.cs" company="Evertec Colombia">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -20,7 +20,7 @@ namespace Everco.Services.Aspen.Client.Identity
     /// Obtiene la información que se utiliza para autenticar la solicitud en el servicio Aspen de un archivo de texto cifrado.
     /// </summary>
     [Serializable]
-    public class SecureIdentity : IAppIdentity, ISecureStorage
+    public class SecureFileIdentity : IAppIdentity, ISecureStorage
     {
         /// <summary>
         /// Para uso interno.
@@ -33,21 +33,21 @@ namespace Everco.Services.Aspen.Client.Identity
         private readonly byte[] entropy;
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="SecureIdentity"/>
+        /// Inicializa una nueva instancia de la clase <see cref="SecureFileIdentity"/>
         /// </summary>
         /// <param name="apiKey">Valor del ApiKey que se desea cifrar.</param>
         /// <param name="apiSecret">Valor del ApiSecret que se desea cifrar.</param>
-        public SecureIdentity(string apiKey, string apiSecret) :
+        public SecureFileIdentity(string apiKey, string apiSecret) :
             this(apiKey, apiSecret, null, Encoding.UTF8)
         {
         }
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="SecureIdentity"/>
+        /// Inicializa una nueva instancia de la clase <see cref="SecureFileIdentity"/>
         /// </summary>
         /// <param name="entropy">Una matriz de bytes (opcional) que se utiliza para aumentar la complejidad del cifrado, o  <see langword="null" /> para no agregar complejidad adicional.</param>
         /// <param name="encoding">Codificación que se desea utilizar en el proceso de cifrado.</param>
-        public SecureIdentity(
+        public SecureFileIdentity(
             byte[] entropy,
             Encoding encoding)
         {
@@ -56,13 +56,13 @@ namespace Everco.Services.Aspen.Client.Identity
         }
 
         /// <summary>
-        /// Inicializa una nueva instancia de la clase <see cref="SecureIdentity"/>
+        /// Inicializa una nueva instancia de la clase <see cref="SecureFileIdentity"/>
         /// </summary>
         /// <param name="apiKey">Valor del ApiKey que se desea cifrar.</param>
         /// <param name="apiSecret">Valor del ApiSecret que se desea cifrar.</param>
         /// <param name="entropy">Una matriz de bytes (opcional) que se utiliza para aumentar la complejidad del cifrado, o  <see langword="null" /> para no agregar complejidad adicional.</param>
         /// <param name="encoding">Codificación que se desea utilizar en el proceso de cifrado.</param>
-        public SecureIdentity(
+        public SecureFileIdentity(
             string apiKey,
             string apiSecret,
             byte[] entropy,
@@ -85,9 +85,9 @@ namespace Everco.Services.Aspen.Client.Identity
         }
 
         /// <summary>
-        /// Previene la creación de una instancia de la clase <see cref="SecureIdentity"/>
+        /// Previene la creación de una instancia de la clase <see cref="SecureFileIdentity"/>
         /// </summary>
-        private SecureIdentity()
+        private SecureFileIdentity()
         {
         }
         
@@ -102,11 +102,11 @@ namespace Everco.Services.Aspen.Client.Identity
         public string ApiSecret { get; private set; }
 
         /// <summary>
-        /// Crea una instancia de <see cref="SecureIdentity"/> a partir del archivo especificado.
+        /// Crea una instancia de <see cref="SecureFileIdentity"/> a partir del archivo especificado.
         /// </summary>
         /// <param name="path">Ruta del archivo con la información cifrada.</param>
-        /// <returns>Instancia de <see cref="SecureIdentity"/> con la información a partir del archivo.</returns>
-        public static SecureIdentity FromFile(string path)
+        /// <returns>Instancia de <see cref="SecureFileIdentity"/> con la información a partir del archivo.</returns>
+        public static SecureFileIdentity FromFile(string path)
         {
             try
             {
@@ -124,13 +124,13 @@ namespace Everco.Services.Aspen.Client.Identity
                     string apiKey = (string)result.Find(m => m.Key == Keys.ApiKey).Value;
                     string apiSecret = (string)result.Find(m => m.Key == Keys.ApiSecret).Value;
                     
-                    SecureIdentity secureIdentity = new SecureIdentity(entropy, encoding)
+                    SecureFileIdentity secureFileIdentity = new SecureFileIdentity(entropy, encoding)
                     {
                         ApiKey = CryptoHelper.UnprotectString(apiKey, entropy),
                         ApiSecret = CryptoHelper.UnprotectString(apiSecret, entropy)
                     };
                     
-                    return secureIdentity;
+                    return secureFileIdentity;
                 }
             }
             catch (Exception exception)

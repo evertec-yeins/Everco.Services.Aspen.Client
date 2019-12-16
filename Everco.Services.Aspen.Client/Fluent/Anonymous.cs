@@ -13,11 +13,12 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Net;
     using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Providers;
+    using Identity;
     using Newtonsoft.Json;
     using RestSharp;
 
     /// <summary>
-    /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance autónomo.
+    /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance anonimo.
     /// </summary>
     public sealed partial class Anonymous : IAnonymous
     {

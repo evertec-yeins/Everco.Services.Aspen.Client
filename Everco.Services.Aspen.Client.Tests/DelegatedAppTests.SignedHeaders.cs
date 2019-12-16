@@ -14,6 +14,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Fluent;
     using Identities;
+    using Identity;
     using NUnit.Framework;
     using Providers;
 
@@ -193,7 +194,7 @@ namespace Everco.Services.Aspen.Client.Tests
             // Se usa un nonce aleatorio con la autenticación del cliente...
             ServiceLocator.Instance.RegisterNonceGenerator(new SingleUseNonceGenerator());
             IDelegatedApp client = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
                 .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
@@ -213,7 +214,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MissingTokenWhenSignedRequestThrows()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
                 .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();
@@ -234,7 +235,7 @@ namespace Everco.Services.Aspen.Client.Tests
         public void NullOrEmptyTokenWhenSignedRequestThrows()
         {
             IDelegatedApp client = DelegatedApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
                 .AuthenticateNoCache(RecognizedUserIdentity.Master)
                 .GetClient();

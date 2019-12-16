@@ -15,6 +15,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using Everco.Services.Aspen.Client.Tests.Assets;
     using Identities;
     using Identity;
+    using Newtonsoft.Json;
     using NUnit.Framework;
 
     /// <summary>
@@ -135,7 +136,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
             IAutonomousApp clientAppMaster = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
                 .AuthenticateNoCache()
                 .GetClient();
@@ -146,7 +147,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             IAppIdentity appIdentityHelper = AutonomousAppIdentity.Helper;
             IAutonomousApp clientAppHelper = AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
+                .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
                 .AuthenticateNoCache()
                 .GetClient();

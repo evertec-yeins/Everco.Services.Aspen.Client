@@ -23,10 +23,11 @@ namespace Everco.Services.Aspen.Client.Identity
         /// <param name="subKeyPath">El nombre o la ruta de la subclave donde se buscan los valores.</param>
         /// <param name="apiKeyName">El nombre de la entrada en donde se busca el valor del ApiKey. Esta cadena no distingue entre mayúsculas y minúsculas.</param>
         /// <param name="apiSecretName">El nombre de la entrada en donde se busca el valor del ApiSecret.</param>
-        public RegistryIdentity(RegistryRoot root, 
-                                string subKeyPath, 
-                                string apiKeyName = "ASPEN:APIKEY", 
-                                string apiSecretName = "ASPEN:APISECRET")
+        public RegistryIdentity(
+            RegistryRoot root = RegistryRoot.LocalMachine, 
+            string subKeyPath = @"SOFTWARE\Aspen\Credentials", 
+            string apiKeyName = "APIKEY", 
+            string apiSecretName = "APISECRET")
         {
             try
             {
@@ -51,6 +52,7 @@ namespace Everco.Services.Aspen.Client.Identity
 
 #pragma warning restore SA0102
 
+                string registryPath = $@"{rootKey}\{subKeyPath}";
                 using RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath);
             
                 if (registryKey == null)
@@ -60,6 +62,16 @@ namespace Everco.Services.Aspen.Client.Identity
 
                 this.ApiKey = registryKey.GetValue(apiKeyName)?.ToString()?.TryDecrypt();
                 this.ApiSecret = registryKey.GetValue(apiSecretName)?.ToString()?.TryDecrypt();
+
+                if (string.IsNullOrWhiteSpace(this.ApiKey))
+                {
+                    throw new IdentityException($@"Value for ApiKey not found in Registry:{registryPath} => {apiKeyName}");
+                }
+
+                if (string.IsNullOrWhiteSpace(this.ApiSecret))
+                {
+                    throw new IdentityException($@"Value for ApiSecret not found in Registry:{registryPath} => {apiSecretName}");
+                }
             }
             catch (Exception exception)
             {

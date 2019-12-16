@@ -8,8 +8,6 @@
 namespace Everco.Services.Aspen.Client.Tests
 {
     using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Client.Tests.Identities;
     using NUnit.Framework;
 
     /// <summary>
@@ -24,9 +22,9 @@ namespace Everco.Services.Aspen.Client.Tests
         /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
         public IAutonomousApp GetAutonomousClient() =>
             AutonomousApp.Initialize()
-                .RoutingTo(EnvironmentEndpointProvider.Default)
-                .WithIdentity(AutonomousAppIdentity.Master)
-                .AuthenticateNoCache()
+                .RoutingTo(ServiceLocator.Instance.DefaultEndpoint)
+                .WithIdentity(ServiceLocator.Instance.DefaultIdentity)
+                .Authenticate()
                 .GetClient();
     }
 }

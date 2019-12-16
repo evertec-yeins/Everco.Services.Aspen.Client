@@ -138,6 +138,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Establece la URL y la identidad para las solicitudes al servicio Aspen a partir de los valores predeterminados.
+        /// </summary>
+        /// <returns>Instancia de <see cref="IAppIdentity{TFluent}"/> que permite establecer los datos de conexión con el servicio.</returns>
+        public TFluent WithDefaults()
+        {
+            this.RoutingTo(ServiceLocator.Instance.DefaultEndpoint);
+            this.WithIdentity(ServiceLocator.Instance.DefaultIdentity);
+            return this as TFluent;
+        }
+
+        /// <summary>
         /// Establece la identidad de la aplicación solicitante.
         /// </summary>
         /// <param name="apiKey">El ApiKey asignado a la aplicación que se está conectando con el servicio Aspen.</param>

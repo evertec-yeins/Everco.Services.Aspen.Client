@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Identity
 {
     using System;
+    using System.Threading;
 
     /// <summary>
     /// Representa la información de la identidad de una aplicación a partir de las variables de ambiente del sistema.
@@ -36,6 +37,16 @@ namespace Everco.Services.Aspen.Client.Identity
 
             this.ApiKey = Environment.GetEnvironmentVariable(apiKeyEnvName).TryDecrypt();
             this.ApiSecret = Environment.GetEnvironmentVariable(apiSecretEnvName).TryDecrypt();
+
+            if (string.IsNullOrWhiteSpace(this.ApiKey))
+            {
+                throw new IdentityException($"Value for ApiKey not found in environment variable:{apiKeyEnvName}.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.ApiSecret))
+            {
+                throw new IdentityException($"Value for ApiSecret not found in environment variable:{apiSecretEnvName}.");
+            }
         }
         
         /// <summary>
