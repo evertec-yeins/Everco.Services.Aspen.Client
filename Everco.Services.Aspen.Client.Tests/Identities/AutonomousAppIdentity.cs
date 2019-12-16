@@ -19,7 +19,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private static IAppIdentity assistantIdentity;
+        private static IAppIdentity helperIdentity;
 
         /// <summary>
         /// Para uso interno.
@@ -41,7 +41,7 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// Obtiene la identidad de una aplicación autónoma para fines de comparación.
         /// </summary>
         public static IAppIdentity Helper =>
-            assistantIdentity ?? (assistantIdentity = new EnvironmentIdentity(
+            helperIdentity ?? (helperIdentity = new EnvironmentIdentity(
                 "ASPEN:AUTONOMOUSAPP2:APIKEY",
                 "ASPEN:AUTONOMOUSAPP2:APISECRET"));
 

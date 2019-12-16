@@ -9,10 +9,10 @@ namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
     using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Providers;
+    using Everco.Services.Aspen.Entities;
     using Identity;
     using Newtonsoft.Json;
     using RestSharp;
@@ -20,7 +20,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     /// <summary>
     /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance anonimo.
     /// </summary>
-    public sealed partial class Anonymous : IAnonymous
+    public sealed class Anonymous : IAnonymous
     {
         /// <summary>
         /// Para uso interno.
@@ -38,7 +38,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         private TimeSpan timeout;
 
         /// <summary>
-        /// Previene la creación de una instancia de la clase <see cref="Anonymous"/>
+        /// Previene la creación de una instancia de la clase <see cref="Fluent.Anonymous"/>
         /// </summary>
         private Anonymous()
         {
@@ -60,6 +60,18 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             this.InitializeClient();
             return this;
+        }
+
+        /// <summary>
+        /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
+        /// </summary>
+        /// <returns>
+        /// Lista de tipos de documento predeterminados.
+        /// </returns>
+        public IList<DocTypeInfo> GetDefaultDocTypes()
+        {
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.DefaultDocTypes);
+            return this.Execute<List<DocTypeInfo>>(request);
         }
 
         /// <summary>
@@ -110,22 +122,52 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación que generó el error.</param>
+        /// <param name="username">El identificador del último usuario que uso la aplicación antes de generarse el error.</param>
+        /// <param name="errorReport">La información del reporte de error generado en la aplicación.</param>
+        public void SaveAppCrash(string apiKey, string username, string errorReport)
+        {
+            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
+            {
+                Throw.IfNullOrEmpty(apiKey, nameof(apiKey));
+                Throw.IfNullOrEmpty(errorReport, nameof(errorReport));
+                Throw.IfNullOrEmpty(username, nameof(username));
+            }
+
+            IRestRequest request = new AspenRequest(
+                Scope.Anonymous,
+                EndpointMapping.AppCrash,
+                contentType: "application/x-www-form-urlencoded");
+            request.AddParameter("ErrorReport", errorReport);
+            request.AddParameter("Username", username);
+            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
+            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
+            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
+            this.Execute(request);
+        }
+
+        #region Internals
+
+        /// <summary>
         /// Envía la solicitud al servicio Aspen.
         /// </summary>
         /// <typeparam name="TResponse">Tipo al que se convierte la respuesta del servicio Aspen.</typeparam>
         /// <param name="request">Información de la solicitud.</param>
-        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
         /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
+        private TResponse Execute<TResponse>(IRestRequest request) where TResponse : class, new()
         {
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+#if DEBUG
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.restClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
@@ -152,17 +194,18 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// Envía la solicitud al servicio ASPEN.
         /// </summary>
         /// <param name="request">La información de la solicitud.</param>
-        /// <param name="apiVersion">El número de versión del API para incluir en la cabecera de la solicitud.</param>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private void Execute(IRestRequest request, string apiVersion = null)
+        private void Execute(IRestRequest request)
         {
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+#if DEBUG
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.restClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
@@ -182,38 +225,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Obtiene el cupero que se está enviando con la solicitud (en formato Json).
-        /// </summary>
-        /// <param name="parameters">Parámetros de la solicitud.</param>
-        /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
-        private Dictionary<string, object> GetBody(IEnumerable<Parameter> parameters)
-        {
-            return parameters
-                .Where(item => item.Type == ParameterType.GetOrPost | item.Type == ParameterType.RequestBody)
-                .ToDictionary(p => p.Name, p => p.Value);
-        }
-
-        /// <summary>
-        /// Obtiene la lista de cabeceras que se envian con la solicitud.
-        /// </summary>
-        /// <param name="parameters">Parámeros de la solicitud.</param>
-        /// <returns>Listado de parámeros que se envian en la cabecera de la solicitud.</returns>
-        private Dictionary<string, object> GetHeaders(IEnumerable<Parameter> parameters)
-        {
-            return parameters
-                .Where(item => item.Type == ParameterType.HttpHeader)
-                .ToDictionary(p => p.Name, p => p.Value);
-        }
-
-        /// <summary>
         /// Inicializa la instancia del tipo <see cref="RestSharp.RestClient"/> que se utilza para enviar las solicitudes al servicio Aspen.
         /// </summary>
         private void InitializeClient()
         {
             this.restClient = new RestClient(this.endpoint.ToString().TrimEnd('/'))
-                    {
-                        Timeout = (int)this.timeout.TotalMilliseconds
-                    };
+            {
+                Timeout = (int)this.timeout.TotalMilliseconds
+            };
             this.restClient.UseSerializer(JsonNetSerializer.Default);
 
             IWebProxy webProxy = ServiceLocator.Instance.WebProxy;
@@ -228,5 +247,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
         }
+
+        #endregion
     }
 }

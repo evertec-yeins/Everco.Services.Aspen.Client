@@ -102,6 +102,18 @@ namespace Everco.Services.Aspen.Client
             string defaultValue = null) => string.IsNullOrWhiteSpace(input) ? defaultValue : input;
 
         /// <summary>
+        /// Obtiene el cupero que se está enviando con la solicitud (en formato Json).
+        /// </summary>
+        /// <param name="parameters">Parámetros de la solicitud.</param>
+        /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
+        internal static Dictionary<string, object> GetBody(this IEnumerable<Parameter> parameters)
+        {
+            return parameters
+                .Where(item => item.Type == ParameterType.GetOrPost | item.Type == ParameterType.RequestBody)
+                .ToDictionary(p => p.Name, p => p.Value);
+        }
+
+        /// <summary>
         /// Obtiene el valor de una cabecera de la respuesta.
         /// </summary>
         /// <param name="response">Instancia con la información de la respuesta.</param>
@@ -116,6 +128,18 @@ namespace Everco.Services.Aspen.Client
             return response
                 .Headers
                 .SingleOrDefault(h => h.Name.Equals(name, comparisonType))?.Value?.ToString();
+        }
+
+        /// <summary>
+        /// Obtiene la lista de cabeceras que se envian con la solicitud.
+        /// </summary>
+        /// <param name="parameters">Parámeros de la solicitud.</param>
+        /// <returns>Listado de parámeros que se envian en la cabecera de la solicitud.</returns>
+        internal static Dictionary<string, object> GetHeaders(this IEnumerable<Parameter> parameters)
+        {
+            return parameters
+                .Where(item => item.Type == ParameterType.HttpHeader)
+                .ToDictionary(p => p.Name, p => p.Value);
         }
     }
 }

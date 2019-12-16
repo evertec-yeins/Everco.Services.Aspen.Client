@@ -81,8 +81,9 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+#if DEBUG
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
             try
             {
@@ -96,6 +97,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
@@ -140,8 +142,9 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+#if DEBUG
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
             try
             {
@@ -152,9 +155,10 @@ namespace Everco.Services.Aspen.Client.Fluent
             {
                 ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
             }
-            
+
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body =>  {JsonConvert.SerializeObject(body)}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
@@ -196,8 +200,8 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
 #if DEBUG
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
             try
             {
@@ -249,8 +253,9 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-            Dictionary<string, object> headers = this.GetHeaders(request.Parameters);
-            Dictionary<string, object> body = this.GetBody(request.Parameters);
+#if DEBUG
+            Dictionary<string, object> headers = request.Parameters.GetHeaders();
+            Dictionary<string, object> body = request.Parameters.GetBody();
             string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
             try
             {
@@ -264,6 +269,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
+#endif
             IRestResponse response = this.RestClient.Execute(request);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
