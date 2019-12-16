@@ -42,10 +42,10 @@ namespace Everco.Services.Aspen.Client.Providers
         /// Indica que el proxy no debe usarse para el host especificado.
         /// </summary>
         /// <param name="host">La <see cref="T:System.Uri"></see> del host para verificar el uso del proxy.</param>
-        /// <returns>Siempre false en esta instancia.</returns>
+        /// <returns>Siempre <see langword="true" /> en esta instancia.</returns>
         public bool IsBypassed(Uri host)
         {
-            return false;
+            return true;
         }
     }
 }

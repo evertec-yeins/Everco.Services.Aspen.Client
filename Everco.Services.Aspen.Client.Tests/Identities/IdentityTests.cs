@@ -39,14 +39,14 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
             // Primer paso (Guardar en un archivo, una única vez)
             string apiKey = Guid.NewGuid().ToString("D");
             string apiSecret = TestContext.CurrentContext.Random.GetString(150);
-            SecureIdentity identity = new SecureIdentity(apiKey, apiSecret);
+            SecureFileIdentity fileIdentity = new SecureFileIdentity(apiKey, apiSecret);
             string fileName = $@"D:\Temp\{Guid.NewGuid():N}.bin";
-            identity.Encrypt().SaveTo(fileName);
+            fileIdentity.Encrypt().SaveTo(fileName);
 
             // Segundo paso (Leer del archivo guardado, tantas veces como se necesite)
-            SecureIdentity identityFromFile = SecureIdentity.FromFile(fileName);
-            Assert.That(identityFromFile.ApiKey, Is.EqualTo(apiKey));
-            Assert.That(identityFromFile.ApiSecret, Is.EqualTo(apiSecret));
+            SecureFileIdentity fileIdentityFromFile = SecureFileIdentity.FromFile(fileName);
+            Assert.That(fileIdentityFromFile.ApiKey, Is.EqualTo(apiKey));
+            Assert.That(fileIdentityFromFile.ApiSecret, Is.EqualTo(apiSecret));
         }
 
         [Test]
@@ -61,14 +61,14 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
             int ordinal = TestContext.CurrentContext.Random.Next(encodings.Length);
             Encoding encoding = Encoding.GetEncoding(encodings[ordinal].CodePage);
             byte[] entropy = encoding.GetBytes(entropyText);
-            SecureIdentity identity = new SecureIdentity(apiKey, apiSecret, entropy, encoding);
+            SecureFileIdentity fileIdentity = new SecureFileIdentity(apiKey, apiSecret, entropy, encoding);
             string fileName = $@"D:\Temp\{Guid.NewGuid():N}.bin";
-            identity.Encrypt().SaveTo(fileName);
+            fileIdentity.Encrypt().SaveTo(fileName);
 
             // Segundo paso (Leer del archivo guardado, tantas veces como se necesite)
-            SecureIdentity identityFromFile = SecureIdentity.FromFile(fileName);
-            Assert.That(identityFromFile.ApiKey, Is.EqualTo(apiKey));
-            Assert.That(identityFromFile.ApiSecret, Is.EqualTo(apiSecret));
+            SecureFileIdentity fileIdentityFromFile = SecureFileIdentity.FromFile(fileName);
+            Assert.That(fileIdentityFromFile.ApiKey, Is.EqualTo(apiKey));
+            Assert.That(fileIdentityFromFile.ApiSecret, Is.EqualTo(apiSecret));
         }
 
         [Test]
