@@ -29,7 +29,7 @@ namespace Everco.Services.Aspen.Client
         /// <returns>
         /// Instancia de <typeparamref name="T"/> o <paramref name="defaultValue" /> si la conversión falla.
         /// </returns>
-        public static T Convert<T>(this string input, T defaultValue = default)
+        internal static T Convert<T>(this string input, T defaultValue = default)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace Everco.Services.Aspen.Client
         /// <param name="mapping">Campo en donde se busca la información de mapeo.</param>
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
         /// <returns>Tupla donde <c>Resource</c> representa el endpoint de la solicitud y <c>Method</c> el método HTTP esperado por la solicitud.</returns>
-        public static (string Resource, Method Method) GetEndPointMappingInfo(this EndpointMapping mapping, Scope scope)
+        internal static (string Resource, Method Method) GetEndPointMappingInfo(this EndpointMapping mapping, Scope scope)
         {
             string keyName = $"GetEndPointMappingInfo.{scope}.{mapping}";
 
@@ -87,6 +87,32 @@ namespace Everco.Services.Aspen.Client
             KeyValuePair<string, Method> endpointMappingInfo = new KeyValuePair<string, Method>(resource, method);
             AppDomain.CurrentDomain.SetData(keyName, endpointMappingInfo);
             return (resource, method);
+        }
+
+        /// <summary>
+        /// Obtiene el valor de una clave en el diccionario o un valor por defecto.
+        /// </summary>
+        /// <typeparam name="TKey">Tipo de la clave en el diccionario.</typeparam>
+        /// <typeparam name="TValue">Tipo del valor en el diccionario.</typeparam>
+        /// <param name="dictionary">Diccionario donde se busca la información.</param>
+        /// <param name="key">Clave a buscar.</param>
+        /// <param name="defaultValue">Valor por defecto si no se encuentra la clave.</param>
+        /// <returns>Valor de la clave en el diccionario o <paramref name="defaultValue"/> si no se encuentra <paramref name="key"/>.</returns>
+        internal static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default)
+        {
+            if (key == null)
+            {
+                return defaultValue;
+            }
+
+            try
+            {
+                return dictionary.TryGetValue(key, out TValue value) ? value : defaultValue;
+            }
+            catch (Exception)
+            {
+                return defaultValue;
+            }
         }
 
         /// <summary>

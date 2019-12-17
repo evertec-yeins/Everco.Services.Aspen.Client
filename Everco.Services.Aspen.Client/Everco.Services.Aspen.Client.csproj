@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>False</Deterministic>
   </PropertyGroup>
@@ -16,7 +16,8 @@
     <None Remove="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Everco.Services.Aspen.Entities" Version="2019.12.10" />
+    <PackageReference Include="Everco.Services.Aspen.Client.Identity" Version="2019.12.17" />
+    <PackageReference Include="Everco.Services.Aspen.Entities" Version="2019.12.17" />
     <PackageReference Include="JWT" Version="5.3.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RestSharp" Version="106.6.10" />
@@ -24,12 +25,6 @@
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Fluent\Anonymous.*.cs">
-      <DependentUpon>Fluent\Anonymous.cs</DependentUpon>
-    </Compile>
     <Compile Update="Fluent\AutonomousApp.*.cs">
       <DependentUpon>Fluent\AutonomousApp.cs</DependentUpon>
     </Compile>

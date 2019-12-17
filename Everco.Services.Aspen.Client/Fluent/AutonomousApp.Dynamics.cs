@@ -79,7 +79,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public void Delete(string resource, params KeyValuePair<string, object>[] body)
         {
             IEnumerable<KeyValuePair<string, object>> kvp = body ?? Enumerable.Empty<KeyValuePair<string, object>>();
-            this.Submit<ExpandoObject>(resource, Method.DELETE, new Dictionary<string, object>(kvp));
+            this.Submit<ExpandoObject>(resource, Method.DELETE, kvp.ToDictionary(pair => pair.Key, pair => pair.Value));
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public void Post(string resource, params KeyValuePair<string, object>[] body)
         {
             IEnumerable<KeyValuePair<string, object>> kvp = body ?? Enumerable.Empty<KeyValuePair<string, object>>();
-            this.Submit<ExpandoObject>(resource, Method.POST, new Dictionary<string, object>(kvp));
+            this.Submit<ExpandoObject>(resource, Method.POST, kvp.ToDictionary(pair => pair.Key, pair => pair.Value));
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public void Put(string resource, params KeyValuePair<string, object>[] body)
         {
             IEnumerable<KeyValuePair<string, object>> kvp = body ?? Enumerable.Empty<KeyValuePair<string, object>>();
-            this.Submit<ExpandoObject>(resource, Method.PUT, new Dictionary<string, object>(kvp));
+            this.Submit<ExpandoObject>(resource, Method.PUT, kvp.ToDictionary(pair => pair.Key, pair => pair.Value));
         }
 
         /// <summary>

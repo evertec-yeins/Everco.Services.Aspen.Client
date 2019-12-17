@@ -1,10 +1,10 @@
 ﻿Properties {
 	$TargetDir        = (Join-Path -Path ($PSScriptRoot | Split-Path) -ChildPath 'NuGet')
-	$SolutionName     = 'Everco.Services.Aspen.Client'
-	$ProjectName      = 'Everco.Services.Aspen.Client'
-	$ProjectTags      = 'Everco Services Aspen Client'
+	$SolutionName     = 'Everco.Services.Aspen.Client.Identity'
+	$ProjectName      = 'Everco.Services.Aspen.Client.Identity'
+	$ProjectTags      = 'Everco Services Aspen Client Identity'
 	$ProjectDir       = ($PSScriptRoot | Split-Path)
-	$NugetSpec        = 'Everco.Services.Aspen.Client.Proget.nuspec'
+	$NugetSpec        = 'Everco.Services.Aspen.Client.Identity.Proget.nuspec'
 	$Publish          = $Publish
 	$NugetPath        = $env:NUGET_PATH
 	$ProGetApiKey     = $env:PROGET_APIKEY_LIBRARIES

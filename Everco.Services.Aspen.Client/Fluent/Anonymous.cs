@@ -122,6 +122,18 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Establece la URL para las solicitudes al servicio Aspen a partir de los valores predeterminados.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="ISession" /> que permite acceder a los datos de conexión con el servicio.
+        /// </returns>
+        public ISession WithDefaults()
+        {
+            this.RoutingTo(ServiceLocator.Instance.DefaultEndpoint);
+            return this;
+        }
+
+        /// <summary>
         /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
         /// </summary>
         /// <param name="apiKey">El identificador de la aplicación que generó el error.</param>

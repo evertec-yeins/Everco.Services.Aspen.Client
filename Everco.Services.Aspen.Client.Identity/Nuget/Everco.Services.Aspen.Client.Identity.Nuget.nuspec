@@ -1,12 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package>
   <metadata>
-    <id>Everco.Services.Aspen.Client</id>
-    <version>2019.12.17.0</version>
+    <id>Everco.Services.Aspen.Client.Identity</id>
+    <version>1.0.0.0</version>
     <authors>dmontalvo</authors>
     <owners>Evertec Colombia</owners>
     <license type="expression">MIT</license>
-    <projectUrl>https://github.com/RD-Processa/Everco.Services.Aspen.Client</projectUrl>
+    <projectUrl>https://github.com/RD-Processa/Everco.Services.Aspen.Client.Identity</projectUrl>
     <icon>images\evertec.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>El cliente de Aspen es una librería que facilita la conexión con el servicio Aspen de Evertec Colombia.</description>
@@ -14,18 +14,16 @@
     <copyright>Evertec Colombia (c) 2019</copyright>
     <tags>Everco Services Aspen Client</tags>
     <dependencies>
-      <dependency id="Everco.Services.Aspen.Client.Identity" version="2019.12.17" />
-      <dependency id="Everco.Services.Aspen.Entities" version="2019.12.17" />
-      <dependency id="JWT" version="5.3.1" />
+      <dependency id="Microsoft.Win32.Registry" version="4.7.0" />
       <dependency id="Newtonsoft.Json" version="12.0.3" />
-      <dependency id="RestSharp" version="106.6.10" />
-      <dependency id="SimpleInjector" version="4.8.1" />
+      <dependency id="System.Configuration.ConfigurationManager" version="4.7.0" />
       <dependency id="System.Management" version="4.7.0" />
+      <dependency id="System.Security.Cryptography.ProtectedData" version="4.7.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="evertec.png" target="images\" />
-    <file src="..\bin\Release\netstandard2.0\Everco.Services.Aspen.Client.dll" target="lib\netstandard2.0" />
-    <file src="..\bin\Release\netstandard2.0\Everco.Services.Aspen.Client.xml" target="lib\netstandard2.0" />
+    <file src="..\bin\Release\netstandard2.0\Everco.Services.Aspen.Client.Identity.dll" target="lib\netstandard2.0" />
+    <file src="..\bin\Release\netstandard2.0\Everco.Services.Aspen.Client.Identity.xml" target="lib\netstandard2.0" />
   </files>
 </package>

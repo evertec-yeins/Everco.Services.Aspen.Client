@@ -38,5 +38,13 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="timeout">El tiempo de espera para las respuesta de las solicitudes al servicio o <c>null</c> para establecer el valor predeterminado (15 segundos)</param>
         /// <returns>Instancia de <see cref="ISession"/> que permite acceder a los datos de conexión con el servicio.</returns>
         ISession RoutingTo(Uri url, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Establece la URL para las solicitudes al servicio Aspen a partir de los valores predeterminados.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="ISession" /> que permite acceder a los datos de conexión con el servicio.
+        /// </returns>
+        ISession WithDefaults();
     }
 }
