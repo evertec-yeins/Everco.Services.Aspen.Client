@@ -1,5 +1,5 @@
 ﻿// -----------------------------------------------------------------------
-// <copyright file="AutonomousAppTestsDynamics.cs" company="Processa">
+// <copyright file="AutonomousAppTests.Dynamics.cs" company="Processa">
 // Copyright (c) 2019 Todos los derechos reservados.
 // </copyright>
 // <author>atorrest</author>
@@ -12,14 +12,13 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Net;
     using Fluent;
     using Identities;
-    using Identity;
     using NUnit.Framework;
-    using Providers;
 
     [TestFixture]
-    public class AutonomousAppTests123
+    public partial class AutonomousAppTests
     {
         [Test]
+        [Category("Modules.Dynamics")]
         public void XYZ()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
@@ -34,6 +33,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
+        [Category("Modules.Dynamics")]
         public void RecognizedEndpoint()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
@@ -47,6 +47,7 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         [Test]
+        [Category("Modules.Dynamics")]
         public void RecognizedEndpointWorks()
         {
             IAutonomousApp client = AutonomousApp.Initialize()

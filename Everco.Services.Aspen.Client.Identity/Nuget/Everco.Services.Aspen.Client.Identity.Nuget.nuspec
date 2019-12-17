@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Everco.Services.Aspen.Client.Identity</id>
-    <version>1.0.0.0</version>
+    <version>2019.12.17.0</version>
     <authors>dmontalvo</authors>
     <owners>Evertec Colombia</owners>
     <license type="expression">MIT</license>
@@ -12,7 +12,7 @@
     <description>Implementaciones predeterminadas para manejar la información de la identidad de las aplicaciones para la autenticación al Servicio de Aspen.</description>
     <releaseNotes>Versión inicial</releaseNotes>
     <copyright>Evertec Colombia (c) 2019</copyright>
-    <tags>Everco Services Aspen Client</tags>
+    <tags>Everco Services Aspen Client Identity</tags>
     <dependencies>
       <dependency id="Microsoft.Win32.Registry" version="4.7.0" />
       <dependency id="Newtonsoft.Json" version="12.0.3" />

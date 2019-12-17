@@ -11,15 +11,14 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
 
     /// <summary>
     /// Implementa funcionalidades para administrar servicios ficticios creados a partir de queries de LINQPad.
     /// </summary>
-    [SuppressMessage("Style", "IDE0063:Use simple 'using' statement", Justification = "Keep calm and ignore")]
     public class ServicesHelper : IDisposable
     {
         /// <summary>
@@ -37,7 +36,8 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// </summary>
         private ServicesHelper()
         {
-            this.DummyFilesPath = Path.Join(Directory.GetCurrentDirectory(), @"Assets\Dummies");
+            string currentDirectory = Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+            this.DummyFilesPath = Path.Combine(currentDirectory ?? throw new InvalidOperationException("Not found current directory."), @"Assets\Dummies");
             this.processesStarted = new Dictionary<string, Process>();
         }
 
@@ -61,7 +61,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
                 IEnumerable<Process> killProcesses = Process.GetProcessesByName("lprun");
                 foreach (Process process in killProcesses)
                 {
-                    process.Kill(true);
+                    process.Kill();
                     process.Close();
                     process.Dispose();
                 }
@@ -154,7 +154,7 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
             // Aquí se pretende dar una espera, hasta comprobar que el servicio realmente inició.
             DateTime waitTime = DateTime.Now.AddSeconds(10);
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(dummyFileInfo.FullName);
-            string flagFilePath = Path.Join(dummyFileInfo.Directory?.FullName, $"{fileNameWithoutExtension}.flag");
+            string flagFilePath = Path.Combine(dummyFileInfo.Directory?.FullName ?? throw new InvalidOperationException("Null reference on starting process."), $"{fileNameWithoutExtension}.flag");
             
             do
             {

@@ -1,54 +1,228 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props" Condition="Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props')" />
+  <Import Project="..\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.12.0\build\NUnit.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <IsPackable>false</IsPackable>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Everco.Services.Aspen.Client.Tests</RootNamespace>
+    <AssemblyName>Everco.Services.Aspen.Client.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="StyleCop.Cache" />
+    <Reference Include="Everco.Services.Aspen.Entities, Version=2019.12.17.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Everco.Services.Aspen.Entities.2019.12.17\lib\netstandard2.0\Everco.Services.Aspen.Entities.dll</HintPath>
+    </Reference>
+    <Reference Include="JWT, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\JWT.5.3.1\lib\net472\JWT.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Registry.4.7.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="PasswordGenerator, Version=2.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\PasswordGenerator.2.0.3\lib\netstandard2.0\PasswordGenerator.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=106.6.10.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.106.6.10\lib\net452\RestSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="SimpleInjector, Version=4.8.1.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.4.8.1\lib\net45\SimpleInjector.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.ConfigurationManager, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Configuration.ConfigurationManager.4.7.0\lib\net461\System.Configuration.ConfigurationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.4.7.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.ProtectedData, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Cryptography.ProtectedData.4.7.0\lib\net461\System.Security.Cryptography.ProtectedData.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Permissions, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Permissions.4.7.0\lib\net461\System.Security.Permissions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=4.1.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.4.7.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.DotMemoryUnit" Version="3.0.20171219.105559" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
-    <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-    <PackageReference Include="PasswordGenerator" Version="2.0.3" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj" />
-    <ProjectReference Include="..\Everco.Services.Aspen.Client\Everco.Services.Aspen.Client.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\Dummies\" />
-    <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="AnonymousTests.*.cs">
-      <DependentUpon>AnonymousTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="AutonomousAppTests.*.cs">
-      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="DelegatedAppTests.*.cs">
-      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Data\IDatabaseHelper.cs">
-      <ExcludeFromSourceAnalysis>True</ExcludeFromSourceAnalysis>
+    <Compile Include="AnonymousTests.cs" />
+    <Compile Include="Assets\FixedEpochGenerator.cs" />
+    <Compile Include="Assets\InvalidApiKeyHeader.cs" />
+    <Compile Include="Assets\InvalidApiVersionHeader.cs" />
+    <Compile Include="Assets\InvalidDeviceIdPayloadClaim.cs" />
+    <Compile Include="Assets\InvalidDocNumberPayloadClaim.cs" />
+    <Compile Include="Assets\InvalidDocTypePayloadClaim.cs" />
+    <Compile Include="Assets\InvalidEpochPayloadClaim.cs" />
+    <Compile Include="Assets\InvalidHeadersManager.cs" />
+    <Compile Include="Assets\InvalidNoncePayloadClaim.cs" />
+    <Compile Include="Assets\InvalidPasswordPayloadClaim.cs" />
+    <Compile Include="Assets\InvalidPayloadClaimsManager.cs" />
+    <Compile Include="Assets\InvalidPayloadHeader.cs" />
+    <Compile Include="Assets\InvalidTokenPayloadClaim.cs" />
+    <Compile Include="Assets\InvalidUsernamePayloadClaim.cs" />
+    <Compile Include="Assets\ServicesHelper.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
-    <Compile Update="DelegatedAppTests - Copy.InquiriesModule.cs">
+    <Compile Include="Assets\SingleUseNonceGenerator.cs" />
+    <Compile Include="AutonomousAppTests.cs" />
+    <Compile Include="AutonomousAppTests.Dynamics.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.InquiriesModule.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.ManagementModule.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.Settings.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.SetUp.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.Signed.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.SignedHeaders.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.Signin.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.SigninHeaders.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AutonomousAppTests.UpdateApiSecret.cs">
+      <DependentUpon>AutonomousAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\IDatabaseHelper.cs" />
+    <Compile Include="Data\SqlServerHelper.cs" />
+    <Compile Include="DelegatedAppTests.cs" />
+    <Compile Include="DelegatedAppTests.InquiriesModule.cs">
       <DependentUpon>DelegatedAppTests.cs</DependentUpon>
     </Compile>
+    <Compile Include="DelegatedAppTests.ManagementModule.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.Settings.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.SetUp.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.Signed.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.SignedHeaders.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.Signin.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DelegatedAppTests.SigninHeaders.cs">
+      <DependentUpon>DelegatedAppTests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Identities\AutonomousAppIdentity.cs" />
+    <Compile Include="Identities\DelegatedAppIdentity.cs" />
+    <Compile Include="Identities\IdentityTests.cs" />
+    <Compile Include="Identities\RecognizedUserIdentity.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetUpTests.cs" />
+    <Compile Include="TestContextExtensions.cs" />
+    <Compile Include="TestingEndpointProvider.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Assets\Dummies\RabbitMQ.Services.Bancor.linq">
+    <None Include="app.config" />
+    <None Include="Assets\Dummies\RabbitMQ.Services.Bancor.linq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\Dummies\RabbitMQ.Services.Bifrost.linq">
+    <None Include="Assets\Dummies\RabbitMQ.Services.Bifrost.linq">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\Dummies\RabbitMQ.Services.Calc.linq">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Settings.StyleCop" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj">
+      <Project>{5afc8573-01d3-4350-8fcd-e1ad7663fac2}</Project>
+      <Name>Everco.Services.Aspen.Client.Identity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Everco.Services.Aspen.Client\Everco.Services.Aspen.Client.csproj">
+      <Project>{eccd8ea4-8dfe-415b-953a-59dc97a167d8}</Project>
+      <Name>Everco.Services.Aspen.Client</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit.3.12.0\build\NUnit.props'))" />
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.props'))" />
+    <Error Condition="!Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets'))" />
+  </Target>
+  <Import Project="..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets" Condition="Exists('..\packages\MSTest.TestAdapter.2.0.0\build\net45\MSTest.TestAdapter.targets')" />
 </Project>

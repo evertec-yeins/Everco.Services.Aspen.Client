@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Everco.Services.Aspen.Client", "Everco.Services.Aspen.Client\Everco.Services.Aspen.Client.csproj", "{ECCD8EA4-8DFE-415B-953A-59DC97A167D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Everco.Services.Aspen.Client.Tests", "Everco.Services.Aspen.Client.Tests\Everco.Services.Aspen.Client.Tests.csproj", "{ACED517D-B444-4D8C-8267-52E4FF44B242}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Everco.Services.Aspen.Client.Identity", "Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj", "{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Everco.Services.Aspen.Client.Identity", "Everco.Services.Aspen.Client.Identity\Everco.Services.Aspen.Client.Identity.csproj", "{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Everco.Services.Aspen.Client.Tests", "Everco.Services.Aspen.Client.Tests\Everco.Services.Aspen.Client.Tests.csproj", "{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +19,14 @@ Global
 		{ECCD8EA4-8DFE-415B-953A-59DC97A167D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECCD8EA4-8DFE-415B-953A-59DC97A167D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECCD8EA4-8DFE-415B-953A-59DC97A167D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ACED517D-B444-4D8C-8267-52E4FF44B242}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ACED517D-B444-4D8C-8267-52E4FF44B242}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ACED517D-B444-4D8C-8267-52E4FF44B242}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ACED517D-B444-4D8C-8267-52E4FF44B242}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5AFC8573-01D3-4350-8FCD-E1AD7663FAC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C994B07B-AB37-4EA0-BA8F-7167DB6AF0C8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
