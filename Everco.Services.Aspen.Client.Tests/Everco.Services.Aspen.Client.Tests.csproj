@@ -39,6 +39,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Everco.Services.Aspen.Entities, Version=2019.12.17.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Everco.Services.Aspen.Entities.2019.12.17\lib\netstandard2.0\Everco.Services.Aspen.Entities.dll</HintPath>
