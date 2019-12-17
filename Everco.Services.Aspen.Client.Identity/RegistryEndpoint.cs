@@ -42,26 +42,18 @@ namespace Everco.Services.Aspen.Client.Identity
                     throw new PlatformNotSupportedException();
                 }
 
-#pragma warning disable SA0102
-
-                RegistryKey rootKey = root switch
+                RegistryKey rootKey = root.ToRegistryKey();
+                
+                using (RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath))
                 {
-                    RegistryRoot.LocalMachine => Registry.LocalMachine,
-                    RegistryRoot.CurrentUser => Registry.CurrentUser,
-                    _ => Registry.ClassesRoot
-                };
+                    if (registryKey == null)
+                    {
+                        return;
+                    }
 
-#pragma warning restore SA0102
-
-                using RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath);
-
-                if (registryKey == null)
-                {
-                    return;
+                    this.SetUrl(registryKey.GetValue(urlName)?.ToString());
+                    this.SetTimeout(registryKey.GetValue(timeoutName)?.ToString(), nameof(timeoutName));
                 }
-
-                this.SetUrl(registryKey.GetValue(urlName)?.ToString());
-                this.SetTimeout(registryKey.GetValue(timeoutName)?.ToString(), nameof(timeoutName));
             }
             catch (Exception exception)
             {

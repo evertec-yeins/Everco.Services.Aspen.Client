@@ -14,7 +14,7 @@ namespace Everco.Services.Aspen.Client.Identity
     /// <summary>
     /// Obtiene  la información que se utiliza para autenticar la solicitud en el servicio Aspen del registro de Windows.
     /// </summary>
-    public class RegistryIdentity: IAppIdentity
+    public class RegistryIdentity : IAppIdentity
     {
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="RegistryIdentity" />
@@ -41,36 +41,27 @@ namespace Everco.Services.Aspen.Client.Identity
                     throw new PlatformNotSupportedException();
                 }
 
-#pragma warning disable SA0102
-
-                RegistryKey rootKey = root switch
-                {
-                    RegistryRoot.LocalMachine => Registry.LocalMachine,
-                    RegistryRoot.CurrentUser => Registry.CurrentUser,
-                    _ => Registry.ClassesRoot
-                };
-
-#pragma warning restore SA0102
-
+                RegistryKey rootKey = root.ToRegistryKey();
                 string registryPath = $@"{rootKey}\{subKeyPath}";
-                using RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath);
-            
-                if (registryKey == null)
+                using (RegistryKey registryKey = rootKey.OpenSubKey(subKeyPath))
                 {
-                    return;
-                }
+                    if (registryKey == null)
+                    {
+                        return;
+                    }
 
-                this.ApiKey = registryKey.GetValue(apiKeyName)?.ToString()?.TryDecrypt();
-                this.ApiSecret = registryKey.GetValue(apiSecretName)?.ToString()?.TryDecrypt();
+                    this.ApiKey = registryKey.GetValue(apiKeyName)?.ToString()?.TryDecrypt();
+                    this.ApiSecret = registryKey.GetValue(apiSecretName)?.ToString()?.TryDecrypt();
 
-                if (string.IsNullOrWhiteSpace(this.ApiKey))
-                {
-                    throw new IdentityException($@"Value for ApiKey not found in Registry:{registryPath} => {apiKeyName}");
-                }
+                    if (string.IsNullOrWhiteSpace(this.ApiKey))
+                    {
+                        throw new IdentityException($@"Value for ApiKey not found in Registry:{registryPath} => {apiKeyName}");
+                    }
 
-                if (string.IsNullOrWhiteSpace(this.ApiSecret))
-                {
-                    throw new IdentityException($@"Value for ApiSecret not found in Registry:{registryPath} => {apiSecretName}");
+                    if (string.IsNullOrWhiteSpace(this.ApiSecret))
+                    {
+                        throw new IdentityException($@"Value for ApiSecret not found in Registry:{registryPath} => {apiSecretName}");
+                    }
                 }
             }
             catch (Exception exception)
