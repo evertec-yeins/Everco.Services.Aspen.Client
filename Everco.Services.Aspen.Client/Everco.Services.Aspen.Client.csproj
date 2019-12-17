@@ -13,6 +13,7 @@
     <DocumentationFile>bin\Release\Everco.Services.Aspen.Client.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Nuget\*.nupkg" />
     <None Remove="StyleCop.Cache" />
   </ItemGroup>
   <ItemGroup>
