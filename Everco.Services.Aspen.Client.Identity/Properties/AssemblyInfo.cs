@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Everco.Services.Aspen.Client.Identity")]
-[assembly: AssemblyDescription("Implementa un cliente del API Rest de Aspen.")]
+[assembly: AssemblyDescription("Implementaciones predeterminadas para manejar la información de la identidad de las aplicaciones para la autenticación al Servicio de Aspen.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Evertec Colombia")]
 [assembly: AssemblyProduct("Everco.Services.Aspen.Client.Identity")]
