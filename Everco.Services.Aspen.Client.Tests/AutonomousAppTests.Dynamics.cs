@@ -19,7 +19,7 @@ namespace Everco.Services.Aspen.Client.Tests
     {
         [Test]
         [Category("Modules.Dynamics")]
-        public void XYZ()
+        public void DumpTraceNotFoundWorks()
         {
             IAutonomousApp client = AutonomousApp.Initialize()
                                                  .RoutingTo(TestingEndpointProvider.Default)
@@ -42,7 +42,7 @@ namespace Everco.Services.Aspen.Client.Tests
                                                  .AuthenticateNoCache()
                                                  .GetClient();
 
-            AspenException exception = Assert.Throws<AspenException>(() => client.Dynamics.Post("atorres/calc", new KeyValuePair<string, object>("Input", "20")));
+            AspenException exception = Assert.Throws<AspenException>(() => client.Dynamics.Post("client/test/calc", new KeyValuePair<string, object>("Input", "20")));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -56,25 +56,32 @@ namespace Everco.Services.Aspen.Client.Tests
                                                  .AuthenticateNoCache()
                                                  .GetClient();
 
-            int a = new Random(Guid.NewGuid().GetHashCode()).Next(0, int.MaxValue);
-            int b = new Random(Guid.NewGuid().GetHashCode()).Next(0, int.MaxValue);
-            var request = new CustomRequest(a, b, '+');
-            var response = client.Dynamics.Post<CustomRequest, CustomResponse>("atorres/calc", request);
+            int a = new Random(Guid.NewGuid().GetHashCode()).Next(10, 100);
+            int b = new Random(Guid.NewGuid().GetHashCode()).Next(10, 100);
+            CustomRequest request = new CustomRequest(a, b, '+');
+            CustomResponse response = client.Dynamics.Post<CustomRequest, CustomResponse>("client/test/calc", request);
             Assert.That(response.Result, Is.EqualTo(a+b));
-            Assert.That(response.ResponseCode, Is.EqualTo(200));
-            Assert.That(response.ResponseCode, Is.EqualTo("OK"));
+            Assert.That(response.Text, Is.Null.Or.Empty);
         }
     }
 
     public class CustomResponse
     {
+        public CustomResponse()
+        {
+        }
+
+        public string Text { get; set; }
+
         public int Result { get; set; }
-        public int ResponseCode { get; set; }
-        public string ResponseMessage { get; set; }
     }
 
     public class CustomRequest
     {
+        public CustomRequest()
+        {
+        }
+
         public CustomRequest(int a, int b, char @operator)
         {
             this.Input = $"{a}{@operator}{b}";

@@ -12,15 +12,14 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Net;
     using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Entities;
     using Identity;
     using Newtonsoft.Json;
     using RestSharp;
 
     /// <summary>
-    /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance anonimo.
+    /// Expone las operaciones que permite conectar con las operaciones disponibles en el servicio Aspen que no requieren firma.
     /// </summary>
-    public sealed class Anonymous : IAnonymous
+    public sealed partial class Anonymous : IAnonymous
     {
         /// <summary>
         /// Para uso interno.
@@ -60,18 +59,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             this.InitializeClient();
             return this;
-        }
-
-        /// <summary>
-        /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
-        /// </summary>
-        /// <returns>
-        /// Lista de tipos de documento predeterminados.
-        /// </returns>
-        public IList<DocTypeInfo> GetDefaultDocTypes()
-        {
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.DefaultDocTypes);
-            return this.Execute<List<DocTypeInfo>>(request);
         }
 
         /// <summary>
@@ -132,35 +119,6 @@ namespace Everco.Services.Aspen.Client.Fluent
             this.RoutingTo(ServiceLocator.Instance.DefaultEndpoint);
             return this;
         }
-
-        /// <summary>
-        /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación que generó el error.</param>
-        /// <param name="username">El identificador del último usuario que uso la aplicación antes de generarse el error.</param>
-        /// <param name="errorReport">La información del reporte de error generado en la aplicación.</param>
-        public void SaveAppCrash(string apiKey, string username, string errorReport)
-        {
-            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
-            {
-                Throw.IfNullOrEmpty(apiKey, nameof(apiKey));
-                Throw.IfNullOrEmpty(errorReport, nameof(errorReport));
-                Throw.IfNullOrEmpty(username, nameof(username));
-            }
-
-            IRestRequest request = new AspenRequest(
-                Scope.Anonymous,
-                EndpointMapping.AppCrash,
-                contentType: "application/x-www-form-urlencoded");
-            request.AddParameter("ErrorReport", errorReport);
-            request.AddParameter("Username", username);
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
-            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
-            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
-            this.Execute(request);
-        }
-
-        #region Internals
 
         /// <summary>
         /// Envía la solicitud al servicio Aspen.
@@ -259,7 +217,5 @@ namespace Everco.Services.Aspen.Client.Fluent
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
         }
-
-        #endregion
     }
 }

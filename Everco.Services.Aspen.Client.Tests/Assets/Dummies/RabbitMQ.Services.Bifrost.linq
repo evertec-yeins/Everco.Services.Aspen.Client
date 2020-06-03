@@ -218,7 +218,7 @@ void GetResponse<TRequest, TResponse>(IModel channel, string routingKey, Action<
 	channel.BasicConsume(queue: routingKey, autoAck: false, consumer: consumer);
 	consumer.Received += (model, ea) =>
 	{
-		var body = ea.Body;
+		var body = ea.Body.ToArray();
 		var props = ea.BasicProperties;
 		var replyProps = channel.CreateBasicProperties();
 		replyProps.CorrelationId = props.CorrelationId;

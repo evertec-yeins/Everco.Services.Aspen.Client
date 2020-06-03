@@ -25,13 +25,13 @@ namespace Everco.Services.Aspen.Client.Tests
         /// Obtener los tipos de documento predetermiandos funciona.
         /// </summary>
         [Test]
-        [Category("Anonymous")]
+        [Category("Modules.Settings")]
         public void GetDefaultDocTypesWorks()
         {
             IAnonymous client = Anonymous.Initialize()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
-            IList<DocTypeInfo> defaultDocTypes = client.GetDefaultDocTypes();
+            IList<DocTypeInfo> defaultDocTypes = client.Settings.GetDefaultDocTypes();
             CollectionAssert.IsNotEmpty(defaultDocTypes);
             Assert.That(defaultDocTypes.Count, Is.EqualTo(5));
             foreach (DocTypeInfo docTypeInfo in defaultDocTypes)
@@ -43,10 +43,27 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
+        /// Obtener la configuración de valores misceláneos soportados para la aplicación funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetMiscellaneousSettingsWorks()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+            string recognizedApiKey = AutonomousAppIdentity.Master.ApiKey;
+            MiscellaneousSettings miscellaneousSettings = client.Settings.GetMiscellaneousSettings(recognizedApiKey);
+            CollectionAssert.IsNotEmpty(miscellaneousSettings);
+            Assert.That(miscellaneousSettings.GetKeyValue("EnableBiometrics", true), Is.True);
+            Assert.That(miscellaneousSettings.GetKeyValue("RememberUserName", true), Is.True);
+        }
+
+        /// <summary>
         /// Guardar la información del crash (errores o bloqueos de sistema) generado por una aplicación conocida .
         /// </summary>
         [Test]
-        [Category("Anonymous")]
+        [Category("Modules.Settings")]
         public void SaveAppCrashWorks()
         {
             IAnonymous client = Anonymous.Initialize().RoutingTo(TestingEndpointProvider.Default).GetClient();
@@ -59,10 +76,10 @@ namespace Everco.Services.Aspen.Client.Tests
                                                              };
 
             string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.Indented);
-            Assert.DoesNotThrow(() => client.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
+            Assert.DoesNotThrow(() => client.Utils.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
 
             errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
-            Assert.DoesNotThrow(() => client.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
+            Assert.DoesNotThrow(() => client.Utils.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
         }
     }
 }
