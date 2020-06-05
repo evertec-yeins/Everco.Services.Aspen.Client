@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Entities;
     using Internals;
     using Modules.Delegated;
@@ -36,6 +37,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la lista de operadores de telefonía móvil soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<CarrierInfo>> GetCarriersAsync()
+        {
+            return await Task.Run(this.GetCarriers);
+        }
+
+        /// <summary>
         /// Obtiene la lista de tipos de documento soportados por el servicio Aspen.
         /// </summary>
         /// <returns>
@@ -48,6 +60,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la lista de tipos de documento soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<DocTypeInfo>> GetDocTypesAsync()
+        {
+            return await Task.Run(this.GetDocTypes);
+        }
+
+        /// <summary>
         /// Obtiene la lista de opciones que representan el menú de una aplicación móvil.
         /// </summary>
         /// <returns>Lista de opciones de menú.</returns>
@@ -55,6 +78,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.MenuItems);
             return this.Execute<List<MenuItemInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la lista de opciones que representan el menú de la aplicación móvil.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<MenuItemInfo>> GetMenuAsync()
+        {
+            return await Task.Run(this.GetMenu);
         }
 
         /// <summary>
@@ -70,6 +104,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<MiscellaneousSettings> GetMiscellaneousSettingsAsync()
+        {
+            return await Task.Run(this.GetMiscellaneousSettings);
+        }
+
+        /// <summary>
         /// Obtiene los tipos de pagos que se pueden realizar a una cuenta.
         /// </summary>
         /// <returns>
@@ -79,6 +124,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.PaymentTypes);
             return this.Execute<List<PaymentTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<PaymentTypeInfo>> GetPaymentTypesAsync()
+        {
+            return await Task.Run(this.GetPaymentTypes);
         }
 
         /// <summary>
@@ -94,6 +150,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene los valores admitidos de recarga por operador soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TopUpInfo>> GetTopUpValuesAsync()
+        {
+            return await Task.Run(this.GetTopUpValues);
+        }
+
+        /// <summary>
         /// Obtiene la lista de los tipos de transacción para una aplicación.
         /// </summary>
         /// <returns>
@@ -103,6 +170,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.TranTypes);
             return this.Execute<List<TranTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la lista de los tipos de transacción soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TranTypeInfo>> GetTranTypesAsync()
+        {
+            return await Task.Run(this.GetTranTypes);
         }
     }
 }

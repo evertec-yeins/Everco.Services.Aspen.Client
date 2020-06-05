@@ -9,6 +9,7 @@ namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Entities;
     using Everco.Services.Aspen.Client.Internals;
     using Modules.Delegated;
@@ -34,6 +35,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.TransferAccountsFromCurrentUser);
             return this.Execute<List<TransferAccountInfo>>(request) ?? Enumerable.Empty<TransferAccountInfo>().ToList();
+        }
+
+        /// <summary>
+        /// Obtiene la información de las cuentas vinculadas para transferencia de saldos al usuario actual.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TransferAccountInfo>> GetTransferAccountsAsync()
+        {
+            return await Task.Run(this.GetTransferAccounts);
         }
 
         /// <summary>
@@ -72,6 +84,32 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <summary>
         /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
         /// </summary>
+        /// <param name="cardHolderDocType">El tipo de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="cardHolderDocNumber">El número de documento del titular de la cuenta que se desea registrar.</param>
+        /// <param name="pinNumber">El pin transaccional del usuario autenticado.</param>
+        /// <param name="accountNumber">El número de cuenta que se desea registrar o <c>null</c> para que el sistema busque el número de cuenta asociado con el tarjetahabiente.</param>
+        /// <param name="alias">El nombre con el que se desea identificar la cuenta a registrar.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task LinkTransferAccountAsync(
+            string cardHolderDocType,
+            string cardHolderDocNumber,
+            string pinNumber,
+            string accountNumber = null,
+            string alias = null)
+        {
+            await Task.Run(() => this.LinkTransferAccount(
+                cardHolderDocType,
+                cardHolderDocNumber,
+                pinNumber,
+                accountNumber,
+                alias));
+        }
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
+        /// </summary>
         /// <param name="accountInfo">La información de la cuenta a vincular.</param>
         public void LinkTransferAccount(ILinkTransferAccountInfo accountInfo)
         {
@@ -83,6 +121,18 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.LinkTransferAccountFromCurrentUser);
             request.AddJsonBody(accountInfo);
             this.Execute(request);
+        }
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas para transferencia de saldos al usuario actual.
+        /// </summary>
+        /// <param name="accountInfo">La información de la cuenta a vincular.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task LinkTransferAccountAsync(ILinkTransferAccountInfo accountInfo)
+        {
+            await Task.Run(() => this.LinkTransferAccount(accountInfo));
         }
 
         /// <summary>
@@ -102,6 +152,18 @@ namespace Everco.Services.Aspen.Client.Fluent
                                                         };
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.UnlinkTransferAccountFromCurrentUserByAlias, endpointParameters);
             this.Execute(request);
+        }
+
+        /// <summary>
+        /// Desvincula la información de una cuenta de las cuentas inscritas para transferencia de saldos del usuario actual.
+        /// </summary>
+        /// <param name="alias">El nombre o alias con el que se vinculó la cuenta.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task UnlinkTransferAccountAsync(string alias)
+        {
+            await Task.Run(() => this.UnlinkTransferAccount(alias));
         }
     }
 }
