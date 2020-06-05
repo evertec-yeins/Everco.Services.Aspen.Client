@@ -17,6 +17,24 @@ namespace Everco.Services.Aspen.Client.Modules.Anonymous
     public interface ISettingsModule
     {
         /// <summary>
+        /// Obtiene la configuración de valores de configuración soportados para la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación.</param>
+        /// <returns>
+        /// Colección de clavesy valores soportados para la aplicación.
+        /// </returns>
+        AppMovSettings GetAppSettings(string apiKey);
+
+        /// <summary>
+        /// Obtiene la configuración de valores de configuración soportados para la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task<AppMovSettings> GetAppSettingsAsync(string apiKey);
+
+        /// <summary>
         /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
         /// </summary>
         /// <returns>Lista de tipos de documento predeterminados.</returns>
@@ -29,21 +47,5 @@ namespace Everco.Services.Aspen.Client.Modules.Anonymous
         /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
         /// </returns>
         Task<IList<DocTypeInfo>> GetDefaultDocTypesAsync();
-
-        /// <summary>
-        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación.</param>
-        /// <returns>Colección de valores admitidos.</returns>
-        MiscellaneousSettings GetMiscellaneousSettings(string apiKey);
-
-        /// <summary>
-        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación.</param>
-        /// <returns>
-        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
-        /// </returns>
-        Task<MiscellaneousSettings> GetMiscellaneousSettingsAsync(string apiKey);
     }
 }

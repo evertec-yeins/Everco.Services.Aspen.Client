@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Entities;
     using Everco.Services.Aspen.Client.Internals;
     using Modules.Autonomous;
@@ -42,6 +43,19 @@ namespace Everco.Services.Aspen.Client.Fluent
                                                         };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TransferAccountsByUserIdentity, endpointParameters);
             return this.Execute<List<TransferAccountInfo>>(request) ?? Enumerable.Empty<TransferAccountInfo>().ToList();
+        }
+
+        /// <summary>
+        /// Obtiene la información de las cuentas vinculadas a un usuario para transferencia de saldos.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del usuario para el que se obtienen las cuentas.</param>
+        /// <param name="docNumber">El número de documento del usuario para el que se obtienen las cuentas.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TransferAccountInfo>> GetTransferAccountsAsync(string docType, string docNumber)
+        {
+            return await Task.Run(() => this.GetTransferAccounts(docType, docNumber));
         }
 
         /// <summary>
@@ -92,7 +106,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="accountInfo">La información de la cuenta a vincular.</param>
         /// <exception cref="ArgumentException">Se produce cuando <paramref name="docType"/> o <paramref name="docNumber"/> es nulo o vacío.</exception>
         /// <exception cref="ArgumentNullException">Se produce cuando <paramref name="accountInfo"/> es nulo.</exception>
-        public void LinkTransferAccount(string docType, string docNumber, ILinkTransferAccountInfo accountInfo)
+        public void LinkTransferAccount(
+            string docType,
+            string docNumber,
+            ILinkTransferAccountInfo accountInfo)
         {
             if (!ServiceLocator.Instance.Runtime.IsDevelopment)
             {
@@ -110,7 +127,56 @@ namespace Everco.Services.Aspen.Client.Fluent
             request.AddJsonBody(accountInfo);
             this.Execute(request);
         }
-            
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas de un usuario para transferencia de saldos.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del cliente al cual se vinculará la cuenta.</param>
+        /// <param name="docNumber">El número de documento del cliente al cual se vinculará la cuenta.</param>
+        /// <param name="cardHolderDocType">El tipo de documento del titular de la cuenta que se está vinculando.</param>
+        /// <param name="cardHolderDocNumber">El número de documento del titular de la cuenta que se está vinculando.</param>
+        /// <param name="accountNumber">El número de cuenta que se está vinculando o <see langword="null" /> para usar el primer número de cuenta asociado con <paramref name="cardHolderDocType" /> y <paramref name="cardHolderDocNumber" />.</param>
+        /// <param name="alias">El nombre o alias con el que se desea identificar a la cuenta que se está vinculando o <see langword="null" /> para usar la combinación de <paramref name="cardHolderDocType" /> y <paramref name="cardHolderDocNumber" />.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task LinkTransferAccountAsync(
+            string docType,
+            string docNumber,
+            string cardHolderDocType,
+            string cardHolderDocNumber,
+            string accountNumber = null,
+            string alias = null)
+        {
+            await Task.Run(() => this.LinkTransferAccount(
+                docType,
+                docNumber,
+                cardHolderDocType,
+                cardHolderDocNumber,
+                accountNumber,
+                alias));
+        }
+
+        /// <summary>
+        /// Vincula la información de una cuenta a las cuentas inscritas de un usuario para transferencia de saldos.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del cliente al cual se vinculará la cuenta.</param>
+        /// <param name="docNumber">El número de documento del cliente al cual se vinculará la cuenta.</param>
+        /// <param name="accountInfo">La información de la cuenta a vincular.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task LinkTransferAccountAsync(
+            string docType,
+            string docNumber,
+            ILinkTransferAccountInfo accountInfo)
+        {
+            await Task.Run(() => this.LinkTransferAccount(
+                docType,
+                docNumber,
+                accountInfo));
+        }
+
         /// <summary>
         /// Desvincula la información de una cuenta de las cuentas inscritas de un usuario para transferencia de saldos.
         /// </summary>
@@ -166,6 +232,43 @@ namespace Everco.Services.Aspen.Client.Fluent
                                                         };
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.UnlinkTransferAccountByUserIdentityAndCardHolder, endpointParameters);
             this.Execute(request);
+        }
+
+        /// <summary>
+        /// Desvincula la información de una cuenta de las cuentas inscritas de un usuario para transferencia de saldos.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del cliente al cual se vinculó la cuenta.</param>
+        /// <param name="docNumber">El número de documento del cliente al cual se vinculó la cuenta.</param>
+        /// <param name="alias">El nombre o alias con el que se vinculó la cuenta.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task UnlinkTransferAccountAsync(string docType, string docNumber, string alias)
+        {
+            await Task.Run(() => this.UnlinkTransferAccount(docType, docNumber, alias));
+        }
+
+        /// <summary>
+        /// Desvincula la información de una cuenta de las cuentas inscritas de un usuario para transferencia de saldos.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del cliente al cual se vinculó la cuenta.</param>
+        /// <param name="docNumber">El número de documento del cliente al cual se vinculó la cuenta.</param>
+        /// <param name="cardHolderDocType">El tipo de documento del titular de la cuenta.</param>
+        /// <param name="cardHolderDocNumber">El número de documento del titular de la cuenta.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task UnlinkTransferAccountAsync(
+            string docType,
+            string docNumber,
+            string cardHolderDocType,
+            string cardHolderDocNumber)
+        {
+            await Task.Run(() => this.UnlinkTransferAccount(
+                docType,
+                docNumber,
+                cardHolderDocType,
+                cardHolderDocNumber));
         }
     }
 }

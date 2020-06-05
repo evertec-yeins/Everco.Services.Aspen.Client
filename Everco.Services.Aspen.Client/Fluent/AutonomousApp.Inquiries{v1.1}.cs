@@ -53,7 +53,9 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
         /// </returns>
-        async Task<IList<AccountResultInfo>> IAccountInquiries<AccountResultInfo>.GetAccountsAsync(string docType, string docNumber)
+        async Task<IList<AccountResultInfo>> IAccountInquiries<AccountResultInfo>.GetAccountsAsync(
+            string docType,
+            string docNumber)
         {
             return await Task.Run(() => this.InquiriesV11.GetAccounts(docType, docNumber));
         }
@@ -86,7 +88,9 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
         /// </returns>
-        async Task<IList<AccountResultInfo>> IAccountInquiries<AccountResultInfo>.GetAccountsByAliasAsync(string channelId, string enrollmentAlias)
+        async Task<IList<AccountResultInfo>> IAccountInquiries<AccountResultInfo>.GetAccountsByAliasAsync(
+            string channelId,
+            string enrollmentAlias)
         {
             return await Task.Run(() => this.InquiriesV11.GetAccountsByAlias(channelId, enrollmentAlias));
         }
@@ -115,6 +119,26 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la información del resultado por la solicitud de los saldos de una cuenta asociada a un usuario de forma segura.B
+        /// </summary>
+        /// <param name="docType">El tipo de documento del propietario de la cuenta.</param>
+        /// <param name="docNumber">El número de documento del propietario de la cuenta.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        async Task<IList<BalanceResultInfo>> IBalanceInquiries<BalanceResultInfo>.GetBalancesAsync(
+            string docType,
+            string docNumber,
+            string accountId)
+        {
+            return await Task.Run(() => this.InquiriesV11.GetBalances(
+                docType,
+                docNumber,
+                accountId));
+        }
+
+        /// <summary>
         /// Obtiene la información del resultado que encapsula los saldos de una cuenta asociada a un usuario a partir de su alias de registro procesada de forma segura.
         /// </summary>
         /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
@@ -135,6 +159,26 @@ namespace Everco.Services.Aspen.Client.Fluent
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.BalancesByAlias, endpointParameters);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
             return this.Execute<List<BalanceResultInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la información del resultado que encapsula los saldos de una cuenta asociada a un usuario a partir de su alias de registro procesada de forma segura.
+        /// </summary>
+        /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
+        /// <param name="enrollmentAlias">El alias utilizado en el proceso de registro del usuario.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        async Task<IList<BalanceResultInfo>> IBalanceInquiries<BalanceResultInfo>.GetBalancesByAliasAsync(
+            string channelId,
+            string enrollmentAlias,
+            string accountId)
+        {
+            return await Task.Run(() => this.InquiriesV11.GetBalancesByAlias(
+                channelId,
+                enrollmentAlias,
+                accountId));
         }
 
         /// <summary>

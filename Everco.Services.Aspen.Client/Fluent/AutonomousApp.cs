@@ -12,6 +12,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Net;
     using Auth;
     using Internals;
+    using JWT;
     using Newtonsoft.Json;
     using RestSharp;
 

@@ -20,9 +20,51 @@ namespace Everco.Services.Aspen.Client.Fluent
     public sealed partial class Anonymous : ISettingsModule
     {
         /// <summary>
+        /// Para uso interno.
+        /// </summary>
+        private const string CacheKeyAppSettings = "AppMovSettings";
+
+        /// <summary>
         /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización de la aplicación en el sistema Aspen.
         /// </summary>
         public ISettingsModule Settings => this;
+
+        /// <summary>
+        /// Obtiene la configuración de valores de configuración soportados para la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación.</param>
+        /// <returns>
+        /// Colección de clavesy valores soportados para la aplicación.
+        /// </returns>
+        public AppMovSettings GetAppSettings(string apiKey)
+        {
+            AppMovSettings appMovSettings = this.cache.Get<AppMovSettings>(CacheKeyAppSettings);
+
+            if (appMovSettings != null)
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug("Anonymous => Return App settings from cache.");
+                return appMovSettings;
+            }
+
+            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.AppMovSettings);
+            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
+            appMovSettings = this.Execute<AppMovSettings>(request);
+            this.cache.Add(CacheKeyAppSettings, appMovSettings, this.cacheOptions);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("Anonymous => App settings saved to cache.");
+            return appMovSettings;
+        }
+
+        /// <summary>
+        /// Obtiene la configuración de valores de configuración soportados para la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<AppMovSettings> GetAppSettingsAsync(string apiKey)
+        {
+            return await Task.Run(() => this.GetAppSettings(apiKey));
+        }
 
         /// <summary>
         /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
@@ -45,32 +87,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         public async Task<IList<DocTypeInfo>> GetDefaultDocTypesAsync()
         {
             return await Task.Run(this.GetDefaultDocTypes);
-        }
-
-        /// <summary>
-        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación.</param>
-        /// <returns>
-        /// Colección de valores admitidos.
-        /// </returns>
-        public MiscellaneousSettings GetMiscellaneousSettings(string apiKey)
-        {
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.Miscellaneous);
-            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
-            return this.Execute<MiscellaneousSettings>(request);
-        }
-
-        /// <summary>
-        /// Obtiene la configuración de valores misceláneos soportados para la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación.</param>
-        /// <returns>
-        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
-        /// </returns>
-        public async Task<MiscellaneousSettings> GetMiscellaneousSettingsAsync(string apiKey)
-        {
-            return await Task.Run(() => this.GetMiscellaneousSettings(apiKey));
         }
     }
 }

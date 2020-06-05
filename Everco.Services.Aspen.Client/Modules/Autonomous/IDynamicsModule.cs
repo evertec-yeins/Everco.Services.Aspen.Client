@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Modules.Autonomous
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Define operaciones dinámicas para el servicio Aspen.
@@ -57,6 +58,61 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         void Delete(string resource, params KeyValuePair<string, object>[] body);
 
         /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
+        /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Instancia de un objeto que se envia en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task<TResponse> DeleteAsync<TRequest, TResponse>(string resource, TRequest body) where
+            TRequest : class
+            where TResponse : class, new();
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task<TResponse> DeleteAsync<TResponse>(string resource)
+            where TResponse : class, new();
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task DeleteAsync(string resource);
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task DeleteAsync(string resource, IDictionary<string, object> body);
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task DeleteAsync(string resource, params KeyValuePair<string, object>[] body);
+
+        /// <summary>
         /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
         /// </summary>
         /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
@@ -87,9 +143,47 @@ namespace Everco.Services.Aspen.Client.Modules.Autonomous
         /// <summary>
         /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
         /// </summary>
+        /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
+        /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Instancia de un objeto que se envia en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task<TResponse> GetAsync<TRequest, TResponse>(string resource, TRequest body) where
+            TRequest : class
+            where TResponse : class, new();
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task<TResponse> GetAsync<TResponse>(string resource)
+            where TResponse : class, new();
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task GetAsync(string resource);
+
+        /// <summary>
+        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
-        void Get(string resource, IDictionary<string, object> body);
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        Task GetAsync(string resource, IDictionary<string, object> body);
 
         /// <summary>
         /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.

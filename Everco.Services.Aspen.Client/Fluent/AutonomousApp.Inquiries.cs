@@ -93,7 +93,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Lista de instancias de <see cref="IBalanceInfo"/> con la información de saldos de las cuentas del usuario especificado.
         /// </returns> 
-        public IList<BalanceInfo> GetBalances(string docType, string docNumber, string accountId)
+        public IList<BalanceInfo> GetBalances(
+            string docType,
+            string docNumber,
+            string accountId)
         {
             EndpointParameters endpointParameters = new EndpointParameters()
                 .AddDocType(docType)
@@ -101,6 +104,26 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddAccountId(accountId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.BalancesByUserIdentity, endpointParameters);
             return this.Execute<List<BalanceInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la información de saldos de las cuentas asociadas a un usuario.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del propietario de la cuenta.</param>
+        /// <param name="docNumber">El número de documento del propietario de la cuenta.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<BalanceInfo>> GetBalancesAsync(
+            string docType,
+            string docNumber,
+            string accountId)
+        {
+            return await Task.Run(() => this.GetBalances(
+                docType,
+                docNumber,
+                accountId));
         }
 
         /// <summary>
@@ -112,7 +135,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>
         /// Lista de instancias de <see cref="IBalanceInfo"/> con la información de saldos de las cuentas del usuario a partir del alias especificado.
         /// </returns>
-        public IList<BalanceInfo> GetBalancesByAlias(string channelId, string enrollmentAlias, string accountId)
+        public IList<BalanceInfo> GetBalancesByAlias(
+            string channelId,
+            string enrollmentAlias,
+            string accountId)
         {
             EndpointParameters endpointParameters = new EndpointParameters()
                 .AddChannelId(channelId)
@@ -120,6 +146,26 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddAccountId(accountId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.BalancesByAlias, endpointParameters);
             return this.Execute<List<BalanceInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la información de saldos de una cuenta asociadas a un usuario a partir de su alias utilizado en el registro.
+        /// </summary>
+        /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
+        /// <param name="enrollmentAlias">El alias utilizado en el proceso de registro del usuario.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<BalanceInfo>> GetBalancesByAliasAsync(
+            string channelId,
+            string enrollmentAlias,
+            string accountId)
+        {
+            return await Task.Run(() => this.GetBalancesByAlias(
+                channelId,
+                enrollmentAlias,
+                accountId));
         }
 
         /// <summary>

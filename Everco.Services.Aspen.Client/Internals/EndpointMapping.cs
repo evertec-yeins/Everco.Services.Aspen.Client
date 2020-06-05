@@ -81,6 +81,12 @@ namespace Everco.Services.Aspen.Client.Internals
         Miscellaneous,
 
         /// <summary>
+        /// Operación para obtener los valores de configuración de la aplicación.
+        /// </summary>
+        [EndPointMappingInfo("/appMov/settings", Method.GET)]
+        AppMovSettings,
+
+        /// <summary>
         /// Operación para obtener las cuentas asociadas a un usuario a partir del documento de identidad.
         /// </summary>
         [EndPointMappingInfo("/inquires/accounts/@[DocType]/@[DocNumber]", Method.GET)]

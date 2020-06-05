@@ -9,6 +9,7 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using Everco.Services.Aspen.Client.Fluent;
     using Everco.Services.Aspen.Client.Tests.Identities;
     using Everco.Services.Aspen.Entities;
@@ -21,6 +22,58 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public class AnonymousTests
     {
+        /// <summary>
+        /// Obtener la configuración de una aplicación usando un ApiKey desconocido, no funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetAppSettingsUnrecognizedApiKeyThrows()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+            string unrecognizedApiKey = Guid.NewGuid().ToString();
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetAppSettings(unrecognizedApiKey));
+            Assert.That(exception.EventId, Is.EqualTo("20005"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            StringAssert.IsMatch("Identificador de ApiKey no válido para la cabecera personalizada 'X-PRO-Auth-App'", exception.Message);
+        }
+
+        /// <summary>
+        /// Obtener la configuración de una aplicación usando un ApiKey sin el alcance de delegado, no funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetAppSettingsUsingAutonomousApiKeyThrows()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+            string autonomousApiKey = AutonomousAppIdentity.Master.ApiKey;
+            AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetAppSettings(autonomousApiKey));
+            Assert.That(exception.EventId, Is.EqualTo("1000478"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            StringAssert.IsMatch("ApiKey no tiene permisos para realizar la operación. Alcance requerido: 'Delegated'", exception.Message);
+        }
+
+        /// <summary>
+        /// Obtener la configuración de una aplicación usando un ApiKey conocido y con alcance de delegado funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetAppSettingsWorks()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+            string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
+            AppMovSettings appMovSettings = client.Settings.GetAppSettings(recognizedApiKey);
+            CollectionAssert.IsNotEmpty(appMovSettings);
+            Assert.That(appMovSettings.GetKeyValue<bool>("enableBiometricAuth:iOS", true), Is.True);
+            Assert.That(appMovSettings.GetKeyValue("enableBiometricAuth:Android", true), Is.True);
+            Assert.That(appMovSettings.GetKeyValue("enableRememberUsernameLogin", true), Is.True);
+        }
+
         /// <summary>
         /// Obtener los tipos de documento predetermiandos funciona.
         /// </summary>
@@ -40,23 +93,6 @@ namespace Everco.Services.Aspen.Client.Tests
                 Assert.That(docTypeInfo.Name, Is.Not.Null);
                 Assert.That(docTypeInfo.ShortName, Is.Not.Null);
             }
-        }
-
-        /// <summary>
-        /// Obtener la configuración de valores misceláneos soportados para la aplicación funciona.
-        /// </summary>
-        [Test]
-        [Category("Modules.Settings")]
-        public void GetMiscellaneousSettingsWorks()
-        {
-            IAnonymous client = Anonymous.Initialize()
-                .RoutingTo(TestingEndpointProvider.Default)
-                .GetClient();
-            string recognizedApiKey = AutonomousAppIdentity.Master.ApiKey;
-            MiscellaneousSettings miscellaneousSettings = client.Settings.GetMiscellaneousSettings(recognizedApiKey);
-            CollectionAssert.IsNotEmpty(miscellaneousSettings);
-            Assert.That(miscellaneousSettings.GetKeyValue("EnableBiometrics", true), Is.True);
-            Assert.That(miscellaneousSettings.GetKeyValue("RememberUserName", true), Is.True);
         }
 
         /// <summary>

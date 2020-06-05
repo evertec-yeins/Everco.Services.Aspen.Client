@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Collections.Generic;
     using System.Dynamic;
     using System.Linq;
+    using System.Threading.Tasks;
     using Internals;
     using Modules.Autonomous;
     using RestSharp;
@@ -25,7 +26,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         public IDynamicsModule Dynamics => this;
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
         /// </summary>
         /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
         /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
@@ -40,7 +41,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
         /// </summary>
         /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
@@ -52,7 +53,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
@@ -62,7 +63,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -72,7 +73,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.DELETE" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -83,7 +84,76 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
+        /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Instancia de un objeto que se envia en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<TResponse> DeleteAsync<TRequest, TResponse>(string resource, TRequest body)
+            where TRequest : class
+            where TResponse : class, new()
+        {
+            return await Task.Run(() => this.Delete<TRequest, TResponse>(resource, body));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<TResponse> DeleteAsync<TResponse>(string resource)
+            where TResponse : class, new()
+        {
+            return await Task.Run(() => this.Delete<TResponse>(resource));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task DeleteAsync(string resource)
+        {
+            await Task.Run(() => this.Delete(resource));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task DeleteAsync(string resource, IDictionary<string, object> body)
+        {
+            await Task.Run(() => this.Delete(resource, body));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.DELETE" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task DeleteAsync(string resource, params KeyValuePair<string, object>[] body)
+        {
+            await Task.Run(() => this.Delete(resource, body));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
         /// </summary>
         /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
         /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
@@ -98,7 +168,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
         /// </summary>
         /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
@@ -109,7 +179,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
@@ -119,7 +189,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.GET" /> al servicio.
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -129,7 +199,63 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
+        /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Instancia de un objeto que se envia en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<TResponse> GetAsync<TRequest, TResponse>(string resource, TRequest body)
+            where TRequest : class
+            where TResponse : class, new()
+        {
+            return await Task.Run(() => this.Get<TRequest, TResponse>(resource, body));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
+        /// </summary>
+        /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<TResponse> GetAsync<TResponse>(string resource) where TResponse : class, new()
+        {
+            return await Task.Run(() => this.Get<TResponse>(resource));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task GetAsync(string resource)
+        {
+            await Task.Run(() => this.Get(resource));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.GET" /> al servicio.
+        /// </summary>
+        /// <param name="resource">URL de la operación expuesta por el servicio.</param>
+        /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task GetAsync(string resource, IDictionary<string, object> body)
+        {
+            await Task.Run(() => this.Get(resource, body));
+        }
+
+        /// <summary>
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
         /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
@@ -144,7 +270,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
@@ -156,7 +282,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
@@ -166,7 +292,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -176,7 +302,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -187,7 +313,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.PUT" /> al servicio.
+        /// Envia una solicitud <see cref="Method.PUT" /> al servicio.
         /// </summary>
         /// <typeparam name="TRequest">Tipo del objeto que se envía con la solicitud.</typeparam>
         /// <typeparam name="TResponse">Tipo del objeto al que se convierte la respuesta del servicio.</typeparam>
@@ -202,7 +328,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.PUT" /> al servicio.
+        /// Envia una solicitud <see cref="Method.PUT" /> al servicio.
         /// </summary>
         /// <typeparam name="TResponse">Tipo del objeto al que se castea la respuesta del servicio.</typeparam>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
@@ -214,7 +340,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.PUT" /> al servicio.
+        /// Envia una solicitud <see cref="Method.PUT" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <exception cref="AspenException"> el servicio generó una respuesta diferente a OK (200).</exception>
@@ -224,7 +350,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.PUT" /> al servicio.
+        /// Envia una solicitud <see cref="Method.PUT" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>
@@ -234,7 +360,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Envia una solicitud <see cref="RestSharp.Method.POST" /> al servicio.
+        /// Envia una solicitud <see cref="Method.POST" /> al servicio.
         /// </summary>
         /// <param name="resource">URL de la operación expuesta por el servicio.</param>
         /// <param name="body">Valores que se envian en el cuerpo de la solicitud.</param>

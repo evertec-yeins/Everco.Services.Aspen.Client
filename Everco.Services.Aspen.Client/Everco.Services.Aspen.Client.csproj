@@ -18,11 +18,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Everco.Services.Aspen.Client.Identity" Version="2019.12.17" />
-    <PackageReference Include="Everco.Services.Aspen.Entities" Version="2019.12.17" />
-    <PackageReference Include="JWT" Version="5.3.1" />
+    <PackageReference Include="Everco.Services.Aspen.Entities" Version="2020.6.5" />
+    <PackageReference Include="JWT" Version="7.2.1" />
+    <PackageReference Include="LazyCache" Version="2.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="RestSharp" Version="106.6.10" />
-    <PackageReference Include="SimpleInjector" Version="4.8.1" />
+    <PackageReference Include="RestSharp" Version="106.11.4" />
+    <PackageReference Include="SimpleInjector" Version="4.10.2" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>

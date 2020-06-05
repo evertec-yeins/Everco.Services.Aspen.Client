@@ -190,9 +190,9 @@ namespace Everco.Services.Aspen.Client.Fluent
             this.RestClient = new RestClient(this.endpoint.ToString().TrimEnd('/'));
             this.JwtEncoder = new JwtEncoder(this.algorithm, ServiceLocator.Instance.JwtJsonSerializer, this.urlEncoder);
             this.validator = new JwtValidator(ServiceLocator.Instance.JwtJsonSerializer, this.datetimeProvider);
-            this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder);
+            this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder, this.algorithm);
             this.RestClient.Timeout = (int)this.timeout.TotalMilliseconds;
-            this.RestClient.UseSerializer(JsonNetSerializer.Default);
+            this.RestClient.UseSerializer(() => JsonNetSerializer.Default);
 
             IWebProxy webProxy = ServiceLocator.Instance.WebProxy;
             if (webProxy.GetType() != typeof(NullWebProxy))
