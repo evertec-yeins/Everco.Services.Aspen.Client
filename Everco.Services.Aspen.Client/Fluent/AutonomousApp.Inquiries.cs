@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Entities;
     using Everco.Services.Aspen.Client.Internals;
     using RestSharp;
@@ -41,6 +42,19 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la información resumida de las cuentas asociadas a un usuario.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del usuario.</param>
+        /// <param name="docNumber">El número de documento del usuario.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<AccountInfo>> GetAccountsAsync(string docType, string docNumber)
+        {
+            return await Task.Run(() => this.GetAccounts(docType, docNumber));
+        }
+
+        /// <summary>
         /// Obtiene la información resumida de las cuentas asociadas a un usuario a partir de su alias utilizado en el registro.
         /// </summary>
         /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
@@ -55,6 +69,19 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddEnrollmentAlias(enrollmentAlias);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.AccountsByAlias, endpointParameters);
             return this.Execute<List<AccountInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la información resumida de las cuentas asociadas a un usuario a partir de su alias utilizado en el registro.
+        /// </summary>
+        /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
+        /// <param name="enrollmentAlias">El alias utilizado en el proceso de registro del usuario.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<AccountInfo>> GetAccountsByAliasAsync(string channelId, string enrollmentAlias)
+        {
+            return await Task.Run(() => this.GetAccountsByAlias(channelId, enrollmentAlias));
         }
 
         /// <summary>
@@ -121,6 +148,29 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la información de los movimientos financieros de una cuenta asociada a un usuario.
+        /// </summary>
+        /// <param name="docType">El tipo de documento del propietario de la cuenta.</param>
+        /// <param name="docNumber">El número de documento del propietario de la cuenta.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los movimientos financieros.</param>
+        /// <param name="accountTypeId">El identificador del tipo de cuenta (bolsillo) que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<MiniStatementInfo>> GetStatementsAsync(
+            string docType,
+            string docNumber,
+            string accountId,
+            string accountTypeId = null)
+        {
+            return await Task.Run(() => this.GetStatements(
+                docType,
+                docNumber,
+                accountId,
+                accountTypeId));
+        }
+
+        /// <summary>
         /// Obtiene la información de los movimientos financieros de una cuenta asociada a un usuario a partir de su alias de registro.
         /// </summary>
         /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
@@ -143,6 +193,29 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddAccountTypeId(string.IsNullOrWhiteSpace(accountTypeId) ? "*" : accountTypeId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.StatementsByAlias, endpointParameters);
             return this.Execute<List<MiniStatementInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la información de los movimientos financieros de una cuenta asociada a un usuario a partir de su alias de registro.
+        /// </summary>
+        /// <param name="channelId">El identificador del canal por el que se registró el usuario.</param>
+        /// <param name="enrollmentAlias">El alias utilizado en el proceso de registro del usuario.</param>
+        /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
+        /// <param name="accountTypeId">El identificador del tipo de cuenta (bolsillo) que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<MiniStatementInfo>> GetStatementsByAliasAsync(
+            string channelId,
+            string enrollmentAlias,
+            string accountId,
+            string accountTypeId = null)
+        {
+            return await Task.Run(() => this.GetStatementsByAlias(
+                channelId,
+                enrollmentAlias,
+                accountId,
+                accountTypeId));
         }
     }
 }

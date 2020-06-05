@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
+    using System.Threading.Tasks;
     using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Modules.Anonymous;
     using Identity;
@@ -47,6 +48,20 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             this.Execute(request);
+        }
+
+        /// <summary>
+        /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación que generó el error.</param>
+        /// <param name="username">El identificador del último usuario que uso la aplicación antes de generarse el error.</param>
+        /// <param name="errorReport">La información del reporte de error generado en la aplicación.</param>
+        /// <returns>
+        /// Instancia de <see cref="Task" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task SaveAppCrashAsync(string apiKey, string username, string errorReport)
+        {
+            await Task.Run(() => this.SaveAppCrash(apiKey, username, errorReport));
         }
     }
 }

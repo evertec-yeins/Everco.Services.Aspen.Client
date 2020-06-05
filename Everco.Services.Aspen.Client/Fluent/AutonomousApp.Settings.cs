@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Entities;
     using Internals;
     using Modules.Autonomous;
@@ -27,12 +28,23 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// Obtiene la lista de operadores de telefonía móvil soportados para la aplicación.
         /// </summary>
         /// <returns>
-        /// Lista de operadores de telefonía soportados.
+        /// Lista de <see cref="CarrierInfo" /> con los operadores de telefonía soportados.
         /// </returns>
         public IList<CarrierInfo> GetCarriers()
         {
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.Carriers);
             return this.Execute<List<CarrierInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la lista de operadores de telefonía móvil soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<CarrierInfo>> GetCarriersAsync()
+        {
+            return await Task.Run(this.GetCarriers);
         }
 
         /// <summary>
@@ -48,6 +60,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene la lista de tipos de documento soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<DocTypeInfo>> GetDocTypesAsync()
+        {
+            return await Task.Run(this.GetDocTypes);
+        }
+
+        /// <summary>
         /// Obtiene los tipos de pagos que se pueden realizar a una cuenta soportados para la aplicación.
         /// </summary>
         /// <returns>
@@ -57,6 +80,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.PaymentTypes);
             return this.Execute<List<PaymentTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene los tipos de pagos que se pueden realizar a una cuenta soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<PaymentTypeInfo>> GetPaymentTypesAsync()
+        {
+            return await Task.Run(this.GetPaymentTypes);
         }
 
         /// <summary>
@@ -72,6 +106,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Obtiene los valores admitidos de recarga por operador soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TopUpInfo>> GetTopUpValuesAsync()
+        {
+            return await Task.Run(this.GetTopUpValues);
+        }
+
+        /// <summary>
         /// Obtiene la lista de los tipos de transacción soportados para la aplicación.
         /// </summary>
         /// <returns>
@@ -81,6 +126,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TranTypes);
             return this.Execute<List<TranTypeInfo>>(request);
+        }
+
+        /// <summary>
+        /// Obtiene la lista de los tipos de transacción soportados para la aplicación.
+        /// </summary>
+        /// <returns>
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
+        /// </returns>
+        public async Task<IList<TranTypeInfo>> GetTranTypesAsync()
+        {
+            return await Task.Run(this.GetTranTypes);
         }
     }
 }
