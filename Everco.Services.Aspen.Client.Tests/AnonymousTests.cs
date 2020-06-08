@@ -96,24 +96,81 @@ namespace Everco.Services.Aspen.Client.Tests
         }
 
         /// <summary>
+        /// Guardar la información del crash generado por una aplicación usando un ApiKey desconocido, no funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void SaveAppCrashUnrecognizedApiKeyThrows()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+
+            Dictionary<string, object> errorReportInfo = new Dictionary<string, object>
+            {
+                { "Id", Guid.NewGuid().ToString() },
+                { "AppStartTime", DateTime.Now.AddMinutes(-30) },
+                { "AppErrorTime", DateTime.Now }
+            };
+
+            string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
+            string unrecognizedApiKey = Guid.NewGuid().ToString();
+            AspenException exception = Assert.Throws<AspenException>(() => client.Utils.SaveAppCrash(unrecognizedApiKey, Environment.UserName, errorReport));
+            Assert.That(exception.EventId, Is.EqualTo("20011"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            StringAssert.IsMatch("Solicitud no autorizada", exception.Message);
+        }
+
+        /// <summary>
+        /// Guardar la información del crash generado por una aplicación usando un ApiKey con alcance de autónomo, no funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void SaveAppCrashUsingAutonomousApiKeyThrows()
+        {
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+
+            Dictionary<string, object> errorReportInfo = new Dictionary<string, object>
+            {
+                { "Id", Guid.NewGuid().ToString() },
+                { "AppStartTime", DateTime.Now.AddMinutes(-30) },
+                { "AppErrorTime", DateTime.Now }
+            };
+
+            string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
+            string autonomousApiKey = AutonomousAppIdentity.Master.ApiKey;
+            AspenException exception = Assert.Throws<AspenException>(() => client.Utils.SaveAppCrash(autonomousApiKey, Environment.UserName, errorReport));
+            Assert.That(exception.EventId, Is.EqualTo("20011"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            StringAssert.IsMatch("Solicitud no autorizada", exception.Message);
+        }
+
+        /// <summary>
         /// Guardar la información del crash (errores o bloqueos de sistema) generado por una aplicación conocida .
         /// </summary>
         [Test]
         [Category("Modules.Settings")]
         public void SaveAppCrashWorks()
         {
-            IAnonymous client = Anonymous.Initialize().RoutingTo(TestingEndpointProvider.Default).GetClient();
+            IAnonymous client = Anonymous.Initialize()
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
+
             string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
             Dictionary<string, object> errorReportInfo = new Dictionary<string, object>
-                                                             {
-                                                                 { "Id", Guid.NewGuid().ToString() },
-                                                                 { "AppStartTime", DateTime.Now },
-                                                                 { "AppErrorTime", DateTime.Now }
-                                                             };
+            {
+                { "Id", Guid.NewGuid().ToString() },
+                { "AppStartTime", DateTime.Now.AddMinutes(-30) },
+                { "AppErrorTime", DateTime.Now }
+            };
 
+            // Funciona cuando el objeto json está indentado.
             string errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.Indented);
             Assert.DoesNotThrow(() => client.Utils.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
 
+            // Funciona también cuando el objeto json no está indentado.
             errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
             Assert.DoesNotThrow(() => client.Utils.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
         }

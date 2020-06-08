@@ -41,8 +41,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddDocType(docType)
                 .AddDocNumber(docNumber);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.AccountsByUserIdentity, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<AccountResultInfo>>(request);
+            return this.Execute<List<AccountResultInfo>>(request, "1.1");
         }
 
         /// <summary>
@@ -76,8 +75,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddChannelId(channelId)
                 .AddEnrollmentAlias(enrollmentAlias);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.AccountsByAlias, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<AccountResultInfo>>(request);
+            return this.Execute<List<AccountResultInfo>>(request, "1.1");
         }
 
         /// <summary>
@@ -114,8 +112,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddDocNumber(docNumber)
                 .AddAccountId(accountId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.BalancesByUserIdentity, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<BalanceResultInfo>>(request);
+            return this.Execute<List<BalanceResultInfo>>(request, "1.1");
         }
 
         /// <summary>
@@ -157,8 +154,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddEnrollmentAlias(enrollmentAlias)
                 .AddAccountId(accountId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.BalancesByAlias, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<BalanceResultInfo>>(request);
+            return this.Execute<List<BalanceResultInfo>>(request, "1.1");
         }
 
         /// <summary>
@@ -203,8 +199,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddAccountId(accountId)
                 .AddAccountTypeId(string.IsNullOrWhiteSpace(accountTypeId) ? "*" : accountTypeId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.StatementsByUserIdentity, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<MiniStatementResultInfo>>(request);
+            return this.Execute<List<MiniStatementResultInfo>>(request, "1.1");
         }
 
         /// <summary>
@@ -252,8 +247,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 .AddAccountId(accountId)
                 .AddAccountTypeId(string.IsNullOrWhiteSpace(accountTypeId) ? "*" : accountTypeId);
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.StatementsByAlias, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<MiniStatementResultInfo>>(request);
+            return this.Execute<List<MiniStatementResultInfo>>(request, "1.1");
         }
 
         /// <summary>

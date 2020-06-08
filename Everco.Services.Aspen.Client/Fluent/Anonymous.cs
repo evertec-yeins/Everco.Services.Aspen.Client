@@ -110,8 +110,8 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             Throw.IfNullOrEmpty(url, nameof(url));
             this.endpoint = new Uri(url.TrimEnd('/'), UriKind.Absolute);
-            int defaultTimeout = 15;
-            int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
+            const int DefaultTimeout = 15;
+            int waitForSeconds = Math.Max(timeout ?? DefaultTimeout, DefaultTimeout);
             this.timeout = TimeSpan.FromSeconds(waitForSeconds);
             return this;
         }
@@ -152,69 +152,54 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
         private TResponse Execute<TResponse>(IRestRequest request) where TResponse : class, new()
         {
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
-            IRestResponse response = this.restClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
-            string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
-
-            if (!response.IsSuccessful)
-            {
-                throw new AspenException(response);
-            }
-
+            IRestResponse response = this.Execute(request);
             return response.StatusCode == HttpStatusCode.NoContent
                 ? default
                 : JsonConvert.DeserializeObject<TResponse>(response.Content);
         }
 
         /// <summary>
-        /// Envía la solicitud al servicio ASPEN.
+        /// Envía la solicitud al servicio Aspen.
         /// </summary>
-        /// <param name="request">La información de la solicitud.</param>
+        /// <param name="request">Información de la solicitud.</param>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private void Execute(IRestRequest request)
+        /// <returns>Instancia de <see cref="IRestResponse"/> que contiene los datos de la respuesta generada por la solicitud al API.</returns>
+        private IRestResponse Execute(IRestRequest request)
         {
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
+            const string NonSet = "NONSET";
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request Start ==========");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Uri => {this.restClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? NonSet}");
             IRestResponse response = this.restClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
+#if DEBUG
+            Dictionary<string, object> requestBody = request.Parameters.GetBody();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestBody => {JsonConvert.SerializeObject(requestBody)}");
+            Dictionary<string, object> requestHeaders = request.Parameters.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestHeaders => {JsonConvert.SerializeObject(requestHeaders)}");
+#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusCode => {(int)response.StatusCode} ({response.StatusCode})");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty(NonSet);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
             string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
+                ? "[TEXT/HTML]"
+                : response.Content.DefaultIfNullOrEmpty(NonSet);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
+#if DEBUG
+            Dictionary<string, object> responseHeaders = response.Headers.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseHeaders => {JsonConvert.SerializeObject(responseHeaders)}");
+#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"DumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty(NonSet)}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request End ==========");
 
             if (!response.IsSuccessful)
             {
                 throw new AspenException(response);
             }
+
+            return response;
         }
 
         /// <summary>

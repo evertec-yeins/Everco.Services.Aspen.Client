@@ -7,12 +7,9 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Fluent
 {
-    using System;
-    using System.Collections.Generic;
     using System.Net;
     using Auth;
     using Internals;
-    using JWT;
     using Newtonsoft.Json;
     using RestSharp;
     using IDeviceInfo = Identity.IDeviceInfo;
@@ -102,6 +99,51 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Envía la solicitud al servicio Aspen.
+        /// </summary>
+        /// <typeparam name="TResponse">Tipo al que se convierte la respuesta del servicio Aspen.</typeparam>
+        /// <param name="request">Información de la solicitud.</param>
+        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
+        /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
+        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
+        public TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
+        {
+            UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
+            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
+            ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(
+                request,
+                this.JwtEncoder,
+                this.AppIdentity.ApiSecret,
+                userAuthToken.Token,
+                userAuthToken.Username);
+            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
+            IRestResponse response = base.Execute(request);
+            return response.StatusCode == HttpStatusCode.NoContent
+                ? default
+                : JsonConvert.DeserializeObject<TResponse>(response.Content);
+        }
+
+        /// <summary>
+        /// Envía la solicitud al servicio Aspen.
+        /// </summary>
+        /// <param name="request">Información de la solicitud.</param>
+        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
+        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
+        public void Execute(IRestRequest request, string apiVersion = null)
+        {
+            UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
+            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
+            ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(
+                request,
+                this.JwtEncoder,
+                this.AppIdentity.ApiSecret,
+                userAuthToken.Token,
+                userAuthToken.Username);
+            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
+            base.Execute(request);
+        }
+
+        /// <summary>
         /// Envía al servicio la solicitud de generación de un token de autenticación.
         /// </summary>
         /// <param name="userIdentity">La información de usuario que firma la solicitud de autenticación.</param>
@@ -126,152 +168,10 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSigninPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userIdentity);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
-            try
-            {
-                payload = this.JwtDecoder.Decode(payload);
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
-            }
-            catch (Exception)
-            {
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
-            }
-
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
-            IRestResponse response = this.RestClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
-            string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
-
-            if (!response.IsSuccessful)
-            {
-                throw new AspenException(response);
-            }
-
+            IRestResponse response = base.Execute(request);
             this.AuthToken = JsonConvert.DeserializeObject<UserAuthToken>(this.DecodeJwtResponse(response.Content));
             CacheStore.SetCurrentToken(this.AppIdentity.ApiKey, this.AuthToken);
             return this;
-        }
-
-        /// <summary>
-        /// Envía la solicitud al servicio Aspen.
-        /// </summary>
-        /// <typeparam name="TResponse">Tipo al que se convierte la respuesta del servicio Aspen.</typeparam>
-        /// <param name="request">Información de la solicitud.</param>
-        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
-        /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
-        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
-        {
-            UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
-            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
-            ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userAuthToken.Token, userAuthToken.Username);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
-            try
-            {
-                payload = this.JwtDecoder.Decode(payload);
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
-            }
-            catch (Exception)
-            {
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
-            }
-
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
-            IRestResponse response = this.RestClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
-            string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
-
-            if (!response.IsSuccessful)
-            {
-                throw new AspenException(response);
-            }
-
-            return response.StatusCode == HttpStatusCode.NoContent
-                ? default
-                : JsonConvert.DeserializeObject<TResponse>(response.Content);
-        }
-
-        /// <summary>
-        /// Envía la solicitud al servicio Aspen.
-        /// </summary>
-        /// <param name="request">Información de la solicitud.</param>
-        /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
-        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private void Execute(IRestRequest request, string apiVersion = null)
-        {
-            UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
-            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
-            ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(request, this.JwtEncoder, this.AppIdentity.ApiSecret, userAuthToken.Token, userAuthToken.Username);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.RestClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            string payload = headers.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? "NONSET";
-            try
-            {
-                payload = this.JwtDecoder.Decode(payload);
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
-            }
-            catch (Exception)
-            {
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
-            }
-
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
-            IRestResponse response = this.RestClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
-            string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
-
-            if (!response.IsSuccessful)
-            {
-                throw new AspenException(response);
-            }
         }
     }
 }
