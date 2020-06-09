@@ -32,8 +32,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<CarrierInfo> GetCarriers()
         {
+            List<CarrierInfo> carriers = CacheStore.Get<List<CarrierInfo>>(CacheKeys.Carriers);
+
+            if (carriers != null)
+            {
+                return carriers;
+            }
+
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.Carriers);
-            return this.Execute<List<CarrierInfo>>(request);
+            carriers = this.Execute<List<CarrierInfo>>(request);
+            CacheStore.Add(CacheKeys.Carriers, carriers);
+            return carriers;
         }
 
         /// <summary>
@@ -55,8 +64,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<DocTypeInfo> GetDocTypes()
         {
+            List<DocTypeInfo> docTypes = CacheStore.Get<List<DocTypeInfo>>(CacheKeys.DocTypes);
+
+            if (docTypes != null)
+            {
+                return docTypes;
+            }
+
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.DocTypes);
-            return this.Execute<List<DocTypeInfo>>(request);
+            docTypes = this.Execute<List<DocTypeInfo>>(request);
+            CacheStore.Add(CacheKeys.DocTypes, docTypes);
+            return docTypes;
         }
 
         /// <summary>
@@ -78,8 +96,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<PaymentTypeInfo> GetPaymentTypes()
         {
+            List<PaymentTypeInfo> paymentTypes = CacheStore.Get<List<PaymentTypeInfo>>(CacheKeys.PaymentTypes);
+
+            if (paymentTypes != null)
+            {
+                return paymentTypes;
+            }
+            
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.PaymentTypes);
-            return this.Execute<List<PaymentTypeInfo>>(request);
+            paymentTypes = this.Execute<List<PaymentTypeInfo>>(request);
+            CacheStore.Add(CacheKeys.PaymentTypes, paymentTypes);
+            return paymentTypes;
         }
 
         /// <summary>
@@ -101,8 +128,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<TopUpInfo> GetTopUpValues()
         {
-            IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TopUp);
-            return this.Execute<List<TopUpInfo>>(request);
+            List<TopUpInfo> topUpValues = CacheStore.Get<List<TopUpInfo>>(CacheKeys.TopUpValues);
+
+            if (topUpValues != null)
+            {
+                return topUpValues;
+            }
+
+            IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TopUpValues);
+            topUpValues = this.Execute<List<TopUpInfo>>(request);
+            CacheStore.Add(CacheKeys.TopUpValues, topUpValues);
+            return topUpValues;
         }
 
         /// <summary>
@@ -124,8 +160,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public IList<TranTypeInfo> GetTranTypes()
         {
+            List<TranTypeInfo> tranTypes = CacheStore.Get<List<TranTypeInfo>>(CacheKeys.TranTypes);
+
+            if (tranTypes != null)
+            {
+                return tranTypes;
+            }
+
             IRestRequest request = new AspenRequest(Scope.Autonomous, EndpointMapping.TranTypes);
-            return this.Execute<List<TranTypeInfo>>(request);
+            tranTypes = this.Execute<List<TranTypeInfo>>(request);
+            CacheStore.Add(CacheKeys.TranTypes, tranTypes);
+            return tranTypes;
         }
 
         /// <summary>

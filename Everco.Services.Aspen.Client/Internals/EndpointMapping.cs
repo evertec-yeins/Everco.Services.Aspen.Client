@@ -60,7 +60,7 @@ namespace Everco.Services.Aspen.Client.Internals
         /// Operación para obtener los valores admitidos para los procesos de recargas a celular soportados para una aplicación.
         /// </summary>
         [EndPointMappingInfo("/resx/topups", Method.GET)]
-        TopUp,
+        TopUpValues,
 
         /// <summary>
         /// Operación para obtener los tipos de transacción soportados para una aplicación.
@@ -78,7 +78,7 @@ namespace Everco.Services.Aspen.Client.Internals
         /// Operación para obtener los valores misceláneos de la aplicación.
         /// </summary>
         [EndPointMappingInfo("/resx/miscs", Method.GET)]
-        Miscellaneous,
+        MiscellaneousSettings,
 
         /// <summary>
         /// Operación para obtener los valores de configuración de la aplicación.
