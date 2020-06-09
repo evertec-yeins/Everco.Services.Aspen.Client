@@ -44,7 +44,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 contentType: "application/x-www-form-urlencoded");
             request.AddParameter("ErrorReport", errorReport);
             request.AddParameter("Username", username);
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
+            IDeviceInfo deviceInfo = CacheStore.Get<DeviceInfo>(CacheKeys.CurrentDevice) ?? DeviceInfo.Current;
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
             this.Execute(request);

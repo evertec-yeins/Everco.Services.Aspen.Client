@@ -20,11 +20,6 @@ namespace Everco.Services.Aspen.Client.Fluent
     public sealed partial class Anonymous : ISettingsModule
     {
         /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private const string CacheKeyAppSettings = "AppMovSettings";
-
-        /// <summary>
         /// Obtiene un objeto que permite acceder a la información relacionada con la parametrización de la aplicación en el sistema Aspen.
         /// </summary>
         public ISettingsModule Settings => this;
@@ -38,19 +33,17 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </returns>
         public AppMovSettings GetAppSettings(string apiKey)
         {
-            AppMovSettings appMovSettings = this.cache.Get<AppMovSettings>(CacheKeyAppSettings);
+            AppMovSettings appMovSettings = CacheStore.Get<AppMovSettings>(CacheKeys.AppMovSettings);
 
             if (appMovSettings != null)
             {
-                ServiceLocator.Instance.LoggingProvider.WriteDebug("Anonymous => Return App settings from cache.");
                 return appMovSettings;
             }
 
             IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.AppMovSettings);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
             appMovSettings = this.Execute<AppMovSettings>(request);
-            this.cache.Add(CacheKeyAppSettings, appMovSettings, this.cacheOptions);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug("Anonymous => App settings saved to cache.");
+            CacheStore.Add(CacheKeys.AppMovSettings, appMovSettings);
             return appMovSettings;
         }
 

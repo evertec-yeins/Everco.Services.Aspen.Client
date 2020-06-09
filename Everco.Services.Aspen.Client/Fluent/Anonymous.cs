@@ -13,8 +13,6 @@ namespace Everco.Services.Aspen.Client.Fluent
     using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Providers;
     using Identity;
-    using LazyCache;
-    using Microsoft.Extensions.Caching.Memory;
     using Newtonsoft.Json;
     using RestSharp;
 
@@ -23,16 +21,6 @@ namespace Everco.Services.Aspen.Client.Fluent
     /// </summary>
     public sealed partial class Anonymous : IAnonymous
     {
-        /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private readonly IAppCache cache;
-
-        /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private readonly MemoryCacheEntryOptions cacheOptions;
-
         /// <summary>
         /// Para uso interno.
         /// </summary>
@@ -53,17 +41,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// </summary>
         private Anonymous()
         {
-            this.cacheOptions = new MemoryCacheEntryOptions()
-            {
-                Priority = CacheItemPriority.NeverRemove
-            };
-
-            this.cacheOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
-            {
-                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Anonymous => Entry: '{key}' is evicted from cache. Season: {reason}");
-            });
-
-            this.cache = new CachingService();
         }
 
         /// <summary>

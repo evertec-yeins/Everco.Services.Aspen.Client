@@ -7,93 +7,74 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Internals
 {
-    using System;
-    using System.Collections.Generic;
-    using Auth;
-    using Identity;
+    using LazyCache;
+    using Microsoft.Extensions.Caching.Memory;
 
     /// <summary>
-    /// Permite almacenar el último token de autenticación generado.
+    /// Implementa las funcionalidades que permiten almacenar información en caché.
     /// </summary>
     internal static class CacheStore
     {
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private const string DeviceCacheKey = "CURRENT_DEVICE_INFO";
+        private static readonly IAppCache cache;
 
         /// <summary>
         /// Para uso interno.
         /// </summary>
-        private const string TokenCacheKey = "CURRENT_AUTH_TOKEN";
-
-        /// <summary>
-        /// Para uso interno.
-        /// </summary>
-        private static readonly List<string> keys;
+        private static readonly MemoryCacheEntryOptions cacheOptions;
 
         /// <summary>
         /// Inicializa los miembros estáticos de la clase <see cref="CacheStore"/>
         /// </summary>
         static CacheStore()
         {
-            keys = new List<string>();
-        }
-
-        /// <summary>
-        /// Obtiene el último token de autenticación generado o  <see langword="null" /> si no se ha obtenido ninguno.
-        /// </summary>
-        /// <param name="apiKey">ApiKey para el que se obtiene el token de autemticación de la cache.</param>
-        /// <returns>Instancia que implementa <see cref="IAuthToken" /> con el valor del último token generado.</returns>
-        internal static IAuthToken GetCurrentToken(string apiKey)
-        {
-            string cacheKey = $"{TokenCacheKey}-{apiKey}";
-            keys.Add(cacheKey);
-            return AppDomain.CurrentDomain.GetData(cacheKey) as IAuthToken;
-        }
-
-        /// <summary>
-        /// Obtiene la ifnormación del dispositivo solicitante o  <see langword="null" /> si no se ha guardado información.
-        /// </summary>
-        /// <returns>Instancia que implementa <see cref="IDeviceInfo"/> con al información del dispositivo.</returns>
-        internal static IDeviceInfo GetDeviceInfo()
-        {
-            return AppDomain.CurrentDomain.GetData(DeviceCacheKey) as IDeviceInfo;
-        }
-
-        /// <summary>
-        /// Reestablece a <see langword="null" /> todos los valores en la cache.
-        /// </summary>
-        internal static void Reset()
-        {
-            foreach (string key in keys)
+            cacheOptions = new MemoryCacheEntryOptions()
             {
-                AppDomain.CurrentDomain.SetData(key, null);
-            }
+                Priority = CacheItemPriority.NeverRemove
+            };
 
-            keys.Clear();
-            AppDomain.CurrentDomain.SetData(DeviceCacheKey, null);
+            cacheOptions.RegisterPostEvictionCallback((key, value, reason, state) =>
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Entry: '{key}' is evicted from cache. Reason: {reason}");
+            });
+
+            cache = new CachingService();
         }
 
         /// <summary>
-        /// Guarda el último token de autenticación generado.
+        /// Agrega una entrada al caché.
         /// </summary>
-        /// <param name="apiKey">ApiKey con el que se asocia el token de autemticación en la cache.</param>
-        /// <param name="authToken">Instancia del token que se debe guardar.</param>
-        internal static void SetCurrentToken(string apiKey, IAuthToken authToken)
+        /// <typeparam name="TEntry">El tipo de la entrada a guardar.</typeparam>
+        /// <param name="key">La clave que identifica la entrada a guardar.</param>
+        /// <param name="item">El valor o información de la enterada que se desea guardar.</param>
+        internal static void Add<TEntry>(string key, TEntry item)
         {
-            string cacheKey = $"{TokenCacheKey}-{apiKey}";
-            keys.Add(cacheKey);
-            AppDomain.CurrentDomain.SetData(cacheKey, authToken);
+            cache.Add(key, item, cacheOptions);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Entry: '{key}' saved to cache.");
         }
 
         /// <summary>
-        /// Guarda la ifnormación del dispositivo actual.
+        /// Obtiene una entrada almacenada en el caché.
         /// </summary>
-        /// <param name="deviceInfo">Instancia del dispositivo que se debe guardar.</param>
-        internal static void SetDeviceInfo(IDeviceInfo deviceInfo)
+        /// <typeparam name="TEntry">El tipo de la entrada.</typeparam>
+        /// <param name="key">La clave con la que se guardó la entrada en el caché.</param>
+        /// <returns>Una instancia de <typeparamref name="TEntry"/> que representa al valor o información recuperado del caché.</returns>
+        internal static TEntry Get<TEntry>(string key)
         {
-            AppDomain.CurrentDomain.SetData(DeviceCacheKey, deviceInfo);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Getting entry: '{key}' from cache.");
+            return cache.Get<TEntry>(key);
+        }
+
+        /// <summary>
+        /// Remueve una entrada almacenada en el caché.
+        /// </summary>
+        /// <param name="key">La clave con la que se guardó la entrada en el caché.</param>
+        internal static void Remove(string key)
+        {
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Removing entry: '{key}' saved on cache.");
+            cache.Remove(key);
         }
     }
 }

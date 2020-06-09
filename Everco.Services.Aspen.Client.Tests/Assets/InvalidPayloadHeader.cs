@@ -98,12 +98,14 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para el usuario.</param>
         /// <param name="username">La identificación del usuario autenticado.</param>
+        /// <param name="device">La información asociada con el dispositivo del usuario.</param>
         public override void AddSignedPayloadHeader(
             IRestRequest request,
             IJwtEncoder jwtEncoder,
             string apiSecret,
             string token,
-            string username)
+            string username,
+            IDeviceInfo device = null)
         {
             if (!string.IsNullOrEmpty(this.customAppSecret))
             {

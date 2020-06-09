@@ -75,7 +75,11 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para la aplicación.</param>
-        public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token)
+        public virtual void AddSignedPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret,
+            string token)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
@@ -93,9 +97,16 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para el usuario.</param>
         /// <param name="username">La identificación del usuario autenticado.</param>
-        public virtual void AddSignedPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, string token, string username)
+        /// <param name="device">La información asociada con el dispositivo del usuario.</param>
+        public virtual void AddSignedPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret,
+            string token,
+            string username,
+            IDeviceInfo device = null)
         {
-            IDeviceInfo deviceInfo = DeviceInfo.Current;
+            IDeviceInfo deviceInfo = device ?? DeviceInfo.Current;
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
@@ -112,7 +123,10 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="request">Solicitud a donde se agrega la cabecera.</param>
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
-        public virtual void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret)
+        public virtual void AddSigninPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret)
         {
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
@@ -128,7 +142,11 @@ namespace Everco.Services.Aspen.Client.Tests.Assets
         /// <param name="jwtEncoder">Instancia del codificador del contenido de la carga útil.</param>
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="userIdentity">La información que se utiliza para autenticar la solicitud en función de un usuario.</param>
-        public virtual void AddSigninPayloadHeader(IRestRequest request, IJwtEncoder jwtEncoder, string apiSecret, IUserIdentity userIdentity)
+        public virtual void AddSigninPayloadHeader(
+            IRestRequest request,
+            IJwtEncoder jwtEncoder,
+            string apiSecret,
+            IUserIdentity userIdentity)
         {
             IDeviceInfo deviceInfo = userIdentity.Device ?? DeviceInfo.Current;
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());

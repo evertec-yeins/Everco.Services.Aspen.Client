@@ -128,7 +128,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             if (cache == CachePolicy.CacheIfAvailable)
             {
-                this.AuthToken = CacheStore.GetCurrentToken(this.AppIdentity.ApiKey);
+                this.AuthToken = CacheStore.Get<AuthToken>(CacheKeys.CurrentAuthToken);
                 if (this.AuthToken != null)
                 {
                     return this;
@@ -142,7 +142,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
             IRestResponse response = base.Execute(request);
             this.AuthToken = JsonConvert.DeserializeObject<AuthToken>(this.DecodeJwtResponse(response.Content));
-            CacheStore.SetCurrentToken(this.AppIdentity.ApiKey, this.AuthToken);
+            CacheStore.Add(CacheKeys.CurrentAuthToken, this.AuthToken);
             return this;
         }
     }
