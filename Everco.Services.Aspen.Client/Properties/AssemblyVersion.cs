@@ -7,4 +7,4 @@
 // ----------------------------------------------------------------------
 using System.Reflection;
 
-[assembly: AssemblyVersion("2020.6.3.0")]
+[assembly: AssemblyVersion("2020.6.12.0")]

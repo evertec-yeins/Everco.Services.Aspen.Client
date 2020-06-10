@@ -10,10 +10,10 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using Everco.Services.Aspen.Client.Internals;
-    using Everco.Services.Aspen.Client.Providers;
     using Identity;
+    using Internals;
     using Newtonsoft.Json;
+    using Providers;
     using RestSharp;
 
     /// <summary>

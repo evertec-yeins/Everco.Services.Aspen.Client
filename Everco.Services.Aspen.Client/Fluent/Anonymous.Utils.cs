@@ -8,9 +8,9 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Threading.Tasks;
-    using Everco.Services.Aspen.Client.Internals;
     using Everco.Services.Aspen.Client.Modules.Anonymous;
     using Identity;
+    using Internals;
     using RestSharp;
 
     /// <summary>

@@ -44,13 +44,10 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>Instancia de <see cref="ISession{TFluent}" /> que permite el acceso a las operaciones del servicio.</returns>
         public ISession<IAutonomousApp> Authenticate()
         {
-            if (!ServiceLocator.Instance.Runtime.IsTestingExecuting)
+            this.AuthToken = CacheStore.GetCurrentAuthToken(this.AppIdentity.ApiKey);
+            if (this.AuthToken != null)
             {
-                this.AuthToken = CacheStore.Get<AuthToken>(CacheKeys.CurrentAuthToken);
-                if (this.AuthToken != null)
-                {
-                    return this;
-                }
+                return this;
             }
 
             this.InitializeClient();
@@ -60,7 +57,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
             IRestResponse response = base.Execute(request);
             this.AuthToken = JsonConvert.DeserializeObject<AuthToken>(this.DecodeJwtResponse(response.Content));
-            CacheStore.Add(CacheKeys.CurrentAuthToken, this.AuthToken);
+            CacheStore.SetCurrentAuthToken(this.AppIdentity.ApiKey, this.AuthToken);
             return this;
         }
 

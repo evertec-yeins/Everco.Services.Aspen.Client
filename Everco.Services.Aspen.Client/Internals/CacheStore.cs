@@ -7,6 +7,7 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Internals
 {
+    using Auth;
     using LazyCache;
     using Microsoft.Extensions.Caching.Memory;
 
@@ -83,6 +84,19 @@ namespace Everco.Services.Aspen.Client.Internals
         }
 
         /// <summary>
+        /// Obtiene el último token de autenticación generado o <see langword="null" /> si no se ha emitido ninguno.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación para el que se obtiene el token de autenticación del caché.</param>
+        /// <returns>Instancia de <see cref="IAuthToken" /> con la información del último token de autenticación generado.</returns>
+        internal static IAuthToken GetCurrentAuthToken(string apiKey)
+        {
+            string cacheKey = $"{CacheKeys.CurrentAuthToken}:{apiKey.ToUpper()}";
+            return ServiceLocator.Instance.Runtime.IsTestingExecuting
+                ? null
+                : Get<AuthToken>(cacheKey);
+        }
+
+        /// <summary>
         /// Remueve una entrada almacenada en el caché.
         /// </summary>
         /// <param name="key">La clave con la que se guardó la entrada en el caché.</param>
@@ -90,6 +104,17 @@ namespace Everco.Services.Aspen.Client.Internals
         {
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Removing entry: '{key}' saved on cache.");
             cache.Remove(key);
+        }
+
+        /// <summary>
+        /// Guarda la información del último token de autenticación emitido.
+        /// </summary>
+        /// <param name="apiKey">El identificador de la aplicación con el que se asocia el token de autenticación en el caché.</param>
+        /// <param name="authToken">La información del token de autenticación que se desea guardar.</param>
+        internal static void SetCurrentAuthToken(string apiKey, IAuthToken authToken)
+        {
+            string cacheKey = $"{CacheKeys.CurrentAuthToken}:{apiKey.ToUpper()}";
+            Add(cacheKey, authToken);
         }
     }
 }

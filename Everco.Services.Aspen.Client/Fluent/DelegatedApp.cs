@@ -71,15 +71,12 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             Throw.IfNull(userIdentity, nameof(userIdentity));
 
-            if (!ServiceLocator.Instance.Runtime.IsTestingExecuting)
+            this.AuthToken = CacheStore.GetCurrentAuthToken(this.AppIdentity.ApiKey);
+            if (this.AuthToken != null)
             {
-                this.AuthToken = CacheStore.Get<AuthToken>(CacheKeys.CurrentAuthToken);
-                if (this.AuthToken != null)
-                {
-                    return this;
-                }
+                return this;
             }
-            
+
             this.InitializeClient();
             IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.Signin);
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
@@ -87,7 +84,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, null);
             IRestResponse response = base.Execute(request);
             this.AuthToken = JsonConvert.DeserializeObject<UserAuthToken>(this.DecodeJwtResponse(response.Content));
-            CacheStore.Add(CacheKeys.CurrentAuthToken, this.AuthToken);
+            CacheStore.SetCurrentAuthToken(this.AppIdentity.ApiKey, this.AuthToken);
             return this;
         }
 
