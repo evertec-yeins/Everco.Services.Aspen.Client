@@ -59,14 +59,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         private IJwtValidator validator;
 
         /// <summary>
-        /// Obtiene la información de la identidad de la aplicación.
-        /// </summary>
-        public IAppIdentity AppIdentity { get; internal set; }
-
-        /// <summary>
         /// Obtiene el token de autenticación emitido para la sesión.
         /// </summary>
         public IAuthToken AuthToken { get; internal set; }
+
+        /// <summary>
+        /// Obtiene la información de la identidad de la aplicación.
+        /// </summary>
+        protected IAppIdentity AppIdentity { get; private set; }
 
         /// <summary>
         /// Para uso interno.

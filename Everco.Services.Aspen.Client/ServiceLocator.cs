@@ -110,15 +110,15 @@ namespace Everco.Services.Aspen.Client
         public IPayloadClaimElement PayloadClaimNames => this.container?.GetInstance<IPayloadClaimElement>();
 
         /// <summary>
-        /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio.
-        /// </summary>
-        public IHeaderElement RequestHeaderNames => this.container?.GetInstance<IHeaderElement>();
-
-        /// <summary>
         /// Obtiene la instancia del componente que se utiliza para agregar las reclamaciones en la carga útil requeridas por el servicio.
         /// </summary>
         public IPayloadClaimsManager PayloadClaimsManager => this.container?.GetInstance<IPayloadClaimsManager>();
 
+        /// <summary>
+        /// Obtiene la instancia del servicio que se utiliza para obtener los nombres de las cabeceras personalizadas del servicio.
+        /// </summary>
+        public IHeaderElement RequestHeaderNames => this.container?.GetInstance<IHeaderElement>();
+        
         /// <summary>
         /// Obtiene una referencia que permite acceder al entorno de ejecución.
         /// </summary>
@@ -128,26 +128,6 @@ namespace Everco.Services.Aspen.Client
         /// Obtiene la instancia del servidor proxy que se debe utilizar para las conexiones con el servicio.
         /// </summary>
         public IWebProxy WebProxy => this.container?.GetInstance<IWebProxy>();
-
-        /// <summary>
-        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
-        /// </summary>
-        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
-        public void SetDefaultEndpoint(IEndpointProvider endpointProvider)
-        {
-            Throw.IfNull(endpointProvider, nameof(endpointProvider));
-            this.RegisterInstance(endpointProvider: endpointProvider);
-        }
-
-        /// <summary>
-        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
-        /// </summary>
-        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
-        public void SetDefaultIdentity(IAppIdentity appIdentity)
-        {
-            Throw.IfNull(appIdentity, nameof(appIdentity));
-            this.RegisterInstance(appIdentity: appIdentity);
-        }
 
         /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator" /> para la generación de valores Epoch.
@@ -250,6 +230,26 @@ namespace Everco.Services.Aspen.Client
             instance = new ServiceLocator();
         }
 
+        /// <summary>
+        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
+        public void SetDefaultEndpoint(IEndpointProvider endpointProvider)
+        {
+            Throw.IfNull(endpointProvider, nameof(endpointProvider));
+            this.RegisterInstance(endpointProvider: endpointProvider);
+        }
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
+        public void SetDefaultIdentity(IAppIdentity appIdentity)
+        {
+            Throw.IfNull(appIdentity, nameof(appIdentity));
+            this.RegisterInstance(appIdentity: appIdentity);
+        }
+        
         /// <summary>
         /// Inicializa una nueva instancia de la clase <see cref="ServiceLocator" />
         /// </summary>

@@ -12,6 +12,7 @@ namespace Everco.Services.Aspen.Client
     using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using Everco.Services.Aspen.Client.Internals;
     using RestSharp;
 
@@ -40,6 +41,30 @@ namespace Everco.Services.Aspen.Client
             {
                 return defaultValue;
             }
+        }
+
+        /// <summary>
+        /// Retorna <paramref name="defaultValue" /> si <paramref name="input" /> es nulo o vacío.
+        /// </summary>
+        /// <param name="input">Texto a evaluar.</param>
+        /// <param name="defaultValue">Texto de reemplazo o  <see langword="null" /> para utilizar el texto predeterminado.</param>
+        /// <returns>
+        /// <paramref name="defaultValue" /> si <paramref name="input" /> es nulo o vacío; de lo contrario<paramref name="input" />.
+        /// </returns>
+        internal static string DefaultIfNullOrEmpty(
+            this string input,
+            string defaultValue = null) => string.IsNullOrWhiteSpace(input) ? defaultValue : input;
+
+        /// <summary>
+        /// Obtiene el cupero que se está enviando con la solicitud (en formato Json).
+        /// </summary>
+        /// <param name="parameters">Parámetros de la solicitud.</param>
+        /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
+        internal static Dictionary<string, object> GetBody(this IEnumerable<Parameter> parameters)
+        {
+            return parameters
+                .Where(item => item.Type == ParameterType.GetOrPost | item.Type == ParameterType.RequestBody)
+                .ToDictionary(p => p.Name, p => p.Value);
         }
 
         /// <summary>
@@ -90,56 +115,6 @@ namespace Everco.Services.Aspen.Client
         }
 
         /// <summary>
-        /// Obtiene el valor de una clave en el diccionario o un valor por defecto.
-        /// </summary>
-        /// <typeparam name="TKey">Tipo de la clave en el diccionario.</typeparam>
-        /// <typeparam name="TValue">Tipo del valor en el diccionario.</typeparam>
-        /// <param name="dictionary">Diccionario donde se busca la información.</param>
-        /// <param name="key">Clave a buscar.</param>
-        /// <param name="defaultValue">Valor por defecto si no se encuentra la clave.</param>
-        /// <returns>Valor de la clave en el diccionario o <paramref name="defaultValue"/> si no se encuentra <paramref name="key"/>.</returns>
-        internal static TValue GetValueOrDefault<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key, TValue defaultValue = default)
-        {
-            if (key == null)
-            {
-                return defaultValue;
-            }
-
-            try
-            {
-                return dictionary.TryGetValue(key, out TValue value) ? value : defaultValue;
-            }
-            catch (Exception)
-            {
-                return defaultValue;
-            }
-        }
-
-        /// <summary>
-        /// Retorna <paramref name="defaultValue" /> si <paramref name="input" /> es nulo o vacío.
-        /// </summary>
-        /// <param name="input">Texto a evaluar.</param>
-        /// <param name="defaultValue">Texto de reemplazo o  <see langword="null" /> para utilizar el texto predeterminado.</param>
-        /// <returns>
-        /// <paramref name="defaultValue" /> si <paramref name="input" /> es nulo o vacío; de lo contrario<paramref name="input" />.
-        /// </returns>
-        internal static string DefaultIfNullOrEmpty(
-            this string input,
-            string defaultValue = null) => string.IsNullOrWhiteSpace(input) ? defaultValue : input;
-
-        /// <summary>
-        /// Obtiene el cupero que se está enviando con la solicitud (en formato Json).
-        /// </summary>
-        /// <param name="parameters">Parámetros de la solicitud.</param>
-        /// <returns>Cadena en formato JSON con el cuerpo de la solicitud o <see langword="null" /> si no se envian datos en el cuerpo.</returns>
-        internal static Dictionary<string, object> GetBody(this IEnumerable<Parameter> parameters)
-        {
-            return parameters
-                .Where(item => item.Type == ParameterType.GetOrPost | item.Type == ParameterType.RequestBody)
-                .ToDictionary(p => p.Name, p => p.Value);
-        }
-
-        /// <summary>
         /// Obtiene el valor de una cabecera de la respuesta.
         /// </summary>
         /// <param name="response">Instancia con la información de la respuesta.</param>
@@ -166,6 +141,50 @@ namespace Everco.Services.Aspen.Client
             return parameters
                 .Where(item => item.Type == ParameterType.HttpHeader)
                 .ToDictionary(p => p.Name, p => p.Value);
+        }
+
+        /// <summary>
+        /// Obtiene el valor de una clave en el diccionario o un valor por defecto.
+        /// </summary>
+        /// <typeparam name="TKey">Tipo de la clave en el diccionario.</typeparam>
+        /// <typeparam name="TValue">Tipo del valor en el diccionario.</typeparam>
+        /// <param name="dictionary">Diccionario donde se busca la información.</param>
+        /// <param name="key">Clave a buscar.</param>
+        /// <param name="defaultValue">Valor por defecto si no se encuentra la clave.</param>
+        /// <returns>Valor de la clave en el diccionario o <paramref name="defaultValue"/> si no se encuentra <paramref name="key"/>.</returns>
+        internal static TValue GetValueOrDefault<TKey, TValue>(
+            this IReadOnlyDictionary<TKey, TValue> dictionary,
+            TKey key,
+            TValue defaultValue = default)
+        {
+            if (key == null)
+            {
+                return defaultValue;
+            }
+
+            try
+            {
+                return dictionary.TryGetValue(key, out TValue value) ? value : defaultValue;
+            }
+            catch (Exception)
+            {
+                return defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Convierte una cadena de texto a un <see cref="bool"/>.
+        /// </summary>
+        /// <param name="value">La cadena de texto a convertir.</param>
+        /// <returns>Cuando la </returns>
+        internal static bool ToBool(this string value)
+        {
+            const RegexOptions Options = RegexOptions.IgnoreCase |
+                                         RegexOptions.Singleline |
+                                         RegexOptions.CultureInvariant |
+                                         RegexOptions.IgnorePatternWhitespace;
+            value = value ?? string.Empty;
+            return Regex.IsMatch(value, "1|true|t|yes|y", Options);
         }
     }
 }

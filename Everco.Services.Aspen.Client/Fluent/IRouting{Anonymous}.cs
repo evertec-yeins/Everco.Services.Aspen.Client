@@ -22,7 +22,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <returns>Instancia de <see cref="ISession"/> que permite acceder a los datos de conexión con el servicio.</returns>
         ISession RoutingTo(IEndpointProvider endpointProvider);
 
-        /// <summary>B
+        /// <summary>
         /// Establece la URL para las solicitudes al servicio ASPEN.
         /// </summary>
         /// <param name="url">La URL para las solicitudes realizadas hacia al servicio ASPEN. Ejemplo: <a>http://localhost/api</a></param>

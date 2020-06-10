@@ -44,6 +44,11 @@ namespace Everco.Services.Aspen.Client.Internals
         }
 
         /// <summary>
+        /// Obtiene o establece la política para el tratamiento de la información almacenada por caché.
+        /// </summary>
+        internal static CachePolicy Policy { get; set; }
+
+        /// <summary>
         /// Agrega una entrada al caché.
         /// </summary>
         /// <typeparam name="TEntry">El tipo de la entrada a guardar.</typeparam>
@@ -51,6 +56,11 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <param name="item">El valor o información de la enterada que se desea guardar.</param>
         internal static void Add<TEntry>(string key, TEntry item)
         {
+            if (Policy == CachePolicy.BypassCache)
+            {
+                return;
+            }
+
             cache.Add(key, item, cacheOptions);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Entry: '{key}' saved to cache.");
         }
@@ -63,6 +73,11 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <returns>Una instancia de <typeparamref name="TEntry"/> que representa al valor o información recuperado del caché.</returns>
         internal static TEntry Get<TEntry>(string key)
         {
+            if (Policy == CachePolicy.BypassCache)
+            {
+                return default;
+            }
+
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"CacheStore => Getting entry: '{key}' from cache.");
             return cache.Get<TEntry>(key);
         }

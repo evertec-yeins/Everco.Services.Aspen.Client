@@ -33,10 +33,10 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 ServiceLocator.Instance.RegisterHeadersManager(InvalidApiKeyHeader.AvoidingHeader());
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                    .Authenticate(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -64,10 +64,10 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
-                    DelegatedApp.Initialize()
+                    DelegatedApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                        .Authenticate(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 
@@ -87,10 +87,10 @@ namespace Everco.Services.Aspen.Client.Tests
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
                 ServiceLocator.Instance.RegisterHeadersManager(InvalidPayloadHeader.AvoidingHeader());
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                    .Authenticate(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -118,10 +118,10 @@ namespace Everco.Services.Aspen.Client.Tests
                 AspenException exception = Assert.Throws<AspenException>(() =>
                 {
                     ServiceLocator.Instance.RegisterHeadersManager(behavior);
-                    DelegatedApp.Initialize()
+                    DelegatedApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                        .Authenticate(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
 

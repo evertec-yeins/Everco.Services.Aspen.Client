@@ -7,8 +7,8 @@
 // ----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Tests.Identities;
+    using Fluent;
+    using Identities;
     using NUnit.Framework;
 
     /// <summary>
@@ -20,12 +20,13 @@ namespace Everco.Services.Aspen.Client.Tests
         /// <summary>
         /// Obtiene un cliente para a partir de la aplicación delegada de pruebas, omitiendo los valores almacenados en memoria. 
         /// </summary>
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
         /// <returns>Instancia de <see cref="IDelegatedApp"/> para interactuar con el servicio.</returns>
-        public IDelegatedApp GetDelegatedClient() =>
-            DelegatedApp.Initialize()
+        public IDelegatedApp GetDelegatedClient(CachePolicy cachePolicy = CachePolicy.BypassCache) =>
+            DelegatedApp.Initialize(cachePolicy)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                .Authenticate(RecognizedUserIdentity.Master)
                 .GetClient();
     }
 }

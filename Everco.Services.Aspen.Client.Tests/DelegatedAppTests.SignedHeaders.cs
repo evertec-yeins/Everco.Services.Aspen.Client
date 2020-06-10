@@ -193,10 +193,10 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             // Se usa un nonce aleatorio con la autenticación del cliente...
             ServiceLocator.Instance.RegisterNonceGenerator(new SingleUseNonceGenerator());
-            IDelegatedApp client = DelegatedApp.Initialize()
+            IDelegatedApp client = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                .Authenticate(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se usa una operación luego de la autenticación con el mismo nonce y debe fallar ya que se está reutilizando...
@@ -213,10 +213,10 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Token")]
         public void MissingTokenWhenSignedRequestThrows()
         {
-            IDelegatedApp client = DelegatedApp.Initialize()
+            IDelegatedApp client = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                .Authenticate(RecognizedUserIdentity.Master)
                 .GetClient();
 
             // Se intenta usar una operación que requiere el token de autenticación.
@@ -234,10 +234,10 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Signed.Headers.Payload.Token")]
         public void NullOrEmptyTokenWhenSignedRequestThrows()
         {
-            IDelegatedApp client = DelegatedApp.Initialize()
+            IDelegatedApp client = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(DelegatedAppIdentity.Master)
-                .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                .Authenticate(RecognizedUserIdentity.Master)
                 .GetClient();
 
             IList<IPayloadClaimsManager> payloadBehaviors = new List<IPayloadClaimsManager>()

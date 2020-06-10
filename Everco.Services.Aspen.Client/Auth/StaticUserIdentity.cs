@@ -25,7 +25,11 @@ namespace Everco.Services.Aspen.Client.Auth
         /// <param name="docNumber">El número de documento del usuario.</param>
         /// <param name="password">La clave de acceso del usuario.</param>
         /// <param name="deviceInfo">La información del dispositivo desde donde se intenta autenticar el usuario.</param>
-        public StaticUserIdentity(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
+        public StaticUserIdentity(
+            string docType,
+            string docNumber,
+            string password,
+            IDeviceInfo deviceInfo = null)
         {
             Throw.IfNullOrEmpty(docType, nameof(docType));
             Throw.IfNullOrEmpty(docNumber, nameof(docNumber));

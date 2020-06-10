@@ -51,10 +51,10 @@ namespace Everco.Services.Aspen.Client.Tests
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(invalidCredentialIdentity)
+                    .Authenticate(invalidCredentialIdentity)
                     .GetClient();
             });
 
@@ -77,10 +77,10 @@ namespace Everco.Services.Aspen.Client.Tests
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(unrecognizedUserIdentity)
+                    .Authenticate(unrecognizedUserIdentity)
                     .GetClient();
             });
 
@@ -100,10 +100,10 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().EnsureUserIsLocked(userIdentity.DocType, userIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(DelegatedAppIdentity.Master)
-                    .AuthenticateNoCache(userIdentity)
+                    .Authenticate(userIdentity)
                     .GetClient();
             });
 
@@ -127,10 +127,10 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().EnsureUserInfo(tempUserIdentity.DocType, tempUserIdentity.DocNumber);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    DelegatedApp.Initialize()
+                    DelegatedApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(DelegatedAppIdentity.Master)
-                        .AuthenticateNoCache(tempUserIdentity)
+                        .Authenticate(tempUserIdentity)
                         .GetClient();
                 });
 
@@ -165,10 +165,10 @@ namespace Everco.Services.Aspen.Client.Tests
 
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    DelegatedApp.Initialize()
+                    DelegatedApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(appIdentity)
-                        .AuthenticateNoCache(tempUserIdentity)
+                        .Authenticate(tempUserIdentity)
                         .GetClient();
                 });
 
@@ -196,10 +196,10 @@ namespace Everco.Services.Aspen.Client.Tests
             int maxFailedPasswordAttempt = TestContext.CurrentContext.DatabaseHelper().GetAppMaxFailedPasswordAttempt(appIdentity.ApiKey);
             
             void Authenticate() =>
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(appIdentity)
-                    .AuthenticateNoCache(userIdentity)
+                    .Authenticate(userIdentity)
                     .GetClient();
 
             AspenException exception;
@@ -227,10 +227,10 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    DelegatedApp.Initialize()
+                    DelegatedApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
-                        .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                        .Authenticate(RecognizedUserIdentity.Master)
                         .GetClient();
                 });
             Assert.That(exception.EventId, Is.EqualTo("1000478"));
@@ -250,10 +250,10 @@ namespace Everco.Services.Aspen.Client.Tests
 
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(randomApiKey, apiKeySecret)
-                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                    .Authenticate(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 
@@ -273,10 +273,10 @@ namespace Everco.Services.Aspen.Client.Tests
             string randomApiSecret = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() =>
             {
-                DelegatedApp.Initialize()
+                DelegatedApp.Initialize(CachePolicy.BypassCache)
                     .RoutingTo(TestingEndpointProvider.Default)
                     .WithIdentity(recognizedApiKey, randomApiSecret)
-                    .AuthenticateNoCache(RecognizedUserIdentity.Master)
+                    .Authenticate(RecognizedUserIdentity.Master)
                     .GetClient();
             });
 

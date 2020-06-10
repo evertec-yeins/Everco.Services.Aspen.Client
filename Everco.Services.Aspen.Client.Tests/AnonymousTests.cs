@@ -9,10 +9,11 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Net;
-    using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Tests.Identities;
-    using Everco.Services.Aspen.Entities;
+    using Entities;
+    using Fluent;
+    using Identities;
     using Newtonsoft.Json;
     using NUnit.Framework;
 
@@ -23,15 +24,33 @@ namespace Everco.Services.Aspen.Client.Tests
     public class AnonymousTests
     {
         /// <summary>
+        /// Obtener la configuración de una aplicación desde el caché funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetAppSettingsFromCacheWorks()
+        {
+            IAnonymous client = this.GetAnonymousClient(CachePolicy.CacheIfAvailable);
+            string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
+            Assert.DoesNotThrow(() => client.Settings.GetAppSettings(recognizedApiKey));
+            for (int index = 1; index <= 10; index++)
+            {
+                Stopwatch watch = Stopwatch.StartNew();
+                AppMovSettings appMovSettings = client.Settings.GetAppSettings(recognizedApiKey);
+                watch.Stop();
+                CollectionAssert.IsNotEmpty(appMovSettings);
+                Assert.That(watch.Elapsed, Is.LessThanOrEqualTo(TimeSpan.FromMilliseconds(10)));
+            }
+        }
+
+        /// <summary>
         /// Obtener la configuración de una aplicación usando un ApiKey desconocido, no funciona.
         /// </summary>
         [Test]
         [Category("Modules.Settings")]
         public void GetAppSettingsUnrecognizedApiKeyThrows()
         {
-            IAnonymous client = Anonymous.Initialize()
-                .RoutingTo(TestingEndpointProvider.Default)
-                .GetClient();
+            IAnonymous client = this.GetAnonymousClient();
             string unrecognizedApiKey = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() => client.Settings.GetAppSettings(unrecognizedApiKey));
             Assert.That(exception.EventId, Is.EqualTo("20005"));
@@ -46,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetAppSettingsUsingAutonomousApiKeyThrows()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
             string autonomousApiKey = AutonomousAppIdentity.Master.ApiKey;
@@ -63,7 +82,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetAppSettingsWorks()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
             string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
@@ -81,7 +100,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void GetDefaultDocTypesWorks()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
             IList<DocTypeInfo> defaultDocTypes = client.Settings.GetDefaultDocTypes();
@@ -102,7 +121,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void SaveAppCrashUnrecognizedApiKeyThrows()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
 
@@ -128,7 +147,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void SaveAppCrashUsingAutonomousApiKeyThrows()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
 
@@ -154,7 +173,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Settings")]
         public void SaveAppCrashWorks()
         {
-            IAnonymous client = Anonymous.Initialize()
+            IAnonymous client = this.GetAnonymousClient()
                 .RoutingTo(TestingEndpointProvider.Default)
                 .GetClient();
 
@@ -174,5 +193,15 @@ namespace Everco.Services.Aspen.Client.Tests
             errorReport = JsonConvert.SerializeObject(errorReportInfo, Formatting.None);
             Assert.DoesNotThrow(() => client.Utils.SaveAppCrash(recognizedApiKey, Environment.UserName, errorReport));
         }
+
+        /// <summary>
+        /// Obtiene un cliente para a partir de la aplicación autónoma de pruebas, omitiendo los valores almacenados en memoria.
+        /// </summary>
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
+        /// <returns>Instancia de <see cref="IAutonomousApp"/> para interactuar con el servicio.</returns>
+        private IAnonymous GetAnonymousClient(CachePolicy cachePolicy = CachePolicy.BypassCache) =>
+            Anonymous.Initialize(cachePolicy)
+                .RoutingTo(TestingEndpointProvider.Default)
+                .GetClient();
     }
 }

@@ -135,10 +135,10 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MismatchTokenBetweenAppsWhenAppSignedRequestThrows()
         {
             IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
-            IAutonomousApp clientAppMaster = AutonomousApp.Initialize()
+            IAutonomousApp clientAppMaster = AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.That(clientAppMaster, Is.Not.Null);
@@ -146,10 +146,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IAppIdentity appIdentityHelper = AutonomousAppIdentity.Helper;
-            IAutonomousApp clientAppHelper = AutonomousApp.Initialize()
+            IAutonomousApp clientAppHelper = AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.That(clientAppHelper, Is.Not.Null);

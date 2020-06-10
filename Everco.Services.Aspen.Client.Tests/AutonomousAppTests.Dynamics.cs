@@ -11,7 +11,6 @@ namespace Everco.Services.Aspen.Client.Tests
     using System.Collections.Generic;
     using System.Net;
     using Fluent;
-    using Identities;
     using NUnit.Framework;
 
     [TestFixture]
@@ -21,12 +20,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Dynamics")]
         public void DumpTraceNotFoundWorks()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(TestingEndpointProvider.Default)
-                                                 .WithIdentity(AutonomousAppIdentity.Master)
-                                                 .AuthenticateNoCache()
-                                                 .GetClient();
-
+            IAutonomousApp client = this.GetAutonomousClient();
             AspenException exception = Assert.Throws<AspenException>(() => client.Dynamics.Post("diagnostics/dump/998fdd73"));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
             Assert.That(exception.EventId, Is.EqualTo("15840"));
@@ -36,12 +30,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Dynamics")]
         public void RecognizedEndpoint()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(TestingEndpointProvider.Default)
-                                                 .WithIdentity(AutonomousAppIdentity.Master)
-                                                 .AuthenticateNoCache()
-                                                 .GetClient();
-
+            IAutonomousApp client = this.GetAutonomousClient();
             AspenException exception = Assert.Throws<AspenException>(() => client.Dynamics.Post("client/test/calc", new KeyValuePair<string, object>("Input", "20")));
             Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
@@ -50,12 +39,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [Category("Modules.Dynamics")]
         public void RecognizedEndpointWorks()
         {
-            IAutonomousApp client = AutonomousApp.Initialize()
-                                                 .RoutingTo(TestingEndpointProvider.Default)
-                                                 .WithIdentity(AutonomousAppIdentity.Master)
-                                                 .AuthenticateNoCache()
-                                                 .GetClient();
-
+            IAutonomousApp client = this.GetAutonomousClient();
             int a = new Random(Guid.NewGuid().GetHashCode()).Next(10, 100);
             int b = new Random(Guid.NewGuid().GetHashCode()).Next(10, 100);
             CustomRequest request = new CustomRequest(a, b, '+');

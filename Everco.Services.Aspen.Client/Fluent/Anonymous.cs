@@ -37,17 +37,24 @@ namespace Everco.Services.Aspen.Client.Fluent
         private TimeSpan timeout;
 
         /// <summary>
-        /// Previene la creación de una instancia de la clase <see cref="Fluent.Anonymous"/>
+        /// Previene la creación de una instancia de la clase <see cref="Anonymous"/>
         /// </summary>
-        private Anonymous()
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
+        private Anonymous(CachePolicy cachePolicy)
         {
+            CacheStore.Policy = cachePolicy;
         }
 
         /// <summary>
         /// Obtiene una instancia que permite conectar con el servico Aspen.
         /// </summary>
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
         /// <returns>Instancia de <see cref="IRouting{TFluent}"/> que permite establecer la información de conexión.</returns>
-        public static IRouting Initialize() => new Anonymous();
+        public static IRouting Initialize(
+            CachePolicy cachePolicy = CachePolicy.CacheIfAvailable)
+        {
+            return new Anonymous(cachePolicy);
+        } 
 
         /// <summary>
         /// Obtiene la instancia actual configurada para interactuar con el servicio Aspen.
