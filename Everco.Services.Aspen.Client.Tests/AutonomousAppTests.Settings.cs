@@ -10,6 +10,8 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
+    using System.Threading.Tasks;
     using Entities;
     using Fluent;
     using NUnit.Framework;
@@ -20,6 +22,25 @@ namespace Everco.Services.Aspen.Client.Tests
     [TestFixture]
     public partial class AutonomousAppTests
     {
+        /// <summary>
+        /// Obtener todos los recursos de la parametrización en paralelo funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetAllSettingsAsynchronouslyWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            Task[] tasks =
+            {
+                client.Settings.GetCarriersAsync(),
+                client.Settings.GetDocTypesAsync(),
+                client.Settings.GetPaymentTypesAsync(),
+                client.Settings.GetTopUpValuesAsync(),
+                client.Settings.GetTranTypesAsync()
+            };
+            Assert.DoesNotThrow(() => Task.WaitAll(tasks));
+        }
+
         /// <summary>
         /// Obtener la lista de operadores de telefonía móvil soportados para la aplicación desde el caché funciona.
         /// </summary>
@@ -111,6 +132,33 @@ namespace Everco.Services.Aspen.Client.Tests
             IAutonomousApp client = this.GetAutonomousClient();
             IList<PaymentTypeInfo> paymentTypes = client.Settings.GetPaymentTypes();
             CollectionAssert.IsNotEmpty(paymentTypes);
+        }
+
+        /// <summary>
+        /// Obtener todos los recursos de la parametrización asíncronamente funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetSettingsAsynchronouslyWorks()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+
+            IList<CarrierInfo> carriers = Enumerable.Empty<CarrierInfo>().ToList();
+            IList<DocTypeInfo> docTypes = Enumerable.Empty<DocTypeInfo>().ToList();
+            IList<PaymentTypeInfo> paymentTypes = Enumerable.Empty<PaymentTypeInfo>().ToList();
+            IList<TopUpInfo> topUpValues = Enumerable.Empty<TopUpInfo>().ToList();
+            IList<TranTypeInfo> tranTypes = Enumerable.Empty<TranTypeInfo>().ToList();
+
+            Assert.DoesNotThrowAsync(async () => carriers = await client.Settings.GetCarriersAsync());
+            Assert.DoesNotThrowAsync(async () => docTypes = await client.Settings.GetDocTypesAsync());
+            Assert.DoesNotThrowAsync(async () => paymentTypes = await client.Settings.GetPaymentTypesAsync());
+            Assert.DoesNotThrowAsync(async () => topUpValues = await client.Settings.GetTopUpValuesAsync());
+            Assert.DoesNotThrowAsync(async () => tranTypes = await client.Settings.GetTranTypesAsync());
+            CollectionAssert.IsNotEmpty(carriers);
+            CollectionAssert.IsNotEmpty(docTypes);
+            CollectionAssert.IsNotEmpty(paymentTypes);
+            CollectionAssert.IsNotEmpty(topUpValues);
+            CollectionAssert.IsNotEmpty(tranTypes);
         }
 
         /// <summary>

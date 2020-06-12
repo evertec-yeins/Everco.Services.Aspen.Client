@@ -10,6 +10,7 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Linq;
     using System.Net;
     using Entities;
     using Fluent;
@@ -112,6 +113,25 @@ namespace Everco.Services.Aspen.Client.Tests
                 Assert.That(docTypeInfo.Name, Is.Not.Null);
                 Assert.That(docTypeInfo.ShortName, Is.Not.Null);
             }
+        }
+
+        /// <summary>
+        /// Obtener todos los recursos de la parametrización asíncronamente funciona.
+        /// </summary>
+        [Test]
+        [Category("Modules.Settings")]
+        public void GetSettingsAsynchronouslyWorks()
+        {
+            IAnonymous client = this.GetAnonymousClient();
+
+            IList<DocTypeInfo> docTypes = Enumerable.Empty<DocTypeInfo>().ToList();
+            string recognizedApiKey = DelegatedAppIdentity.Master.ApiKey;
+            AppMovSettings appMovSettings = new AppMovSettings();
+
+            Assert.DoesNotThrowAsync(async () => docTypes = await client.Settings.GetDefaultDocTypesAsync());
+            Assert.DoesNotThrowAsync(async () => appMovSettings = await client.Settings.GetAppSettingsAsync(recognizedApiKey));
+            CollectionAssert.IsNotEmpty(docTypes);
+            CollectionAssert.IsNotEmpty(appMovSettings);
         }
 
         /// <summary>

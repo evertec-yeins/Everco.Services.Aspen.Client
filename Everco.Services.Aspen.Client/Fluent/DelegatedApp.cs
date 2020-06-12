@@ -96,7 +96,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
         /// <returns>Instancia de <typeparamref name="TResponse"/> con la información de respuesta del servicio Aspen.</returns>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        internal TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
+        private TResponse Execute<TResponse>(IRestRequest request, string apiVersion = null) where TResponse : class, new()
         {
             UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
@@ -119,7 +119,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="request">Información de la solicitud.</param>
         /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        internal void Execute(IRestRequest request, string apiVersion = null)
+        private void Execute(IRestRequest request, string apiVersion = null)
         {
             UserAuthToken userAuthToken = (UserAuthToken)this.AuthToken;
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
