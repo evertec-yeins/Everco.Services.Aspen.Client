@@ -36,7 +36,6 @@ namespace Everco.Services.Aspen.Client.Tests
             string docNumber = userIdentity.DocNumber;
             IList<AccountInfo> accounts = client.Inquiries.GetAccounts(docType, docNumber);
             CollectionAssert.IsNotEmpty(accounts);
-            Assert.That(accounts.Count, Is.EqualTo(1));
 
             const string AccountIdPattern = @"^[\d]*$";
             const string AccountNumberPattern = @".*\d{4}";
@@ -99,7 +98,6 @@ namespace Everco.Services.Aspen.Client.Tests
             }
 
             IList<AccountProperty> properties = accounts.First().Properties.ToList();
-            Assert.That(properties.Count, Is.EqualTo(4));
             Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranName"), Is.Not.Null);
             Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranDate"), Is.Not.Null);
             Assert.That(properties.SingleOrDefault(p => p.Key == "LastTranCardAcceptor"), Is.Not.Null);
@@ -471,7 +469,6 @@ namespace Everco.Services.Aspen.Client.Tests
                 switch (account.Source)
                 {
                     case Subsystem.Tup:
-                        Assert.That(accountProperties.Count, Is.EqualTo(4));
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranName"), Is.Not.Null);
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranDate"), Is.Not.Null);
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTranCardAcceptor"), Is.Not.Null);
@@ -479,7 +476,6 @@ namespace Everco.Services.Aspen.Client.Tests
                         break;
 
                     case Subsystem.Bancor:
-                        Assert.That(accountProperties.Count, Is.EqualTo(4));
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "LastTran"), Is.Not.Null);
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "NextPayment"), Is.Not.Null);
                         Assert.That(accountProperties.SingleOrDefault(p => p.Key == "FullPayment"), Is.Not.Null);
@@ -634,6 +630,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Aspen");
 
             IList<BalanceResultInfo> inquiryResults = client.InquiriesV11.GetBalances(docType, docNumber, accountId);
             CollectionAssert.IsNotEmpty(inquiryResults);
@@ -656,6 +653,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             // Se reestablece las conexión valida al proveedor de datos de TUP...
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Sql:TupCompensar");
         }
 
         /// <summary>
@@ -681,7 +679,6 @@ namespace Everco.Services.Aspen.Client.Tests
             void AssertStatementsSafeResults(IList<MiniStatementResultInfo> statementInquiryResults)
             {
                 CollectionAssert.IsNotEmpty(statementInquiryResults);
-                Assert.That(statementInquiryResults.Count, Is.EqualTo(1));
                 foreach (MiniStatementResultInfo inquiryResult in statementInquiryResults)
                 {
                     Assert.IsNotEmpty(inquiryResult.Reason);
@@ -750,6 +747,7 @@ namespace Everco.Services.Aspen.Client.Tests
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Aspen");
 
             // Los movimientos más recientes realizados por la cuenta...
             IList<MiniStatementResultInfo> inquiryResults = client.InquiriesV11.GetStatements(docType, docNumber, accountId);
@@ -763,6 +761,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             // Se reestablece las conexión valida al proveedor de datos de TUP...
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Sql:TupCompensar");
         }
     }
 }
