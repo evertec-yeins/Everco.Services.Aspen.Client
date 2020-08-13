@@ -16,6 +16,7 @@ void Main()
 	string debugMessage = $"[x] Starting RpcServer [{Util.CurrentQuery.Name}]...";
 	flagBluider.AppendLine(debugMessage);
 	Console.WriteLine(debugMessage);
+	Util.ClearResults();
 	
 	try
 	{
@@ -34,10 +35,18 @@ void Main()
 		{
 			using (IModel channel = connection.CreateModel())
 			{
-				channel.ExchangeDeclare(exchange: Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
+				channel.ExchangeDeclare(exchange: this.Exchange, type: ExchangeType.Direct, durable: false, autoDelete: true, arguments: null);
 				this.GetCardHolder(channel);
 				this.GetBalances(channel);
 				this.GetMiniStatements(channel);
+				this.ProcessPayment(channel);
+				this.ProcessWithdrawal(channel);
+				this.ProcessMoneyTransfer(channel);
+				this.ProcessTopUpMobile(channel);
+				this.ProcessRefund(channel);
+				this.ProcessWithdrawalReversal(channel);
+				this.ProcessPaymentReversal(channel);
+				this.RefundReversalReversal(channel);
 
 				debugMessage = "[x] Awaiting requests...";
 				Console.WriteLine(debugMessage);
@@ -201,10 +210,206 @@ void GetMiniStatements(IModel channel)
 		response.CorrelationalId = request.CorrelationalId;
 
 		string key = $"{request.DocType}-{request.DocNumber}";
+		if (string.IsNullOrWhiteSpace(request.AccountTypeId))
+		{
+			request.AccountTypeId = ".*";
+		}
+		
 		if (Statements.TryGetValue(key, out List<Statement> statements))
 		{
 			response.Statements = statements.Where(s => Regex.IsMatch(s.FromAccountTypeId, request.AccountTypeId)).ToList();
 		}
+	});
+}
+
+void ProcessPayment(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.PurchaseRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (PaymentRequest request, PaymentResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Payment Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+		
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}		
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.BadRequest;
+		response.ResponseMessage = "No se encontraron tarjetas activas asociadas al número y/o tipo de identificación.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessWithdrawal(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CashWithdrawalRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (WithdrawalRequest request, WithdrawalResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Withdrawal Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.BadRequest;
+		response.ResponseMessage = "No se encontraron tarjetas activas asociadas al número y/o tipo de identificación.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessMoneyTransfer(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.AccountsTransfersRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (MoneyTransferRequest request, MoneyTransferResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Money Transfer Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType & a.Pan == request.FromAccountNumber);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.BadRequest;
+		response.ResponseMessage = "No se encontraron tarjetas activas asociadas al número y/o tipo de identificación.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessTopUpMobile(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.AddBalancePhoneRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (TopUpMobileRequest request, TopUpMobileResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Topup Mobile Request [{request.PhoneNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		foreach (List<Account> accounts in Accounts.Values)
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType & a.Pan == request.FromAccountNumber);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.BadRequest;
+		response.ResponseMessage = "No se encontraron tarjetas activas asociadas al número y/o tipo de identificación.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessRefund(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.RefundRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (RefundRequest request, RefundResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Refund Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.BadRequest;
+		response.ResponseMessage = "No se encontró transacción para anular.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessWithdrawalReversal(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.CashWithdrawalReversalRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (WithdrawalReversalRequest request, WithdrawalReversalResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Withdrawal Reversal Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.NotFound;
+		response.ResponseMessage = "Transacción original no encontrada.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void ProcessPaymentReversal(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.PurchaseReversalRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (PaymentReversalRequest request, PaymentReversalResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Payment Reversal Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.NotFound;
+		response.ResponseMessage = "Transacción original no encontrada.";
+		response.AuthorizationNumber = "000000";
+	});
+}
+
+void RefundReversalReversal(IModel channel)
+{
+	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.RefundReversalRequest:Processa.RabbitMQ.Services.Bifrost";
+	this.GetResponse(channel, routingKey, (RefundReversalRequest request, RefundReversalResponse response) =>
+	{
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Refund Reversal Request [{request.DocType}-{request.DocNumber}] Received...");
+		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
+
+		string key = $"{request.DocType}-{request.DocNumber}";
+		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		{
+			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType);
+			if (account != null)
+			{
+				return;
+			}
+		}
+
+		response.ResponseCode = (int)HttpStatusCode.NotFound;
+		response.ResponseMessage = "Transacción original no encontrada.";
+		response.AuthorizationNumber = "000000";
 	});
 }
 
@@ -272,7 +477,7 @@ class CardHolderResponse : IResponse
 	public string CorrelationalId { get; set; }
 	public int ResponseCode { get; set; } = (int)HttpStatusCode.OK;
 	public string ResponseMessage { get; set; } = HttpStatusCode.OK.ToString();
-	public bool Successful => this.ResponseCode >= 200 | this.ResponseCode <= 299;
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
 	public IList<CardHolder> CardHolders { get; set; }
 }
 
@@ -336,7 +541,7 @@ class BalanceResponse : IResponse
 	public string CorrelationalId { get; set; }
 	public int ResponseCode { get; set; } = (int)HttpStatusCode.OK;
 	public string ResponseMessage { get; set; } = HttpStatusCode.OK.ToString();
-	public bool Successful => this.ResponseCode >= 200 | this.ResponseCode <= 299;
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
 	public List<Account> Accounts { get; set; }
 }
 
@@ -408,7 +613,7 @@ class MiniStatementsResponse : IResponse
 	public string CorrelationalId { get; set; }
 	public int ResponseCode { get; set; } = (int)HttpStatusCode.OK;
 	public string ResponseMessage { get; set; } = HttpStatusCode.OK.ToString();
-	public bool Successful => this.ResponseCode >= 200 | this.ResponseCode <= 299;
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
 	public List<Statement> Statements { get; set; }
 }
 
@@ -470,4 +675,261 @@ enum Accounting
 {
 	Debit = 0,
 	Credit = 1
+}
+
+class PaymentRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public int Amount { get; set; }
+	public string FromAccountType { get; set; }
+	public IDictionary<string, string> CustomData { get; set; }
+}
+
+class PaymentResponse : IResponse
+{
+	public PaymentResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+	
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class WithdrawalRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public int Amount { get; set; }
+	public string FromAccountType { get; set; }
+	public IDictionary<string, string> CustomData { get; set; }
+}
+
+class WithdrawalResponse : IResponse
+{
+	public WithdrawalResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class MoneyTransferRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string FromAccountNumber { get; set; }
+	public string ToAccountNumber { get; set; }
+	public int Amount { get; set; }
+}
+
+class MoneyTransferResponse : IResponse
+{
+	public MoneyTransferResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+		this.Empty = false;
+		this.MachineName = Environment.MachineName;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public bool Empty { get; set; }
+	public string AuthorizationNumber { get; set; }
+	public string MachineName { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class TopUpMobileRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string FromAccountNumber { get; set; }
+	public string PhoneNumber { get; set; }
+	public string Carrier { get; set; }
+	public int Amount { get; set; }
+}
+
+class TopUpMobileResponse : IResponse
+{
+	public TopUpMobileResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+		this.Empty = false;
+		this.MachineName = Environment.MachineName;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public bool Empty { get; set; }
+	public string AuthorizationNumber { get; set; }
+	public string MachineName { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class RefundRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string AuthorizationNumber { get; set; }
+	public int Amount { get; set; }
+}
+
+class RefundResponse : IResponse
+{
+	public RefundResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class WithdrawalReversalRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string OriginalTransactionId { get; set; }
+	public int Amount { get; set; }
+}
+
+class WithdrawalReversalResponse : IResponse
+{
+	public WithdrawalReversalResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class PaymentReversalRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string OriginalTransactionId { get; set; }
+	public int Amount { get; set; }
+}
+
+class PaymentReversalResponse : IResponse
+{
+	public PaymentReversalResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
+}
+
+class RefundReversalRequest : IRequest
+{
+	public string CorrelationalId { get; set; }
+	public string DocType { get; set; }
+	public string DocNumber { get; set; }
+	[JsonProperty("Channel")]
+	public string ChannelId { get; set; }
+	public string FromAccountType { get; set; }
+	public string OriginalTransactionId { get; set; }
+	public int Amount { get; set; }
+}
+
+class RefundReversalResponse : IResponse
+{
+	public RefundReversalResponse()
+	{
+		const HttpStatusCode statusCode = HttpStatusCode.OK;
+		this.ResponseCode = (int)statusCode;
+		this.ResponseMessage = statusCode.ToString();
+		this.AuthorizationNumber = new Random().Next(100000, 999999).ToString();
+		this.Date = DateTime.Now;
+	}
+
+	public string CorrelationalId { get; set; }
+	public int ResponseCode { get; set; }
+	public string ResponseMessage { get; set; }
+	public bool Successful => this.ResponseCode >= 200 && this.ResponseCode <= 299;
+	public string AuthorizationNumber { get; set; }
+	public DateTime Date { get; set; }
 }

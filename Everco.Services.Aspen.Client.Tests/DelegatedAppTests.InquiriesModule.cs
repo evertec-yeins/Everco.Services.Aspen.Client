@@ -155,7 +155,7 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IDelegatedApp client = this.GetDelegatedClient();
             string unrecognizedAccountId = new Random().Next(999, 9999).ToString();
-            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(unrecognizedAccountId);
+            IList<MiniStatementInfo> GetStatements() => client.Inquiries.GetStatements(unrecognizedAccountId, "80");
             Assert.DoesNotThrow(() => GetStatements());
             CollectionAssert.IsEmpty(GetStatements());
         }
