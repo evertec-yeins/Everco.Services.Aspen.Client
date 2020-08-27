@@ -536,7 +536,7 @@ namespace Everco.Services.Aspen.Client.Tests
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP|Bancor");
 
             // Se configura una conexión inválida a un proveedor de datos conocido para esperar que falle la consulta...
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Broken:Tests");
 
             IAutonomousApp client = this.GetAutonomousClient();
             IUserIdentity userIdentity = RecognizedUserIdentity.Master;
@@ -629,7 +629,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string accountId = accountInfo.SourceAccountId;
 
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken:Tests");
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Aspen");
 
             IList<BalanceResultInfo> inquiryResults = client.InquiriesV11.GetBalances(docType, docNumber, accountId);
@@ -746,7 +746,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             // Se configura una conexión inválida para el proveedor de datos de TUP para esperar que falle la consulta de saldos...
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
-            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Broken:Tests");
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:ConnectionStringName", "Aspen");
 
             // Los movimientos más recientes realizados por la cuenta...

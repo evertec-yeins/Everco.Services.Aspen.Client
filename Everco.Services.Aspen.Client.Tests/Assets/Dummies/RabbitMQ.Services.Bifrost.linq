@@ -275,17 +275,14 @@ void ProcessMoneyTransfer(IModel channel)
 	string routingKey = "Processa.RabbitMQ.Services.Bifrost.Contracts.AccountsTransfersRequest:Processa.RabbitMQ.Services.Bifrost";
 	this.GetResponse(channel, routingKey, (MoneyTransferRequest request, MoneyTransferResponse response) =>
 	{
-		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Money Transfer Request [{request.DocType}-{request.DocNumber}] Received...");
+		Console.WriteLine($"[x] ({DateTime.Now.ToString("HH:mm:ss.fff")}) Money Transfer Request from account [{request.FromAccountNumber}] to [{request.ToAccountNumber}] Received...");
 		response.CorrelationalId = request.CorrelationalId ?? Guid.NewGuid().ToString();
 
-		string key = $"{request.DocType}-{request.DocNumber}";
-		if (Accounts.TryGetValue(key, out List<Account> accounts))
+		List<Account> accounts = Accounts.Values.SelectMany(a => a).ToList();
+		Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType & a.Pan == request.FromAccountNumber);
+		if (account != null)
 		{
-			Account account = accounts.FirstOrDefault(a => a.AccountTypeId == request.FromAccountType & a.Pan == request.FromAccountNumber);
-			if (account != null)
-			{
-				return;
-			}
+			return;
 		}
 
 		response.ResponseCode = (int)HttpStatusCode.BadRequest;
@@ -742,8 +739,6 @@ class WithdrawalResponse : IResponse
 class MoneyTransferRequest : IRequest
 {
 	public string CorrelationalId { get; set; }
-	public string DocType { get; set; }
-	public string DocNumber { get; set; }
 	[JsonProperty("Channel")]
 	public string ChannelId { get; set; }
 	public string FromAccountType { get; set; }
