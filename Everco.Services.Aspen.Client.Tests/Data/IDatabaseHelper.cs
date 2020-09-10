@@ -15,25 +15,22 @@ namespace Everco.Services.Aspen.Client.Tests.Data
     public interface IDatabaseHelper
     {
         /// <summary>
+        /// Agrega las propiedades del perfil a un usuario.
+        /// </summary>
+        /// <param name="userId">El identificador del usuario en el sistema.</param>
+        /// <param name="appId">El identificador de la aplicación en el sistema.</param>
+        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
+        void AddUserProfileProperties(
+            int userId,
+            int appId,
+            IDictionary<string, string> profileProperties);
+
+        /// <summary>
         /// Verifica si el secreto de una aplicación está encriptado.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
         /// <returns><c>true</c> cuando el formato de secreto es encriptado; de lo contrario <c>false</c>.</returns>
         bool AppSecretFormatIsEncrypted(string appKey);
-
-        /// <summary>
-        /// Habilita o inhabilita una aplicación en el sistema del servicio.
-        /// </summary>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="enabled"><see langword="true" /> para habilitar la aplicación; de lo contrario <see langword="false" />.</param>
-        void UpdateEnabled(string appKey, bool enabled);
-
-        /// <summary>
-        /// Asegura que una aplicación requiera (o no) cambio de su secreto.
-        /// </summary>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="newValue"><see langword="true" /> cuando la aplicación requiera cambio de secreto; de lo contrario <see langword="false" />.</param>
-        void UpdateChangeSecret(string appKey, bool newValue);
 
         /// <summary>
         /// Se asegura que el token de autenticación generado por una aplicación haya expirado.
@@ -49,7 +46,7 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         void EnsureExpireUserAuthToken(
-            string appKey, 
+            string appKey,
             string docType,
             string docNumber,
             string deviceId);
@@ -68,7 +65,7 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         void EnsureMismatchUserAuthToken(
-            string appKey, 
+            string appKey,
             string docType,
             string docNumber,
             string deviceId);
@@ -85,9 +82,9 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         /// <param name="secret">Clave de acceso del usuario.</param>
         /// <param name="email">Correo electrónico del usuario.</param>
         void EnsureUserAndProfileInfo(
-            string appKey, 
-            string docType, 
-            string docNumber, 
+            string appKey,
+            string docType,
+            string docNumber,
             string pinNumber = null,
             string firstName = null,
             string lastName = null,
@@ -164,9 +161,9 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         void RemoveUserAuthToken(
-            string appKey, 
-            string docType, 
-            string docNumber, 
+            string appKey,
+            string docType,
+            string docNumber,
             string deviceId);
 
         /// <summary>
@@ -177,13 +174,6 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         void RemoveUserInfo(string docType, string docNumber);
 
         /// <summary>
-        /// Actualiza el secreto de una aplicación.
-        /// </summary>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="apiSecret">El secreto en claro para la aplicación.</param>
-        void UpdateApiSecret(string appKey, string apiSecret);
-
-        /// <summary>
         /// Establece una clave en la configuración personalizadas de la aplicación.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
@@ -192,14 +182,24 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         void SetAppSettingsKey(string appKey, string key, string value);
 
         /// <summary>
-        /// Agrega las propiedades del perfil a un usuario.
+        /// Actualiza el secreto de una aplicación.
         /// </summary>
-        /// <param name="userId">El identificador del usuario en el sistema.</param>
-        /// <param name="appId">El identificador de la aplicación en el sistema.</param>
-        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
-        void AddUserProfileProperties(
-            int userId, 
-            int appId, 
-            IDictionary<string, string> profileProperties);
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="apiSecret">El secreto en claro para la aplicación.</param>
+        void UpdateApiSecret(string appKey, string apiSecret);
+
+        /// <summary>
+        /// Asegura que una aplicación requiera (o no) cambio de su secreto.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="newValue"><see langword="true" /> cuando la aplicación requiera cambio de secreto; de lo contrario <see langword="false" />.</param>
+        void UpdateChangeSecret(string appKey, bool newValue);
+
+        /// <summary>
+        /// Habilita o inhabilita una aplicación en el sistema del servicio.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="enabled"><see langword="true" /> para habilitar la aplicación; de lo contrario <see langword="false" />.</param>
+        void UpdateEnabled(string appKey, bool enabled);
     }
 }

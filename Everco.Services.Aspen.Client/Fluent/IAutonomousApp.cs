@@ -42,6 +42,11 @@ namespace Everco.Services.Aspen.Client.Fluent
         ISettingsModule Settings { get; }
 
         /// <summary>
+        /// Obtiene un objeto que permite acceder a las operaciones para la generación y validación de tokens o claves transnacionales.
+        /// </summary>
+        ITokenModule Token { get; }
+
+        /// <summary>
         /// Envía al servicio una solicitud de generación de un token de autenticación, si no se encuentra uno en la cache.
         /// </summary>
         /// <returns>Instancia de <see cref="ISession{TFluent}"/> que permite el acceso a las operaciones del servicio.</returns>

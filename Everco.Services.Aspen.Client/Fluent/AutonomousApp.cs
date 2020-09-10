@@ -115,7 +115,8 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="request">Información de la solicitud.</param>
         /// <param name="apiVersion">Número de versión del API para incluir en la cabecera.</param>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private void Execute(IRestRequest request, string apiVersion = null)
+        /// <returns>Instancia de <see cref="IRestResponse"/> que contiene los datos de la respuesta generada por la solicitud al API.</returns>
+        private IRestResponse Execute(IRestRequest request, string apiVersion = null)
         {
             ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, this.AppIdentity.ApiKey);
             ServiceLocator.Instance.HeadersManager.AddSignedPayloadHeader(
@@ -124,7 +125,7 @@ namespace Everco.Services.Aspen.Client.Fluent
                 this.AppIdentity.ApiSecret,
                 this.AuthToken.Token);
             ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, apiVersion);
-            base.Execute(request);
+            return base.Execute(request);
         }
     }
 }

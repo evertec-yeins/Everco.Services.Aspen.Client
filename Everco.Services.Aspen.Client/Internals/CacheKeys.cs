@@ -53,6 +53,11 @@ namespace Everco.Services.Aspen.Client.Internals
         internal const string PaymentTypes = "RESX_PAYMENT_TYPES";
 
         /// <summary>
+        /// Identificador de la entrada en el caché de la lista de canales soportados para la generación de tokens o claves transaccionales.
+        /// </summary>
+        internal const string TokenChannels = "TOKEN_CHANNELS";
+
+        /// <summary>
         /// Identificador de la entrada en el caché de los valores admitidos de recarga por operador soportados para la aplicación.
         /// </summary>
         internal const string TopUpValues = "RESX_TOPUP_VALUES";

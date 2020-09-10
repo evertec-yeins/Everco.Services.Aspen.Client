@@ -180,6 +180,42 @@ namespace Everco.Services.Aspen.Client.Internals
         /// Operación para desvincular una cuenta registrada al usuario actual autenticado por el alias de la cuenta.
         /// </summary>
         [EndPointMappingInfo("/transfers/accounts/@[Alias]", Method.DELETE)]
-        UnlinkTransferAccountFromCurrentUserByAlias
+        UnlinkTransferAccountFromCurrentUserByAlias,
+
+        /// <summary>
+        /// Operación para obtener los canales para los que se pueden generar tokens o claves transaccionales.
+        /// </summary>
+        [EndPointMappingInfo("/tokens/channels", Method.GET)]
+        TokenChannels,
+
+        /// <summary>
+        /// Operación para generar y enviar un token o clave transaccional a un usuario.
+        /// </summary>
+        [EndPointMappingInfo("/tokens/send", Method.POST)]
+        SendToken,
+
+        /// <summary>
+        /// Operación para generar un token o clave transaccional al usuario autenticado.
+        /// </summary>
+        [EndPointMappingInfo("/tokens", Method.POST)]
+        GenerateToken,
+
+        /// <summary>
+        /// Operación para validar o redimir un token o clave transaccional emitido.
+        /// </summary>
+        [EndPointMappingInfo("/tokens/@[Token]", Method.PUT)]
+        RedeemToken,
+
+        /// <summary>
+        /// Operación para obtener la información de un token o clave transaccional en formato imagen (base64).
+        /// </summary>
+        [EndPointMappingInfo("/tokens/channel/@[ChannelId]/alias/@[EnrollmentAlias]", Method.GET)]
+        GenerateTokenByAlias,
+        
+        /// <summary>
+        /// Operación para solicitar la anulación de un token o clave transaccional.
+        /// </summary>
+        [EndPointMappingInfo("/tokens/@[Token]", Method.DELETE)]
+        NullifyToken
     }
 }

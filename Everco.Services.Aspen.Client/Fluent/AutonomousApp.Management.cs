@@ -12,7 +12,7 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System.Linq;
     using System.Threading.Tasks;
     using Entities;
-    using Everco.Services.Aspen.Client.Internals;
+    using Internals;
     using Modules.Autonomous;
     using RestSharp;
 

@@ -32,7 +32,11 @@ namespace Everco.Services.Aspen.Client.Tests.Identities
         /// <param name="docNumber">El número de documento del usuario.</param>
         /// <param name="password">La clave de acceso del usuario.</param>
         /// <param name="deviceInfo">La información del dispositivo.</param>
-        public RecognizedUserIdentity(string docType, string docNumber, string password, IDeviceInfo deviceInfo = null)
+        public RecognizedUserIdentity(
+            string docType,
+            string docNumber,
+            string password,
+            IDeviceInfo deviceInfo = null)
         {
             this.DocType = docType;
             this.DocNumber = docNumber;

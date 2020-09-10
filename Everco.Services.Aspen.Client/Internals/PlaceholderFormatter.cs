@@ -43,7 +43,7 @@ namespace Everco.Services.Aspen.Client.Internals
         /// <param name="placeholders">Una colección de clave y valores para inicializar los marcadores de posición.</param>
         public PlaceholderFormatter(string format, IDictionary<string, object> placeholders) : this(format)
         {
-            this.placeholders = placeholders;
+            this.placeholders = placeholders ?? new Dictionary<string, object>();
         }
 
         /// <summary>

@@ -19,12 +19,14 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         /// <param name="resource">Url del recurso solicitado.</param>
         /// <param name="method">Método o verbo HTTP para invocar el recurso.</param>
+        /// <param name="body">Los datos para el cuerpo de la solicitud.</param>
         /// <param name="accept">Texto que se envía en la cabecera Accept de la solicitud.</param>
         /// <param name="contentType">Texto que se envía en la cabecera Content-Type de la solicitud.</param>
         /// <param name="dataFormat">Formato de los datos que se envian con la solicitud.</param>
         internal AspenRequest(
             string resource,
             Method method,
+            object body = null,
             string accept = "application/json",
             string contentType = "application/json; charset=utf-8",
             DataFormat dataFormat = DataFormat.Json) : base(resource, method, dataFormat)
@@ -39,6 +41,11 @@ namespace Everco.Services.Aspen.Client.Internals
             {
                 this.AddHeader("Content-Type", contentType);
             }
+
+            if (body != null)
+            {
+                this.AddJsonBody(body);
+            }
         }
 
         /// <summary>
@@ -46,17 +53,22 @@ namespace Everco.Services.Aspen.Client.Internals
         /// </summary>
         /// <param name="scope">Alcance de la aplicación que solicita la información.</param>
         /// <param name="mappingInfo">Valor de la enumeración de donde se extraen la Url y el método.</param>
+        /// <param name="body">Los datos para el cuerpo de la solicitud.</param>
+        /// <param name="endpointParameters">La colección de parámetros para el endpoint.</param>
         /// <param name="accept">Texto que se envía en la cabecera Accept de la solicitud.</param>
         /// <param name="contentType">Texto que se envía en la cabecera Content-Type de la solicitud.</param>
         /// <param name="dataFormat">Formato de los datos que se envian con la solicitud.</param>
         internal AspenRequest(
             Scope scope,
             EndpointMapping mappingInfo,
+            object body = null,
+            EndpointParameters endpointParameters = null,
             string accept = "application/json",
             string contentType = "application/json; charset=utf-8",
             DataFormat dataFormat = DataFormat.Json) : this(
-                mappingInfo.GetEndPointMappingInfo(scope).Resource,
+            new PlaceholderFormatter(mappingInfo.GetEndPointMappingInfo(scope).Resource, endpointParameters).ToString(),
                 mappingInfo.GetEndPointMappingInfo(scope).Method,
+                body,
                 accept,
                 contentType,
                 dataFormat)

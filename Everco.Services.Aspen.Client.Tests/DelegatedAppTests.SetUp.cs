@@ -7,8 +7,8 @@
 // -----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Identity;
-    using Everco.Services.Aspen.Client.Tests.Identities;
+    using Identities;
+    using Identity;
     using NUnit.Framework;
 
     /// <summary>
@@ -35,6 +35,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bifrost:ConnectionStringName", "RabbitMQ:Bifrost:Tests");
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Bancor:ConnectionStringName", "RabbitMQ:Bancor:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "Kraken:ConnectionStringName", "RabbitMQ:Kraken:Tests");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "TUP:InquiryProvider", "Database");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:AuthProviderKey", "DbAuthProvider");
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:TokenProviderKey", "LocalTokenProvider");
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "DataProvider:SubsystemEnabled", "TUP");
         }
     }
