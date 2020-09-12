@@ -334,6 +334,25 @@ namespace Everco.Services.Aspen.Client.Tests
             UseLocalTokenProvider();
         }
 
+        /// <summary>
+        /// La solicitud falla si no se reconoce el nombre del proveedor de token transaccionales establecido para la aplicación.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void UnrecognizedTokenProviderNameThrows()
+        {
+            IAutonomousApp client = this.GetAutonomousClient();
+            UseUnrecognizedTokenProvider();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            AspenException exception = Assert.Throws<AspenException>(() => client.Token.SendToken(docType, docNumber));
+            Assert.That(exception.EventId, Is.EqualTo("15898"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotImplemented));
+            StringAssert.IsMatch("No se reconoce el nombre el proveedor de token transaccionales configurado para la aplicación", exception.Message);
+            UseLocalTokenProvider();
+        }
+
         private static void UseRemoteTokenProvider()
         {
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
@@ -344,6 +363,12 @@ namespace Everco.Services.Aspen.Client.Tests
         {
             IAppIdentity appIdentity = AutonomousAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:TokenProviderKey", "LocalTokenProvider");
+        }
+
+        private static void UseUnrecognizedTokenProvider()
+        {
+            IAppIdentity appIdentity = AutonomousAppIdentity.Master;
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:TokenProviderKey", "UnrecognizedTokenProviderName");
         }
 
         private static void UseBrokenConnection()

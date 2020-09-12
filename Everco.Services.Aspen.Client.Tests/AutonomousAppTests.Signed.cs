@@ -9,14 +9,13 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Net;
-    using Everco.Services.Aspen.Client.Auth;
-    using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Client.Tests.Assets;
+    using Assets;
+    using Auth;
+    using Fluent;
     using Identities;
     using Identity;
-    using Newtonsoft.Json;
     using NUnit.Framework;
+    using Providers;
 
     /// <summary>
     /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de autónoma.

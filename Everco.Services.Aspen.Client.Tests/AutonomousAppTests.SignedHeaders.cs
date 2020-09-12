@@ -11,8 +11,8 @@ namespace Everco.Services.Aspen.Client.Tests
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using Everco.Services.Aspen.Client.Tests.Assets;
-    using Everco.Services.Aspen.Entities;
+    using Assets;
+    using Entities;
     using Fluent;
     using NUnit.Framework;
     using Providers;

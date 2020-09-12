@@ -164,6 +164,155 @@ namespace Everco.Services.Aspen.Client.Tests
             UseLocalTokenProvider();
         }
 
+        /// <summary>
+        /// La solicitud falla si no se reconoce el nombre del proveedor de token transaccionales establecido para la aplicación.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void UnrecognizedTokenProviderNameThrows()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            UseUnrecognizedTokenProvider();
+            IUserIdentity userIdentity = RecognizedUserIdentity.Master;
+            string docType = userIdentity.DocType;
+            string docNumber = userIdentity.DocNumber;
+            AspenException exception = Assert.Throws<AspenException>(() => client.Token.SendToken(docType, docNumber));
+            Assert.That(exception.EventId, Is.EqualTo("15898"));
+            Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.NotImplemented));
+            StringAssert.IsMatch("No se reconoce el nombre el proveedor de token transaccionales configurado para la aplicación", exception.Message);
+            UseLocalTokenProvider();
+        }
+
+        /// <summary>
+        /// Enviar un token transaccional a un usuario usando un canal nulo o vacío genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void EmptyOrWhitespaceChannelWhenGenerateTokenThrows()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            string pinNumber = "141414";
+            List<string> invalidChannels = new List<string>()
+            {
+                string.Empty,
+                "     "
+            };
+
+            foreach (string invalidChannel in invalidChannels)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() => client.Token.GenerateToken(pinNumber, channelKey: invalidChannel));
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("'ChannelKey' no puede ser vacío", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Enviar un token transaccional a un usuario usando un canal desconocido genera una respuesta inválida.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void UnrecognizedChannelWhenGenerateTokenThrows()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            string pinNumber = "141414";
+            List<string> unrecognizedChannels = new List<string>()
+            {
+                "XX",
+                "00",
+                "X0",
+                "**"
+            };
+
+            foreach (string unrecognizedChannel in unrecognizedChannels)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() => client.Token.GenerateToken(pinNumber, channelKey: unrecognizedChannel));
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("No existe un canal con el código proporcionado", exception.Message);
+            }
+        }
+
+        /// <summary>
+        /// Enviar un token transaccional a un usuario usando un canal desconocido funciona,
+        /// cuando no se soportan los canales usando el proveedor remoto de tokens.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void UnrecognizedChannelWhenGenerateTokenFromRemoteProviderWorks()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            UseRemoteTokenProvider();
+
+            string pinNumber = "141414";
+            List<string> unrecognizedChannels = new List<string>()
+            {
+                "XX",
+                "00",
+                "X0",
+                "**"
+            };
+
+            foreach (string unrecognizedChannel in unrecognizedChannels)
+            {
+                TokenResponseInfo tokenResponseInfo = null;
+                Assert.DoesNotThrow(() => tokenResponseInfo = client.Token.GenerateToken(pinNumber, channelKey: unrecognizedChannel));
+                Printer.Print(tokenResponseInfo, "TokenResponseInfo");
+                Assert.NotNull(tokenResponseInfo);
+                Assert.IsNotEmpty(tokenResponseInfo.Token);
+                Assert.That(tokenResponseInfo.ExpirationMinutes, Is.GreaterThan(0));
+                Assert.That(tokenResponseInfo.ExpiresAt, Is.GreaterThan(DateTimeOffset.Now));
+            }
+
+            UseLocalTokenProvider();
+        }
+
+        /// <summary>
+        /// Enviar un token transaccional a un usuario usando un canal desconocido genera una respuesta inválida,
+        /// cuando se soportan los canales usando el proveedor remoto de tokens.
+        /// </summary>
+        [Test]
+        [Category("Modules.Token")]
+        public void UnrecognizedChannelWhenGenerateTokenFromRemoteProviderThrows()
+        {
+            IDelegatedApp client = this.GetDelegatedClient();
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            UseRemoteTokenProvider();
+            SupportsChannels();
+
+            string pinNumber = "141414";
+            List<string> unrecognizedChannels = new List<string>()
+            {
+                "XX",
+                "00",
+                "X0",
+                "**"
+            };
+
+            foreach (string unrecognizedChannel in unrecognizedChannels)
+            {
+                AspenException exception = Assert.Throws<AspenException>(() => client.Token.GenerateToken(pinNumber, channelKey: unrecognizedChannel));
+                Assert.That(exception.EventId, Is.EqualTo("15852"));
+                Assert.That(exception.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+                StringAssert.IsMatch("No existe un canal con el código proporcionado", exception.Message);
+            }
+
+            UseLocalTokenProvider();
+            NotSupportsChannels();
+        }
+
+        private static void SupportsChannels()
+        {
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "RemoteTokenProvider:SupportsChannels", "True");
+        }
+
+        private static void NotSupportsChannels()
+        {
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "RemoteTokenProvider:SupportsChannels", "False");
+        }
+
         private static void UseRemoteTokenProvider()
         {
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
@@ -175,7 +324,13 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:TokenProviderKey", "LocalTokenProvider");
         }
-        
+
+        private static void UseUnrecognizedTokenProvider()
+        {
+            IAppIdentity appIdentity = DelegatedAppIdentity.Master;
+            TestContext.CurrentContext.DatabaseHelper().SetAppSettingsKey(appIdentity.ApiKey, "IOC:TokenProviderKey", "UnrecognizedTokenProviderName");
+        }
+
         private static void UseBrokenConnection()
         {
             IAppIdentity appIdentity = DelegatedAppIdentity.Master;
