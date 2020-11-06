@@ -134,6 +134,39 @@ WHERE [AppId] = @AppId
         }
 
         /// <summary>
+        /// Se asegura que el token o clave transaccional de un usuario haya expirado.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public void EnsureExpireToken(
+            string docType,
+            string docNumber,
+            string appKey)
+        {
+            int requestedFromAppId = this.GetAppId(appKey);
+            int randomDays = new Random().Next(2, 10);
+            DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddDays(-randomDays);
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+                const string CommandText = @"
+UPDATE [dbo].[Tokens]
+   SET [ExpiresAt] = @ExpiresAt
+ WHERE [DocType] = @DocType AND [DocNumber] = @DocNumber AND [RequestedFromAppId] = @RequestedFromAppId;
+";
+                using (SqlCommand command = new SqlCommand(CommandText, connection))
+                {
+                    command.Parameters.AddWithValue("DocType", docType);
+                    command.Parameters.AddWithValue("DocNumber", docNumber);
+                    command.Parameters.AddWithValue("RequestedFromAppId", requestedFromAppId);
+                    command.Parameters.AddWithValue("ExpiresAt", expiresAt);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Se asegura que el token de autenticación de un usuario haya expirado.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>

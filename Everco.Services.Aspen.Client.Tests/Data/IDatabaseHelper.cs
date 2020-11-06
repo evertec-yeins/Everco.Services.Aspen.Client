@@ -39,6 +39,17 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         void EnsureExpireAppAuthToken(string appKey);
 
         /// <summary>
+        /// Se asegura que el token o clave transaccional de un usuario haya expirado.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        void EnsureExpireToken(
+            string docType,
+            string docNumber,
+            string appKey);
+
+        /// <summary>
         /// Se asegura que el token de autenticación de un usuario haya expirado.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
