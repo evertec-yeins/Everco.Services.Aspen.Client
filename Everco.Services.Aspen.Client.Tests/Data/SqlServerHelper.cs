@@ -41,8 +41,41 @@ namespace Everco.Services.Aspen.Client.Tests.Data
         /// <summary>
         /// Obtiene la cadena de conexión usada para el acceso al origen de datos.
         /// </summary>
-        // ReSharper disable once MemberCanBePrivate.Global
         public string ConnectionString { get; }
+
+        /// <summary>
+        /// Agrega las propiedades del perfil a un usuario.
+        /// </summary>
+        /// <param name="userId">El identificador del usuario en el sistema.</param>
+        /// <param name="appId">El identificador de la aplicación en el sistema.</param>
+        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
+        public void AddUserProfileProperties(
+            int userId,
+            int appId,
+            IDictionary<string, string> profileProperties)
+        {
+            if (profileProperties == null || !profileProperties.Any())
+            {
+                throw new ArgumentNullException($"Se requieren las propiedades de perfil para el usuario.");
+            }
+
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+                foreach (KeyValuePair<string, string> kvp in profileProperties)
+                {
+                    using (SqlCommand command = new SqlCommand("[dbo].[SetUserProfileProperty]", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("AppId", appId);
+                        command.Parameters.AddWithValue("UserId", userId);
+                        command.Parameters.AddWithValue("PropertyName", kvp.Key);
+                        command.Parameters.AddWithValue("PropertyValue", kvp.Value);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Verifica si el secreto de una aplicación está encriptado.
@@ -75,54 +108,6 @@ WHERE [AppKey] = @AppKey
         }
 
         /// <summary>
-        /// Habilita o inhabilita una aplicación en el sistema del servicio.
-        /// </summary>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="enabled"><see langword="true" /> para habilitar la aplicación; de lo contrario <see langword="false" />.</param>
-        public void UpdateEnabled(string appKey, bool enabled)
-        {
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
-            {
-                connection.Open();
-                string commandText = @"
-UPDATE [dbo].[Apps]
-  SET [Enabled] = @Enabled
-WHERE [AppKey] = @AppKey
-";
-                using (SqlCommand command = new SqlCommand(commandText, connection))
-                {
-                    command.Parameters.AddWithValue("AppKey", appKey);
-                    command.Parameters.AddWithValue("Enabled", enabled);
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Asegura que una aplicación requiera (o no) cambio de su secreto.
-        /// </summary>
-        /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="newValue"><see langword="true" /> cuando la aplicación requiera cambio de secreto; de lo contrario <see langword="false" />.</param>
-        public void UpdateChangeSecret(string appKey, bool newValue)
-        {
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
-            {
-                connection.Open();
-                string commandText = @"
-UPDATE [dbo].[Apps]
-  SET [UpdateSecret] = @UpdateSecret
-WHERE [AppKey] = @AppKey
-";
-                using (SqlCommand command = new SqlCommand(commandText, connection))
-                {
-                    command.Parameters.AddWithValue("AppKey", appKey);
-                    command.Parameters.AddWithValue("UpdateSecret", newValue);
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
-        /// <summary>
         /// Se asegura que el token de autenticación generado por una aplicación haya expirado.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
@@ -149,6 +134,39 @@ WHERE [AppId] = @AppId
         }
 
         /// <summary>
+        /// Se asegura que el token o clave transaccional de un usuario haya expirado.
+        /// </summary>
+        /// <param name="docType">Tipo de documento del usuario.</param>
+        /// <param name="docNumber">Número de documento del usuario.</param>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        public void EnsureExpireToken(
+            string docType,
+            string docNumber,
+            string appKey)
+        {
+            int requestedFromAppId = this.GetAppId(appKey);
+            int randomDays = new Random().Next(2, 10);
+            DateTimeOffset expiresAt = DateTimeOffset.UtcNow.AddDays(-randomDays);
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+                const string CommandText = @"
+UPDATE [dbo].[Tokens]
+   SET [ExpiresAt] = @ExpiresAt
+ WHERE [DocType] = @DocType AND [DocNumber] = @DocNumber AND [RequestedFromAppId] = @RequestedFromAppId;
+";
+                using (SqlCommand command = new SqlCommand(CommandText, connection))
+                {
+                    command.Parameters.AddWithValue("DocType", docType);
+                    command.Parameters.AddWithValue("DocNumber", docNumber);
+                    command.Parameters.AddWithValue("RequestedFromAppId", requestedFromAppId);
+                    command.Parameters.AddWithValue("ExpiresAt", expiresAt);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Se asegura que el token de autenticación de un usuario haya expirado.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
@@ -156,7 +174,7 @@ WHERE [AppId] = @AppId
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         public void EnsureExpireUserAuthToken(
-            string appKey, 
+            string appKey,
             string docType,
             string docNumber,
             string deviceId)
@@ -217,7 +235,7 @@ UPDATE [dbo].[AuthTokenApp]
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         public void EnsureMismatchUserAuthToken(
-            string appKey, 
+            string appKey,
             string docType,
             string docNumber,
             string deviceId)
@@ -526,7 +544,7 @@ DELETE FROM [dbo].[AuthTokenApp]
         /// <param name="docNumber">Número de documento del usuario.</param>
         /// <param name="deviceId">El identificador del dispositivo.</param>
         public void RemoveUserAuthToken(
-            string appKey, 
+            string appKey,
             string docType,
             string docNumber,
             string deviceId)
@@ -576,6 +594,34 @@ DELETE FROM [dbo].[Users]
         }
 
         /// <summary>
+        /// Establece una clave en la configuración personalizadas de la aplicación.
+        /// </summary>
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="key">El nombre de la clave.</param>
+        /// <param name="value">El valor para la clave.</param>
+        public void SetAppSettingsKey(
+            string appKey,
+            string key,
+            string value)
+        {
+            int appId = this.GetAppId(appKey);
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+                string commandText = $@"
+UPDATE [dbo].[Apps]
+  SET [JsonSettings] = JSON_MODIFY([JsonSettings], '$.appSettings.""{key}""', '{value}')
+WHERE[AppId] = @AppId;
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
+                {
+                    command.Parameters.AddWithValue("AppId", appId);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Restaura el secreto de una aplicación.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
@@ -602,63 +648,49 @@ UPDATE [dbo].[Apps]
         }
 
         /// <summary>
-        /// Establece una clave en la configuración personalizadas de la aplicación.
+        /// Asegura que una aplicación requiera (o no) cambio de su secreto.
         /// </summary>
         /// <param name="appKey">El identificador de la aplicación.</param>
-        /// <param name="key">El nombre de la clave.</param>
-        /// <param name="value">El valor para la clave.</param>
-        public void SetAppSettingsKey(
-            string appKey, 
-            string key, 
-            string value)
+        /// <param name="newValue"><see langword="true" /> cuando la aplicación requiera cambio de secreto; de lo contrario <see langword="false" />.</param>
+        public void UpdateChangeSecret(string appKey, bool newValue)
         {
-            int appId = this.GetAppId(appKey);
             using (SqlConnection connection = new SqlConnection(this.ConnectionString))
             {
                 connection.Open();
-                string commandText = $@"
+                string commandText = @"
 UPDATE [dbo].[Apps]
-  SET [JsonSettings] = JSON_MODIFY([JsonSettings], '$.appSettings.""{key}""', '{value}')
-WHERE[AppId] = @AppId;
+  SET [UpdateSecret] = @UpdateSecret
+WHERE [AppKey] = @AppKey
 ";
                 using (SqlCommand command = new SqlCommand(commandText, connection))
                 {
-                    command.Parameters.AddWithValue("AppId", appId);
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.Parameters.AddWithValue("UpdateSecret", newValue);
                     command.ExecuteNonQuery();
                 }
             }
         }
 
         /// <summary>
-        /// Agrega las propiedades del perfil a un usuario.
+        /// Habilita o inhabilita una aplicación en el sistema del servicio.
         /// </summary>
-        /// <param name="userId">El identificador del usuario en el sistema.</param>
-        /// <param name="appId">El identificador de la aplicación en el sistema.</param>
-        /// <param name="profileProperties">Una colección de claves y valores que representa las propiedades del perfil del usuario.</param>
-        public void AddUserProfileProperties(
-            int userId,
-            int appId,
-            IDictionary<string, string> profileProperties)
+        /// <param name="appKey">El identificador de la aplicación.</param>
+        /// <param name="enabled"><see langword="true" /> para habilitar la aplicación; de lo contrario <see langword="false" />.</param>
+        public void UpdateEnabled(string appKey, bool enabled)
         {
-            if (profileProperties == null || !profileProperties.Any())
-            {
-                throw new ArgumentNullException($"Se requieren las propiedades de perfil para el usuario.");
-            }
-
             using (SqlConnection connection = new SqlConnection(this.ConnectionString))
             {
                 connection.Open();
-                foreach (KeyValuePair<string, string> kvp in profileProperties)
+                string commandText = @"
+UPDATE [dbo].[Apps]
+  SET [Enabled] = @Enabled
+WHERE [AppKey] = @AppKey
+";
+                using (SqlCommand command = new SqlCommand(commandText, connection))
                 {
-                    using (SqlCommand command = new SqlCommand("[dbo].[SetUserProfileProperty]", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("AppId", appId);
-                        command.Parameters.AddWithValue("UserId", userId);
-                        command.Parameters.AddWithValue("PropertyName", kvp.Key);
-                        command.Parameters.AddWithValue("PropertyValue", kvp.Value);
-                        command.ExecuteNonQuery();
-                    }
+                    command.Parameters.AddWithValue("AppKey", appKey);
+                    command.Parameters.AddWithValue("Enabled", enabled);
+                    command.ExecuteNonQuery();
                 }
             }
         }

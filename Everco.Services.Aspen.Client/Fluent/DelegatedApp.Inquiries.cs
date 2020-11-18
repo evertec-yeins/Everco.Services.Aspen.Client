@@ -8,6 +8,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Entities;
     using Internals;
     using Modules.Delegated;
@@ -36,16 +37,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Obtiene la información del resultado que encapsula el resumen de las cuentas asociadas al usuario actual procesada de forma segura.
+        /// Obtiene la información resumida de las cuentas asociadas al usuario actual.
         /// </summary>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar las cuentas del usuario actual procesado de forma segura.
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
         /// </returns>
-        public IList<AccountExtendedResultInfo> GetAccountsSafely()
+        public async Task<IList<AccountExtendedInfo>> GetAccountsAsync()
         {
-            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.AccountsFromCurrentUser);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<AccountExtendedResultInfo>>(request);
+            return await Task.Run(this.GetAccounts);
         }
 
         /// <summary>
@@ -63,18 +62,15 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Obtiene la información del resultado que encapsula los saldos de una cuenta asociada al usuario actual procesada de forma segura.
+        /// Obtiene la información de saldos de una cuenta asociada al usuario actual.
         /// </summary>
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los saldos.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquiryResultInfo{IAccountExtendedInfo}" /> con la información del resultado de consultar los saldos de una cuenta procesado de forma segura.
+        /// Instancia de <see cref="Task{TResult}" /> que representa el estado de la ejecución de la tarea.
         /// </returns>
-        public IList<BalanceExtendedResultInfo> GetBalancesSafely(string accountId)
+        public async Task<IList<BalanceExtendedInfo>> GetBalancesAsync(string accountId)
         {
-            EndpointParameters endpointParameters = new EndpointParameters().AddAccountId(accountId);
-            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.BalancesFromCurrentUser, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<BalanceExtendedResultInfo>>(request);
+            return await Task.Run(() => this.GetBalances(accountId));
         }
 
         /// <summary>
@@ -95,21 +91,16 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Obtiene la información del resultado que encapsula los movimientos financieros de una cuenta asociada al usuario actual procesada de forma segura.
+        /// Obtiene la información de los movimientos financieros de una cuenta asociada al usuario actual.
         /// </summary>
         /// <param name="accountId">El identificador de la cuenta para la que se obtienen los movimientos financieros.</param>
         /// <param name="accountTypeId">El identificador del tipo de cuenta que se desea filtrar o <see langword="null" /> para omitir el filtro.</param>
         /// <returns>
-        /// Lista de instancias de <see cref="IInquiryResultInfo{IMiniStatementInfo}" /> con la información del resultado de consultar los movimientos de una cuenta procesado de forma segura.
+        /// Lista de tipo <see cref="IMiniStatementInfo" /> con la información de los movimientos financieros de la cuenta especificada del usuario actual.
         /// </returns>
-        public IList<MiniStatementResultInfo> GetStatementsSafely(string accountId, string accountTypeId = null)
+        public async Task<IList<MiniStatementInfo>> GetStatementsAsync(string accountId, string accountTypeId = null)
         {
-            EndpointParameters endpointParameters = new EndpointParameters()
-                .AddAccountId(accountId)
-                .AddAccountTypeId(string.IsNullOrWhiteSpace(accountTypeId) ? "*" : accountTypeId);
-            IRestRequest request = new AspenRequest(Scope.Delegated, EndpointMapping.StatementsFromCurrentUser, endpointParameters);
-            ServiceLocator.Instance.HeadersManager.AddApiVersionHeader(request, "1.1");
-            return this.Execute<List<MiniStatementResultInfo>>(request);
+            return await Task.Run(() => this.GetStatements(accountId, accountTypeId));
         }
     }
 }

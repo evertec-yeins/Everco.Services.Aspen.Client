@@ -18,18 +18,23 @@ namespace Everco.Services.Aspen.Client.Providers
         string EnvironmentName { get; }
 
         /// <summary>
-        /// Obtiene un valor que indica si entorno de alojamiento actual es Desarrollo.
+        /// Obtiene un valor que indica si entorno de alojamiento actual es desarrollo.
         /// </summary>
         bool IsDevelopment { get; }
 
         /// <summary>
-        /// Obtiene un valor que indica si entorno de alojamiento actual es Producción.
+        /// Obtiene un valor que indica si entorno de alojamiento actual es producción.
         /// </summary>
         bool IsProduction { get; }
 
         /// <summary>
-        /// Obtiene un valor que indica si entorno de alojamiento actual es Pruebas/Certificación.
+        /// Obtiene un valor que indica si entorno de alojamiento actual es certificación.
         /// </summary>        
         bool IsStaging { get; }
+
+        /// <summary>
+        /// Obtiene un valor que indica si la ambiente se está ejecutando en proceso de pruebas.
+        /// </summary>
+        bool IsTestingExecuting { get; }
     }
 }

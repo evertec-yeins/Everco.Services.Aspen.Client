@@ -10,17 +10,16 @@ namespace Everco.Services.Aspen.Client.Fluent
     using System;
     using System.Collections.Generic;
     using System.Net;
-    using Everco.Services.Aspen.Client.Internals;
-    using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Entities;
     using Identity;
+    using Internals;
     using Newtonsoft.Json;
+    using Providers;
     using RestSharp;
 
     /// <summary>
-    /// Expone operaciones que permite conectar con el servicio Aspen para aplicaciones con alcance anonimo.
+    /// Expone las operaciones que permite conectar con las operaciones disponibles en el servicio Aspen que no requieren firma.
     /// </summary>
-    public sealed class Anonymous : IAnonymous
+    public sealed partial class Anonymous : IAnonymous
     {
         /// <summary>
         /// Para uso interno.
@@ -38,17 +37,24 @@ namespace Everco.Services.Aspen.Client.Fluent
         private TimeSpan timeout;
 
         /// <summary>
-        /// Previene la creación de una instancia de la clase <see cref="Fluent.Anonymous"/>
+        /// Previene la creación de una instancia de la clase <see cref="Anonymous"/>
         /// </summary>
-        private Anonymous()
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
+        private Anonymous(CachePolicy cachePolicy)
         {
+            CacheStore.Policy = cachePolicy;
         }
 
         /// <summary>
         /// Obtiene una instancia que permite conectar con el servico Aspen.
         /// </summary>
+        /// <param name="cachePolicy">La política para el tratamiento de la información almacenada por caché.</param>
         /// <returns>Instancia de <see cref="IRouting{TFluent}"/> que permite establecer la información de conexión.</returns>
-        public static IRouting Initialize() => new Anonymous();
+        public static IRouting Initialize(
+            CachePolicy cachePolicy = CachePolicy.CacheIfAvailable)
+        {
+            return new Anonymous(cachePolicy);
+        } 
 
         /// <summary>
         /// Obtiene la instancia actual configurada para interactuar con el servicio Aspen.
@@ -60,18 +66,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             this.InitializeClient();
             return this;
-        }
-
-        /// <summary>
-        /// Obtiene la lista de tipos de documento predeterminados soportados por el servicio.
-        /// </summary>
-        /// <returns>
-        /// Lista de tipos de documento predeterminados.
-        /// </returns>
-        public IList<DocTypeInfo> GetDefaultDocTypes()
-        {
-            IRestRequest request = new AspenRequest(Scope.Anonymous, EndpointMapping.DefaultDocTypes);
-            return this.Execute<List<DocTypeInfo>>(request);
         }
 
         /// <summary>
@@ -100,8 +94,8 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             Throw.IfNullOrEmpty(url, nameof(url));
             this.endpoint = new Uri(url.TrimEnd('/'), UriKind.Absolute);
-            int defaultTimeout = 15;
-            int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
+            const int DefaultTimeout = 15;
+            int waitForSeconds = Math.Max(timeout ?? DefaultTimeout, DefaultTimeout);
             this.timeout = TimeSpan.FromSeconds(waitForSeconds);
             return this;
         }
@@ -134,35 +128,6 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
-        /// Registra la información de las excepciones que se produzcan por cierres inesperados (AppCrash) de la aplicación.
-        /// </summary>
-        /// <param name="apiKey">El identificador de la aplicación que generó el error.</param>
-        /// <param name="username">El identificador del último usuario que uso la aplicación antes de generarse el error.</param>
-        /// <param name="errorReport">La información del reporte de error generado en la aplicación.</param>
-        public void SaveAppCrash(string apiKey, string username, string errorReport)
-        {
-            if (!ServiceLocator.Instance.Runtime.IsDevelopment)
-            {
-                Throw.IfNullOrEmpty(apiKey, nameof(apiKey));
-                Throw.IfNullOrEmpty(errorReport, nameof(errorReport));
-                Throw.IfNullOrEmpty(username, nameof(username));
-            }
-
-            IRestRequest request = new AspenRequest(
-                Scope.Anonymous,
-                EndpointMapping.AppCrash,
-                contentType: "application/x-www-form-urlencoded");
-            request.AddParameter("ErrorReport", errorReport);
-            request.AddParameter("Username", username);
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
-            ServiceLocator.Instance.HeadersManager.AddApiKeyHeader(request, apiKey);
-            request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
-            this.Execute(request);
-        }
-
-        #region Internals
-
-        /// <summary>
         /// Envía la solicitud al servicio Aspen.
         /// </summary>
         /// <typeparam name="TResponse">Tipo al que se convierte la respuesta del servicio Aspen.</typeparam>
@@ -171,69 +136,54 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
         private TResponse Execute<TResponse>(IRestRequest request) where TResponse : class, new()
         {
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
-            IRestResponse response = this.restClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
-            string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
-
-            if (!response.IsSuccessful)
-            {
-                throw new AspenException(response);
-            }
-
+            IRestResponse response = this.Execute(request);
             return response.StatusCode == HttpStatusCode.NoContent
                 ? default
                 : JsonConvert.DeserializeObject<TResponse>(response.Content);
         }
 
         /// <summary>
-        /// Envía la solicitud al servicio ASPEN.
+        /// Envía la solicitud al servicio Aspen.
         /// </summary>
-        /// <param name="request">La información de la solicitud.</param>
+        /// <param name="request">Información de la solicitud.</param>
         /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
-        private void Execute(IRestRequest request)
+        /// <returns>Instancia de <see cref="IRestResponse"/> que contiene los datos de la respuesta generada por la solicitud al API.</returns>
+        private IRestResponse Execute(IRestRequest request)
         {
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Resource => {this.restClient.BaseUrl}{request.Resource}");
+            const string NonSet = "NONSET";
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request Start ==========");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Uri => {this.restClient.BaseUrl}{request.Resource}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? "NONSET"}");
-#if DEBUG
-            Dictionary<string, object> headers = request.Parameters.GetHeaders();
-            Dictionary<string, object> body = request.Parameters.GetBody();
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Headers => {JsonConvert.SerializeObject(headers)}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Body => {JsonConvert.SerializeObject(body)}");
-#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? NonSet}");
             IRestResponse response = this.restClient.Execute(request);
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusCode => {(int)response.StatusCode} ({response.StatusCode.ToString()})");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"StatusDescription => {response.StatusDescription}");
+#if DEBUG
+            Dictionary<string, object> requestBody = request.Parameters.GetBody();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestBody => {JsonConvert.SerializeObject(requestBody)}");
+            Dictionary<string, object> requestHeaders = request.Parameters.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestHeaders => {JsonConvert.SerializeObject(requestHeaders)}");
+#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusCode => {(int)response.StatusCode} ({response.StatusCode})");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusDescription => {response.StatusDescription}");
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
-            string responseContentType = response.ContentType.DefaultIfNullOrEmpty("NONSET");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty(NonSet);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
             string responseContent = responseContentType.Contains("text/html")
-                                         ? "[TEXT/HTML]"
-                                         : response.Content.DefaultIfNullOrEmpty("NONSET");
+                ? "[TEXT/HTML]"
+                : response.Content.DefaultIfNullOrEmpty(NonSet);
             ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
-            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseDumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty("NONSET")}");
+#if DEBUG
+            Dictionary<string, object> responseHeaders = response.Headers.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseHeaders => {JsonConvert.SerializeObject(responseHeaders)}");
+#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"DumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty(NonSet)}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request End ==========");
 
             if (!response.IsSuccessful)
             {
                 throw new AspenException(response);
             }
+
+            return response;
         }
 
         /// <summary>
@@ -245,7 +195,7 @@ namespace Everco.Services.Aspen.Client.Fluent
             {
                 Timeout = (int)this.timeout.TotalMilliseconds
             };
-            this.restClient.UseSerializer(JsonNetSerializer.Default);
+            this.restClient.UseSerializer(() => JsonNetSerializer.Default);
 
             IWebProxy webProxy = ServiceLocator.Instance.WebProxy;
             if (webProxy.GetType() != typeof(NullWebProxy))
@@ -259,7 +209,5 @@ namespace Everco.Services.Aspen.Client.Fluent
                 ReferenceLoopHandling = ReferenceLoopHandling.Ignore
             };
         }
-
-        #endregion
     }
 }

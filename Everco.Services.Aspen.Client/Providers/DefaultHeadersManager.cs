@@ -9,7 +9,6 @@ namespace Everco.Services.Aspen.Client.Providers
 {
     using System;
     using System.Collections.Generic;
-    using Auth;
     using Identity;
     using Internals;
     using JWT;
@@ -82,12 +81,14 @@ namespace Everco.Services.Aspen.Client.Providers
         /// <param name="apiSecret">Secreto de la aplicación que se utiliza para codificar el contenido del carga útil.</param>
         /// <param name="token">El token de autenticación emitido para el usuario.</param>
         /// <param name="username">La identificación del usuario autenticado.</param>
+        /// <param name="device">La información asociada con el dispositivo del usuario.</param>
         public void AddSignedPayloadHeader(
             IRestRequest request,
             IJwtEncoder jwtEncoder,
             string apiSecret,
             string token,
-            string username)
+            string username,
+            IDeviceInfo device = null)
         {
             Throw.IfNull(request, nameof(request));
             Throw.IfNull(jwtEncoder, nameof(jwtEncoder));
@@ -95,7 +96,7 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNullOrEmpty(token, nameof(token));
             Throw.IfNullOrEmpty(username, nameof(username));
 
-            IDeviceInfo deviceInfo = CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
+            IDeviceInfo deviceInfo = device ?? CacheStore.Get<DeviceInfo>(CacheKeys.CurrentDevice) ?? DeviceInfo.Current;
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());
             ServiceLocator.Instance.PayloadClaimsManager.AddEpochClaim(payload, ServiceLocator.Instance.EpochGenerator.GetSeconds());
@@ -145,9 +146,11 @@ namespace Everco.Services.Aspen.Client.Providers
             Throw.IfNullOrEmpty(apiSecret, nameof(apiSecret));
             Throw.IfNull(userIdentity, nameof(userIdentity));
 
-            IDeviceInfo deviceInfo = userIdentity.Device ?? CacheStore.GetDeviceInfo() ?? DeviceInfo.Current;
+            IDeviceInfo deviceInfo = userIdentity.Device ??
+                                     CacheStore.Get<DeviceInfo>(CacheKeys.CurrentDevice) ??
+                                     DeviceInfo.Current;
             request.AddHeader(ServiceLocator.Instance.RequestHeaderNames.DeviceInfoHeaderName, deviceInfo.ToJson());
-            CacheStore.SetDeviceInfo(deviceInfo);
+            CacheStore.Add(CacheKeys.CurrentDevice, deviceInfo);
 
             Dictionary<string, object> payload = new Dictionary<string, object>();
             ServiceLocator.Instance.PayloadClaimsManager.AddNonceClaim(payload, ServiceLocator.Instance.NonceGenerator.GetNonce());

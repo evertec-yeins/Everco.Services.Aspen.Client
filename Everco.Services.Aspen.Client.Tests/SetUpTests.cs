@@ -7,7 +7,8 @@
 // -----------------------------------------------------------------------
 namespace Everco.Services.Aspen.Client.Tests
 {
-    using Everco.Services.Aspen.Client.Tests.Assets;
+    using System;
+    using Assets;
     using NUnit.Framework;
 
     /// <summary>
@@ -16,6 +17,11 @@ namespace Everco.Services.Aspen.Client.Tests
     [SetUpFixture]
     public class SetUpTests
     {
+        /// <summary>
+        /// Para uso interno.
+        /// </summary>
+        private const string TestingEnvName = "ASPEN:TESTING_EXECUTING";
+
         /// <summary>
         /// Proporciona un conjunto de instrucciones que se ejecutarán después de finalizar todas las pruebas implementadas.
         /// </summary>
@@ -31,6 +37,7 @@ namespace Everco.Services.Aspen.Client.Tests
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
+            Environment.SetEnvironmentVariable(TestingEnvName, "true", EnvironmentVariableTarget.Process);
             ServicesHelper.Instance.StartAllServices();
         }
     }

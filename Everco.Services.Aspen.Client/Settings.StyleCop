@@ -33,7 +33,6 @@
       </Rules>
       <AnalyzerSettings>
         <StringProperty Name="CompanyName">Evertec Colombia</StringProperty>
-        <StringProperty Name="Copyright">Copyright (c) 2019 Todos los derechos reservados.</StringProperty>
       </AnalyzerSettings>
     </Analyzer>
     <Analyzer AnalyzerId="StyleCop.CSharp.NamingRules">

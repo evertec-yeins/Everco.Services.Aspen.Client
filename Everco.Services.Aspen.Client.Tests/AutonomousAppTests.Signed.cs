@@ -9,14 +9,13 @@ namespace Everco.Services.Aspen.Client.Tests
 {
     using System;
     using System.Net;
-    using Everco.Services.Aspen.Client.Auth;
-    using Everco.Services.Aspen.Client.Fluent;
-    using Everco.Services.Aspen.Client.Providers;
-    using Everco.Services.Aspen.Client.Tests.Assets;
+    using Assets;
+    using Auth;
+    using Fluent;
     using Identities;
     using Identity;
-    using Newtonsoft.Json;
     using NUnit.Framework;
+    using Providers;
 
     /// <summary>
     /// Implementa las pruebas unitarias de las cabeceras de autenticación requeridas por una aplicación con alcance de autónoma.
@@ -135,10 +134,10 @@ namespace Everco.Services.Aspen.Client.Tests
         public void MismatchTokenBetweenAppsWhenAppSignedRequestThrows()
         {
             IAppIdentity appIdentityMaster = AutonomousAppIdentity.Master;
-            IAutonomousApp clientAppMaster = AutonomousApp.Initialize()
+            IAutonomousApp clientAppMaster = AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.That(clientAppMaster, Is.Not.Null);
@@ -146,10 +145,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IAppIdentity appIdentityHelper = AutonomousAppIdentity.Helper;
-            IAutonomousApp clientAppHelper = AutonomousApp.Initialize()
+            IAutonomousApp clientAppHelper = AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.That(clientAppHelper, Is.Not.Null);

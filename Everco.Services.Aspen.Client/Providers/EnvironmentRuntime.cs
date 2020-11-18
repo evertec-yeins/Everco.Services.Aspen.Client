@@ -41,9 +41,18 @@ namespace Everco.Services.Aspen.Client.Providers
         public bool IsProduction => this.EnvironmentName.StartsWith("PRO");
 
         /// <summary>
-        /// Obtiene un valor que indica si entorno de ejecución actual es pruebas/certificación.
+        /// Obtiene un valor que indica si entorno de ejecución actual es certificación.
         /// </summary>        
         public bool IsStaging => this.EnvironmentName.StartsWith("CERT") || this.EnvironmentName.StartsWith("QA");
+
+        /// <summary>
+        /// Obtiene un valor que indica si la ambiente se está ejecutando en proceso de pruebas.
+        /// </summary>
+        public bool IsTestingExecuting =>
+            Environment.GetEnvironmentVariable(
+                    "ASPEN:TESTING_EXECUTING",
+                    EnvironmentVariableTarget.Process)
+                .ToBool();
 
         /// <summary>
         /// Retorna true si se el assembly está compilado en modo de depuración.

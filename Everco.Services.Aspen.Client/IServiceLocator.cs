@@ -78,18 +78,6 @@ namespace Everco.Services.Aspen.Client
         IWebProxy WebProxy { get; }
 
         /// <summary>
-        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
-        /// </summary>
-        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
-        void SetDefaultEndpoint(IEndpointProvider endpointProvider);
-
-        /// <summary>
-        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
-        /// </summary>
-        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
-        void SetDefaultIdentity(IAppIdentity appIdentity);
-
-        /// <summary>
         /// Registra una instancia de <see cref="IEpochGenerator"/> para la generación de valores Epoch.
         /// </summary>
         /// <param name="epochGenerator">Instancia que implementa <see cref="IEpochGenerator"/>.</param>
@@ -147,5 +135,17 @@ namespace Everco.Services.Aspen.Client
         /// Restablece esta instancia a los valores predeterminados.
         /// </summary>
         void Reset();
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IEndpointProvider"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="endpointProvider">Instancia que implementa <see cref="IEndpointProvider"/>.</param>
+        void SetDefaultEndpoint(IEndpointProvider endpointProvider);
+
+        /// <summary>
+        /// Registra una instancia de <see cref="IAppIdentity"/> para la obtención de valores de configuración.
+        /// </summary>
+        /// <param name="appIdentity">Instancia que implementa <see cref="IAppIdentity"/>.</param>
+        void SetDefaultIdentity(IAppIdentity appIdentity);
     }
 }

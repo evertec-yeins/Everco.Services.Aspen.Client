@@ -10,6 +10,7 @@
 namespace Everco.Services.Aspen.Client.Fluent
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using Auth;
     using Identity;
@@ -58,14 +59,14 @@ namespace Everco.Services.Aspen.Client.Fluent
         private IJwtValidator validator;
 
         /// <summary>
-        /// Obtiene la información de la identidad de la aplicación.
-        /// </summary>
-        public IAppIdentity AppIdentity { get; internal set; }
-
-        /// <summary>
         /// Obtiene el token de autenticación emitido para la sesión.
         /// </summary>
         public IAuthToken AuthToken { get; internal set; }
+
+        /// <summary>
+        /// Obtiene la información de la identidad de la aplicación.
+        /// </summary>
+        protected IAppIdentity AppIdentity { get; private set; }
 
         /// <summary>
         /// Para uso interno.
@@ -114,8 +115,8 @@ namespace Everco.Services.Aspen.Client.Fluent
         {
             Throw.IfNullOrEmpty(url, nameof(url));
             this.endpoint = new Uri(url.TrimEnd('/'), UriKind.Absolute);
-            int defaultTimeout = 15;
-            int waitForSeconds = Math.Max(timeout ?? defaultTimeout, defaultTimeout);
+            const int DefaultTimeout = 15;
+            int waitForSeconds = Math.Max(timeout ?? DefaultTimeout, DefaultTimeout);
             this.timeout = TimeSpan.FromSeconds(waitForSeconds);
             return this;
         }
@@ -126,7 +127,7 @@ namespace Everco.Services.Aspen.Client.Fluent
         /// <param name="url">La URL para las solicitudes hacia al API de ASPEN realizadas por esta instancia de cliente. Ejemplo: <a>http://localhost/api</a>.</param>
         /// <param name="timeout">El tiempo de espera para las respuesta de las solicitudes al servicio o <c>null</c> para establecer el valor predeterminado (15 segundos)</param>
         /// <returns>
-        /// Instancia de <see cref="T:Everco.Services.Aspen.Client.Fluent.IAppIdentity`1" /> que permite establecer los datos de conexión con el servicio.
+        /// Instancia de <see cref="IAppIdentity" /> que permite establecer los datos de conexión con el servicio.
         /// </returns>
         public IAppIdentity<TFluent> RoutingTo(Uri url, TimeSpan? timeout = null)
         {
@@ -183,16 +184,73 @@ namespace Everco.Services.Aspen.Client.Fluent
         }
 
         /// <summary>
+        /// Envía la solicitud al servicio Aspen.
+        /// </summary>
+        /// <param name="request">Información de la solicitud.</param>
+        /// <exception cref="AspenException">Se presentó un error al procesar la solicitud. La excepción contiene los detalles del error.</exception>
+        /// <returns>Instancia de <see cref="IRestResponse"/> que contiene los datos de la respuesta generada por la solicitud al API.</returns>
+        protected IRestResponse Execute(IRestRequest request)
+        {
+            const string NonSet = "NONSET";
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request Start ==========");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Uri => {this.RestClient.BaseUrl}{request.Resource}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Method => {request.Method}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"Proxy => {(ServiceLocator.Instance.WebProxy as WebProxy)?.Address?.ToString() ?? NonSet}");
+#if DEBUG
+            Dictionary<string, object> requestBody = request.Parameters.GetBody();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestBody => {JsonConvert.SerializeObject(requestBody)}");
+            Dictionary<string, object> requestHeaders = request.Parameters.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"RequestHeaders => {JsonConvert.SerializeObject(requestHeaders)}");
+
+            string payload = requestHeaders.GetValueOrDefault(ServiceLocator.Instance.RequestHeaderNames.PayloadHeaderName) as string ?? NonSet;
+            try
+            {
+                payload = this.JwtDecoder.Decode(payload);
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {JsonConvert.DeserializeObject(payload)}");
+            }
+            catch (Exception)
+            {
+                ServiceLocator.Instance.LoggingProvider.WriteDebug($"Payload => {payload}");
+            }
+#endif
+            IRestResponse response = this.RestClient.Execute(request);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusCode => {(int)response.StatusCode} ({response.StatusCode})");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatusDescription => {response.StatusDescription}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseStatus => {response.ResponseStatus}");
+            string responseContentType = response.ContentType.DefaultIfNullOrEmpty(NonSet);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContentType => {responseContentType}");
+            string responseContent = responseContentType.Contains("text/html")
+                ? "[TEXT/HTML]"
+                : response.Content.DefaultIfNullOrEmpty(NonSet);
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseContent => {responseContent}");
+#if DEBUG
+            Dictionary<string, object> responseHeaders = response.Headers.GetHeaders();
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"ResponseHeaders => {JsonConvert.SerializeObject(responseHeaders)}");
+#endif
+            ServiceLocator.Instance.LoggingProvider.WriteDebug($"DumpLink => {response.GetHeader("X-PRO-Response-Dump").DefaultIfNullOrEmpty(NonSet)}");
+            ServiceLocator.Instance.LoggingProvider.WriteDebug("========== Request End ==========");
+
+            if (!response.IsSuccessful)
+            {
+                throw new AspenException(response);
+            }
+
+            return response;
+        }
+
+        /// <summary>
         /// Inicializa la instancia del tipo <see cref="RestSharp.RestClient"/> que se utilza para enviar las solicitudes al servicio Aspen.
         /// </summary>
         protected void InitializeClient()
         {
-            this.RestClient = new RestClient(this.endpoint.ToString().TrimEnd('/'));
             this.JwtEncoder = new JwtEncoder(this.algorithm, ServiceLocator.Instance.JwtJsonSerializer, this.urlEncoder);
             this.validator = new JwtValidator(ServiceLocator.Instance.JwtJsonSerializer, this.datetimeProvider);
-            this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder);
-            this.RestClient.Timeout = (int)this.timeout.TotalMilliseconds;
-            this.RestClient.UseSerializer(JsonNetSerializer.Default);
+            this.JwtDecoder = new JwtDecoder(ServiceLocator.Instance.JwtJsonSerializer, this.validator, this.urlEncoder, this.algorithm);
+            this.RestClient = new RestClient(this.endpoint.ToString().TrimEnd('/'))
+            {
+                Timeout = (int)this.timeout.TotalMilliseconds
+            };
+            this.RestClient.UseSerializer(() => JsonNetSerializer.Default);
 
             IWebProxy webProxy = ServiceLocator.Instance.WebProxy;
             if (webProxy.GetType() != typeof(NullWebProxy))

@@ -92,5 +92,17 @@ namespace Everco.Services.Aspen.Client.Internals
             this.Add("@[EnrollmentAlias]", enrollmentAlias);
             return this;
         }
+
+        /// <summary>
+        /// Agrega el parámetro que representa al token o clave transaccional.
+        /// </summary>
+        /// <param name="token">El valor del token transaccional.</param>
+        /// <returns>Instancia de <see cref="EndpointParameters"/> con la colección actual de parámetros.</returns>
+        internal EndpointParameters AddToken(string token)
+        {
+            Throw.IfNullOrEmpty(token, nameof(token));
+            this.Add("@[Token]", token);
+            return this;
+        }
     }
 }

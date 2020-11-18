@@ -177,10 +177,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity commonAppIdentity = DelegatedAppIdentity.Master;
 
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
-            IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
+            IDelegatedApp clientAppMaster = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
-                .AuthenticateNoCache(userIdentityMaster)
+                .Authenticate(userIdentityMaster)
                 .GetClient();
 
             Assert.That(clientAppMaster, Is.Not.Null);
@@ -188,10 +188,10 @@ namespace Everco.Services.Aspen.Client.Tests
             Assert.That(clientAppMaster.AuthToken.Token, Is.Not.Null);
 
             IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
-            IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
+            IDelegatedApp clientAppHelper = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(commonAppIdentity)
-                .AuthenticateNoCache(userIdentityHelper)
+                .Authenticate(userIdentityHelper)
                 .GetClient();
 
             Assert.That(clientAppHelper, Is.Not.Null);
@@ -218,10 +218,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
-            IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
+            IDelegatedApp clientAppMaster = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
-                .AuthenticateNoCache(commonUserIdentity)
+                .Authenticate(commonUserIdentity)
                 .GetClient();
 
             Assert.That(clientAppMaster, Is.Not.Null);
@@ -231,10 +231,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, commonUserIdentity.DocType, commonUserIdentity.DocNumber);
 
-            IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
+            IDelegatedApp clientAppHelper = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
-                .AuthenticateNoCache(commonUserIdentity)
+                .Authenticate(commonUserIdentity)
                 .GetClient();
 
             Assert.That(clientAppHelper, Is.Not.Null);
@@ -259,10 +259,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentityMaster = DelegatedAppIdentity.Master;
             IUserIdentity userIdentityMaster = RecognizedUserIdentity.Master;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityMaster.ApiKey, userIdentityMaster.DocType, userIdentityMaster.DocNumber);
-            IDelegatedApp clientAppMaster = DelegatedApp.Initialize()
+            IDelegatedApp clientAppMaster = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityMaster)
-                .AuthenticateNoCache(userIdentityMaster)
+                .Authenticate(userIdentityMaster)
                 .GetClient();
 
             Assert.That(clientAppMaster, Is.Not.Null);
@@ -272,10 +272,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity appIdentityHelper = DelegatedAppIdentity.Helper;
             IUserIdentity userIdentityHelper = RecognizedUserIdentity.Helper;
             TestContext.CurrentContext.DatabaseHelper().EnsureUserAndProfileInfo(appIdentityHelper.ApiKey, userIdentityHelper.DocType, userIdentityHelper.DocNumber);
-            IDelegatedApp clientAppHelper = DelegatedApp.Initialize()
+            IDelegatedApp clientAppHelper = DelegatedApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(appIdentityHelper)
-                .AuthenticateNoCache(userIdentityHelper)
+                .Authenticate(userIdentityHelper)
                 .GetClient();
 
             Assert.That(clientAppHelper, Is.Not.Null);

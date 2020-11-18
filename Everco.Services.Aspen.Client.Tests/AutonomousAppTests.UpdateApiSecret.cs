@@ -34,7 +34,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string newApiSecret = this.GetRandomSecret();
 
             Assert.That(newApiSecret.Length, Is.GreaterThanOrEqualTo(128));
-            Assert.DoesNotThrow(() => AutonomousApp.Initialize()
+            Assert.DoesNotThrow(() => AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(apiKey, currentApiSecret)
                 .UpdateApiSecret(newApiSecret));
@@ -54,7 +54,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string currentApiSecret = appIdentity.ApiSecret;
             string newApiSecret = this.GetRandomSecret();
 
-            Assert.DoesNotThrow(() => AutonomousApp.Initialize()
+            Assert.DoesNotThrow(() => AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(apiKey, currentApiSecret)
                 .UpdateApiSecret(newApiSecret));
@@ -77,15 +77,15 @@ namespace Everco.Services.Aspen.Client.Tests
             string currentApiSecret = appIdentity.ApiSecret;
             string newApiSecret = this.GetRandomSecret();
 
-            Assert.DoesNotThrow(() => AutonomousApp.Initialize()
+            Assert.DoesNotThrow(() => AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(apiKey, currentApiSecret)
                 .UpdateApiSecret(newApiSecret));
 
-            IAutonomousApp client = AutonomousApp.Initialize()
+            IAutonomousApp client = AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(apiKey, newApiSecret)
-                .AuthenticateNoCache()
+                .Authenticate()
                 .GetClient();
 
             Assert.That(client, Is.Not.Null);
@@ -107,17 +107,17 @@ namespace Everco.Services.Aspen.Client.Tests
             string currentApiSecret = appIdentity.ApiSecret;
             string newApiSecret = new Password(128).Next();
 
-            Assert.DoesNotThrow(() => AutonomousApp.Initialize()
+            Assert.DoesNotThrow(() => AutonomousApp.Initialize(CachePolicy.BypassCache)
                 .RoutingTo(TestingEndpointProvider.Default)
                 .WithIdentity(apiKey, currentApiSecret)
                 .UpdateApiSecret(newApiSecret));
 
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(apiKey, currentApiSecret)
-                        .AuthenticateNoCache()
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -147,7 +147,7 @@ namespace Everco.Services.Aspen.Client.Tests
 
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(apiKey, randomApiSecret)
                         .UpdateApiSecret(randomApiSecret);
@@ -173,7 +173,7 @@ namespace Everco.Services.Aspen.Client.Tests
             {
                 AspenException exception = Assert.Throws<AspenException>(() =>
                     {
-                        AutonomousApp.Initialize()
+                        AutonomousApp.Initialize(CachePolicy.BypassCache)
                             .RoutingTo(TestingEndpointProvider.Default)
                             .WithIdentity(AutonomousAppIdentity.Master)
                             .UpdateApiSecret(newApiSecret);
@@ -197,7 +197,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(randomMinLength);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);
@@ -220,7 +220,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(randomMaxLength);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);
@@ -241,7 +241,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(includeUppercase: false);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);
@@ -262,7 +262,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(includeLowercase: false);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);
@@ -283,7 +283,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(includeNumeric: false);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);
@@ -304,7 +304,7 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidNewApiSecret = this.GetRandomSecret(includeSpecial: false);
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(AutonomousAppIdentity.Master)
                         .UpdateApiSecret(invalidNewApiSecret);

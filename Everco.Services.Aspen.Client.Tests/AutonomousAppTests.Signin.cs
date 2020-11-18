@@ -45,10 +45,10 @@ namespace Everco.Services.Aspen.Client.Tests
             string apiKeySecret = AutonomousAppIdentity.Master.ApiSecret;
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(randomApiKey, apiKeySecret)
-                        .AuthenticateNoCache()
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -68,10 +68,10 @@ namespace Everco.Services.Aspen.Client.Tests
             string invalidApiSecret = Guid.NewGuid().ToString();
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(recognizedApiKey, invalidApiSecret)
-                        .AuthenticateNoCache()
+                        .Authenticate()
                         .GetClient();
                 });
 
@@ -90,10 +90,10 @@ namespace Everco.Services.Aspen.Client.Tests
             IAppIdentity delegatedAppIdentity = DelegatedAppIdentity.Master;
             AspenException exception = Assert.Throws<AspenException>(() =>
                 {
-                    AutonomousApp.Initialize()
+                    AutonomousApp.Initialize(CachePolicy.BypassCache)
                         .RoutingTo(TestingEndpointProvider.Default)
                         .WithIdentity(delegatedAppIdentity)
-                        .AuthenticateNoCache()
+                        .Authenticate()
                         .GetClient();
                 });
             Assert.That(exception.EventId, Is.EqualTo("1000478"));

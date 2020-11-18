@@ -6,6 +6,7 @@
 // <date>2019-09-19 07:29 AM</date>
 // ----------------------------------------------------------------------
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Everco.Services.Aspen.Client")]
@@ -18,3 +19,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("fbed3146-a90f-4658-bb4d-5110ac9bd06c")]
+[assembly: InternalsVisibleTo("Everco.Services.Aspen.Client.Tests")]
